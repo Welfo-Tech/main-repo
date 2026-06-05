@@ -1,0 +1,16 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SetupTest {
+  id        String   @id @default(uuid()) @db.Uuid
+  note      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+
+  @@map("setup_test")
+}
