@@ -36,3 +36,11 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Documentations 
+agent_docs/
+company_docs/
+tech_docs/
+session_docs/
+claude_docs/
+CLAUDE.md

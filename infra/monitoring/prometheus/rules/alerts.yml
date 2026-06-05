@@ -1,0 +1,58 @@
+groups:
+  - name: welfo.infra
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been unreachable for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "high error rate on {{ $labels.job }}"
+          description: "error rate is above 5 percent for the last 5 minutes"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "high p95 latency on {{ $labels.job }}"
+          description: "p95 latency is above 2 seconds"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: db_pool_available_connections == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "database connection pool exhausted"
+          description: "no available database connections in the pool"
+
+  - name: welfo.business
+    rules:
+      - alert: ServiceCaseSLABreach
+        expr: welfo_service_case_sla_breached_total > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "service case SLA breached"
+          description: "{{ $value }} service cases have breached their SLA deadline"
+
+      - alert: HighOpenCaseVolume
+        expr: welfo_service_cases_open_total > 100
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "high number of open service cases"
+          description: "there are {{ $value }} open service cases right now"

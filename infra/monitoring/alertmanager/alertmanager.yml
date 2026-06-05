@@ -1,0 +1,45 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by:
+    - alertname
+    - job
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: telegram
+
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: telegram
+      repeat_interval: 1h
+
+    - matchers:
+        - severity = warning
+      receiver: telegram
+      repeat_interval: 4h
+
+receivers:
+  - name: telegram
+    telegram_configs:
+      - bot_token: ${TELEGRAM_BOT_TOKEN}
+        chat_id: ${TELEGRAM_CHAT_ID}
+        message: |
+          *{{ .Status | toUpper }}* - {{ .CommonLabels.alertname }}
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Details:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          {{ end }}
+        parse_mode: Markdown
+
+inhibit_rules:
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity = warning
+    equal:
+      - alertname
+      - job
