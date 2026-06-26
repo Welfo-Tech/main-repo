@@ -4,7 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
-export default function Home() {
+//just a mock function, will be replaced with actual logic to determine role based access
+function determineRoleFromEmail(email: string) {
+  const normalized = email.trim().toLowerCase();
+
+  if (!normalized.includes("@") || normalized.endsWith("@")) {
+    return "";
+  }
+
+  if (normalized.includes("tech") || normalized.includes("technician") || normalized.endsWith("@tech.com")) {
+    return "technician";
+  }
+
+  return "admin";
+}
+
+export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,8 +31,17 @@ export default function Home() {
       return;
     }
 
-    setError("");
-    router.push("/customer-dashboard");
+    const role = determineRoleFromEmail(email);
+    if (!role) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (role === "technician") {
+      router.push("/technician-dashboard");
+    } else {
+      router.push("/admin-dashboard");
+    }
   };
 
   return (
