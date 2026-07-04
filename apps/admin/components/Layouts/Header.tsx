@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import styles from "./Header.module.css";
 
 const navLinks = [
   { label: "About Us", href: "/about" },
@@ -14,14 +13,14 @@ const navLinks = [
 
 export function SiteHeader() {
   return (
-    <header className={styles.header}>
-      <div className={styles.inner}>
-        <a href="/" className={styles.logoArea} aria-label="Welfo Endovision home">
-          <div className={styles.logoPlaceholder} />
+    <header className="sticky top-0 z-100 bg-white border-b border-slate-200 shadow-md">
+      <div className="max-w-6xl mx-auto px-8 h-18 flex items-center justify-between gap-8 md:px-4 md:gap-4">
+        <a href="/" className="flex-shrink-0 no-underline" aria-label="Welfo Endovision home">
+          <div className="w-52 h-14 border-2 border-dashed border-violet-500 rounded bg-indigo-50" />
         </a>
 
-        <nav className={styles.nav} aria-label="Main navigation">
-          <a href="/" className={styles.homeIcon} aria-label="Home">
+        <nav className="flex items-center gap-6 md:gap-4" aria-label="Main navigation">
+          <a href="/" className="text-purple-700 flex items-center no-underline transition-colors duration-150 hover:text-violet-900" aria-label="Home">
             <svg
               width="18"
               height="18"
@@ -34,12 +33,19 @@ export function SiteHeader() {
           </a>
 
           {navLinks.map((link) => (
-            <a key={link.label} href={link.href} className={styles.navLink}>
+            <a 
+              key={link.label} 
+              href={link.href} 
+              className="text-purple-700 text-base font-semibold no-underline bg-none border-none cursor-pointer p-0 font-inherit flex items-center gap-1 whitespace-nowrap transition-colors duration-150 hover:text-violet-900 hover:underline hover:underline-offset-1 md:text-sm"
+            >
               {link.label}
             </a>
           ))}
 
-          <a href="/cart" className={styles.navLink}>
+          <a 
+            href="/cart" 
+            className="text-purple-700 text-base font-semibold no-underline bg-none border-none cursor-pointer p-0 font-inherit flex items-center gap-1 whitespace-nowrap transition-colors duration-150 hover:text-violet-900 hover:underline hover:underline-offset-1 md:text-sm"
+          >
             my Cart( 0 )
           </a>
         </nav>

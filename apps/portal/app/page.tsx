@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
@@ -21,29 +20,31 @@ export default function Home() {
   };
 
   return (
-    <main className={styles.page}>
-      <section className={styles.card}>
-        <div className={styles.hero}>
-          <span className={styles.heroTag}>Advanced</span>
-          <h1 className={styles.title}>Endoscopy and Laparoscopy Equipments</h1>
-          <p className={styles.description}>
+    <main className="relative min-h-[calc(100vh_-_72px)] flex justify-center items-center px-[70px] py-[60px] overflow-hidden bg-[linear-gradient(135deg,_#2d1b75_0%,_#3b2295_45%,_#4a29c4_100%)] max-[900px]:px-[25px] max-[900px]:py-[40px] max-[600px]:px-[18px] max-[600px]:py-[30px]">
+      <section className="w-full max-w-[1400px] grid grid-cols-[1.15fr_0.85fr] gap-[70px] items-center max-[900px]:grid-cols-1 max-[900px]:gap-[50px] max-[1200px]:gap-[50px]">
+        <div className="text-white max-[900px]:text-center">
+          <span className="inline-block text-white text-[20px] font-medium mb-[18px]">Advanced</span>
+          <h1 className="text-[74px] font-[800] leading-[0.95] text-white mb-[32px] max-[1200px]:text-[60px] max-[600px]:text-[42px] max-[600px]:leading-[1.05]">
+            Endoscopy and Laparoscopy Equipments
+          </h1>
+          <p className="text-[20px] leading-[1.7] text-white text-opacity-95 max-w-[620px] mb-[24px] max-[1200px]:text-[18px] max-[900px]:max-w-full max-[600px]:text-[16px]">
             At Endovision, we are dedicated to providing healthcare professionals
             across India with top-tier endoscopy-related medical equipments.
           </p>
-          <p className={styles.description}>
+          <p className="text-[20px] leading-[1.7] text-white text-opacity-95 max-w-[620px] mb-[24px] max-[1200px]:text-[18px] max-[900px]:max-w-full max-[600px]:text-[16px]">
             Our mission is to empower surgeons, specialists, and medical facilities
             with cutting-edge technology that enhances precision, safety, and
             efficiency in every procedure.
           </p>
-          <a href="#" className={styles.contactLink}>
+          <a href="#" className="inline-block mt-[10px] text-white text-[20px] font-medium no-underline max-[900px]:mx-auto">
             Contact Us
           </a>
         </div>
 
-        <div className={styles.formArea}>
-          <div className={styles.formCard}>
-            <div className={styles.field}>
-              <label htmlFor="email" className={styles.label}>
+        <div className="flex justify-start items-center max-[900px]:justify-center">
+          <div className="w-full max-w-[470px]">
+            <div className="mb-[18px]">
+              <label htmlFor="email" className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]">
                 Email*
               </label>
               <input
@@ -51,14 +52,14 @@ export default function Home() {
                 name="email"
                 type="email"
                 placeholder="Email"
-                className={styles.input}
+                className="w-full h-[58px] px-[20px] rounded-[12px] border border-white/45 bg-transparent text-white text-[17px] outline-none placeholder-white/95 max-[600px]:h-[54px] max-[600px]:text-[16px]"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
               />
             </div>
 
-            <div className={styles.field}>
-              <label htmlFor="password" className={styles.label}>
+            <div className="mb-[18px]">
+              <label htmlFor="password" className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]">
                 Password*
               </label>
               <input
@@ -66,21 +67,28 @@ export default function Home() {
                 name="password"
                 type="password"
                 placeholder="Password"
-                className={styles.input}
+                className="w-full h-[58px] px-[20px] rounded-[12px] border border-white/45 bg-transparent text-white text-[17px] outline-none placeholder-white/95 max-[600px]:h-[54px] max-[600px]:text-[16px]"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
             </div>
 
-            {error ? <p className={styles.errorText}>{error}</p> : null}
+            {error ? <p className="text-[#ffb3b3] text-[14px] mb-[14px]">{error}</p> : null}
 
-            <button type="button" className={styles.button} onClick={handleSignIn}>
+            <button
+              type="button"
+              className="w-[200px] h-[58px] rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5 max-[600px]:w-full"
+              onClick={handleSignIn}
+            >
               Sign In
             </button>
           </div>
         </div>
       </section>
-      <a href="#" className={styles.appointmentButton}>
+      <a
+        href="#"
+        className="fixed right-0 top-1/2 -translate-y-1/2 rotate-90 origin-right no-underline text-white bg-[#24145d] px-[14px] py-[22px] text-[18px] font-medium shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#1c0f49] [writing-mode:vertical-rl] [text-orientation:mixed] [border-radius:8px_0_0_8px] max-[900px]:top-auto max-[900px]:bottom-[20px] max-[900px]:right-[20px] max-[900px]:translate-y-0 max-[900px]:rotate-0 max-[900px]:[border-radius:8px] max-[900px]:py-[14px] max-[900px]:px-[24px] max-[900px]:[writing-mode:horizontal-tb]"
+      >
         Book Appointment
       </a>
     </main>
