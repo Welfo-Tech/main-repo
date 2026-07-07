@@ -1,3 +1,9 @@
+import AdminLayout from "../../components/layout/AdminLayout";
+
 export default function AdminPortalPage() {
-  return <main className="p-6">Admin Portal</main>;
+  return (
+    <AdminLayout>
+      <h1>Dashboard</h1>
+    </AdminLayout>
+  );
 }

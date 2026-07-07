@@ -1,4 +1,4 @@
-import AdminLayout from "../components/Layouts/AdminLayout";
+import AdminLayout from "../components/layout/AdminLayout";
 import { redirect } from "next/navigation";
 export default function Home() {
   redirect("/login");

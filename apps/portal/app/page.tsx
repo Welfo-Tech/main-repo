@@ -9,14 +9,39 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
       setError("Please enter your email and password.");
       return;
     }
 
-    setError("");
-    router.push("/customer-dashboard");
+    try {
+      setError("");
+
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1/portal/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setError(payload?.error || "Unable to sign in.");
+        return;
+      }
+
+      localStorage.setItem("portalAccessToken", payload.accessToken);
+      localStorage.setItem("portalRefreshToken", payload.refreshToken);
+      router.push("/customer-dashboard");
+    } catch {
+      setError("Unable to sign in right now.");
+    }
   };
 
   return (
@@ -87,7 +112,7 @@ export default function Home() {
       </section>
       <a
         href="#"
-        className="fixed right-0 top-1/2 -translate-y-1/2 rotate-90 origin-right no-underline text-white bg-[#24145d] px-[14px] py-[22px] text-[18px] font-medium shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#1c0f49] [writing-mode:vertical-rl] [text-orientation:mixed] [border-radius:8px_0_0_8px] max-[900px]:top-auto max-[900px]:bottom-[20px] max-[900px]:right-[20px] max-[900px]:translate-y-0 max-[900px]:rotate-0 max-[900px]:[border-radius:8px] max-[900px]:py-[14px] max-[900px]:px-[24px] max-[900px]:[writing-mode:horizontal-tb]"
+        className="fixed right-0 top-1/2 -translate-y-1/2 no-underline text-white bg-[#24145d] px-[14px] py-[22px] text-[18px] font-medium shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#1c0f49] [writing-mode:vertical-rl] [text-orientation:mixed] [border-radius:8px_0_0_8px] max-[900px]:top-auto max-[900px]:bottom-[20px] max-[900px]:right-[20px] max-[900px]:translate-y-0 max-[900px]:[border-radius:8px] max-[900px]:py-[14px] max-[900px]:px-[24px] max-[900px]:[writing-mode:horizontal-tb]"
       >
         Book Appointment
       </a>
