@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Footer from "@repo/ui/Footer";
 
 export const metadata: Metadata = {
   title: "Welfo Fiber Optics",
@@ -13,9 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        {/* <SiteHeader /> */}
-        {children}
+      <body className="min-h-screen flex flex-col">
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );
