@@ -19,7 +19,7 @@ export default function Home() {
       setError("");
 
       const response = await fetch(
-        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1/portal/auth/login",
+       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/portal/auth/login`,
         {
           method: "POST",
           headers: {
@@ -30,6 +30,7 @@ export default function Home() {
       );
 
       const payload = await response.json();
+      console.log(payload);
 
       if (!response.ok) {
         setError(payload?.error || "Unable to sign in.");
@@ -38,6 +39,7 @@ export default function Home() {
 
       localStorage.setItem("portalAccessToken", payload.accessToken);
       localStorage.setItem("portalRefreshToken", payload.refreshToken);
+      localStorage.setItem("portalUser", JSON.stringify(payload.contact));
       router.push("/customer-dashboard");
     } catch {
       setError("Unable to sign in right now.");

@@ -3,20 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-//just a mock function, will be replaced with actual logic to determine role based access
-function determineRoleFromEmail(email: string) {
-  const normalized = email.trim().toLowerCase();
-
-  if (!normalized.includes("@") || normalized.endsWith("@")) {
-    return "";
-  }
-
-  if (normalized.includes("tech") || normalized.includes("technician") || normalized.endsWith("@tech.com")) {
-    return "technician";
-  }
-
-  return "admin";
-}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,22 +10,47 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
       setError("Please enter your email and password.");
       return;
     }
 
-    const role = determineRoleFromEmail(email);
-    if (!role) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    try {
+      setError("");
 
-    if (role === "technician") {
-      router.push("/technician-dashboard");
-    } else {
-      router.push("/admin-dashboard");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const payload = await response.json();
+      if (!response.ok) {
+        setError(payload?.error || "Unable to sign in.");
+        return;
+      }
+
+      localStorage.setItem("accessToken", payload.accessToken);
+      localStorage.setItem("refreshToken", payload.refreshToken);
+      localStorage.setItem("user", JSON.stringify(payload.user));
+
+      if (payload.user.role === "TECHNICIAN") {
+        router.push("/technician-dashboard");
+      } else {
+        router.push("/admin-dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+      setError("Unable to sign in right now.");
     }
   };
 

@@ -54,9 +54,9 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="h-full w-60 border-r border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-6 py-5">
-        <h2 className="text-lg font-bold text-slate-900">
+<aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-60 border-r border-slate-200 bg-white">
+        <div className="border-b border-slate-200 px-6 py-5">
+        <h2 className=" text-lg font-bold text-slate-900">
           Admin Panel
         </h2>
       </div>
