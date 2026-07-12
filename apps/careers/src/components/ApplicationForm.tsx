@@ -156,10 +156,10 @@ export default function ApplicationForm({ onSuccess }: Props) {
   return (
     <form className="form-wrap" onSubmit={handleSubmit} noValidate>
       <div className="form-header">
-        <h3>Full Stack Internship — 2026</h3>
+        <h3>Full Stack Internship 2026</h3>
         <p>
-          Fill in all required fields. This form saves directly — there is no email
-          required before submission. We will get back to you within 5–10 business days.
+          Fill in all required fields. This saves directly, no email needed before submitting.
+          We'll get back to you within 5 to 10 business days.
         </p>
       </div>
 
@@ -319,14 +319,14 @@ export default function ApplicationForm({ onSuccess }: Props) {
             errors={displayErrors}
             touched={touched}
             onBlur={touch}
-            hint="Tell us about 1–3 projects. What did you build, what stack, what was your role?"
+            hint="Tell us about 1 to 3 projects. What did you build, what stack, what was your role?"
             full
           >
             <textarea
               value={form.notable_projects}
               onChange={(e) => set("notable_projects", e.target.value)}
               style={{ minHeight: 140 }}
-              placeholder="1. Hospital inventory system — React + Node + Postgres. Built the full backend and the dashboard UI. Deployed on Railway. Link: ..."
+              placeholder="1. Hospital inventory system. React + Node + Postgres. Built the full backend and the dashboard UI. Deployed on Railway. Link: ..."
             />
           </Field>
         </div>
@@ -339,7 +339,7 @@ export default function ApplicationForm({ onSuccess }: Props) {
             errors={displayErrors}
             touched={touched}
             onBlur={touch}
-            hint="Why do you want to work on this specifically? We are building internal tools for a medical fiber optics company — what draws you to this?"
+            hint="Why do you want to work on this specifically? We're building internal tools for a medical fiber optics company. What draws you to this?"
             full
           >
             <textarea
@@ -379,7 +379,7 @@ export default function ApplicationForm({ onSuccess }: Props) {
               onChange={(e) => set("work_preference", e.target.value)}
             >
               <option value="">Select preference</option>
-              <option value="On-site (Rishikesh)">On-site — Rishikesh</option>
+              <option value="On-site (Rishikesh)">On-site, Rishikesh</option>
               <option value="Hybrid">Hybrid</option>
               <option value="Remote">Remote</option>
             </select>
@@ -394,7 +394,7 @@ export default function ApplicationForm({ onSuccess }: Props) {
             errors={displayErrors}
             touched={touched}
             onBlur={touch}
-            hint="Google Drive, Notion, or any public link. Make sure it is accessible."
+            hint="Google Drive, Notion, or any public link. Make sure it's accessible."
             full
           >
             <input
@@ -417,7 +417,7 @@ export default function ApplicationForm({ onSuccess }: Props) {
             <textarea
               value={form.additional_notes}
               onChange={(e) => set("additional_notes", e.target.value)}
-              placeholder="Open to add anything that does not fit above — side projects, context, questions..."
+              placeholder="Anything that doesn't fit above. Side projects, context, questions..."
             />
           </Field>
         </div>
@@ -429,7 +429,7 @@ export default function ApplicationForm({ onSuccess }: Props) {
         <div className="form-submit-row">
           <p className="form-submit-note">
             Your data goes directly into our internal database.
-            We do not share it with third parties.
+            We don't share it with anyone.
           </p>
           <button type="submit" className="btn-submit" disabled={submitting}>
             {submitting ? (

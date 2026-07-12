@@ -8,12 +8,12 @@ export default function SuccessState() {
       </div>
       <h2>Application submitted</h2>
       <p>
-        Thank you for applying to the Full Stack Internship at Welfo Fiber Optics.
-        We have received your application and will review it shortly.
+        We've got your application for the Full Stack Internship at Welfo Fiber Optics.
+        We'll go through it and get back to you.
       </p>
       <p>
-        If your profile is a strong match we will reach out on the email you provided.
-        This usually takes 5–10 business days.
+        If it's a good match we'll reach out on the email you gave us.
+        Usually takes 5 to 10 business days.
       </p>
     </div>
   );

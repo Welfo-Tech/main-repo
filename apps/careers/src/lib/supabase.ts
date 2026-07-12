@@ -41,3 +41,28 @@ export async function submitApplication(data: ApplicationPayload) {
 
   if (error) throw error;
 }
+
+export interface Application extends ApplicationPayload {
+  id: string;
+  created_at: string;
+  status: string;
+}
+
+export async function getApplications(): Promise<Application[]> {
+  const { data, error } = await supabase
+    .from("internship_applications")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Application[];
+}
+
+export async function updateApplicationStatus(id: string, status: string) {
+  const { error } = await supabase
+    .from("internship_applications")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) throw error;
+}

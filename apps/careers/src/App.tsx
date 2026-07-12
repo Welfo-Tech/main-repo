@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ApplicationForm from "./components/ApplicationForm.js";
 import SuccessState from "./components/SuccessState.js";
+import AdminPage from "./pages/AdminPage.js";
 
 function IconBriefcase() {
   return (
@@ -89,6 +90,7 @@ function IconShield() {
 export default function App() {
   const [submitted, setSubmitted] = useState(false);
 
+  if (window.location.pathname.startsWith("/admin")) return <AdminPage />;
   if (submitted) return <SuccessState />;
 
   return (
@@ -113,9 +115,9 @@ export default function App() {
             Build the platform that powers <span>medical device repair</span> in India
           </h1>
           <p className="hero-sub">
-            We are Welfo Fiber Optics — a medical fiber optics and endoscopy repair company
-            based in Rishikesh. We are digitising our entire operations from scratch
-            and need a full stack engineer who wants to build something real.
+            We're Welfo Fiber Optics. Medical fiber optics and endoscopy repair, based in Rishikesh.
+            We're digitising everything from scratch and need a full stack engineer
+            who actually wants to build something.
           </p>
           <a href="#apply" className="btn-primary">
             Apply now
@@ -161,12 +163,12 @@ export default function App() {
               <p className="section-body">
                 Welfo repairs and services fiber optic cables and endoscopes used in hospitals
                 and diagnostic centres across India. Every repair case, every spare part, every
-                invoice — currently managed on paper and in spreadsheets.
+                invoice is currently on paper or in spreadsheets.
               </p>
               <p className="section-body" style={{ marginTop: 16 }}>
-                We are building the internal platform that runs all of this: repair case management,
-                inventory, quoting, invoicing, dispatch tracking, customer portal, and more.
-                It is a greenfield TypeScript monorepo, and you will be working directly on production code.
+                We're building the internal platform that runs all of this. Repair case management,
+                inventory, quoting, invoicing, dispatch tracking, customer portal. Greenfield
+                TypeScript monorepo. You'll be working directly on production code.
               </p>
             </div>
             <div className="about-cards">
@@ -182,14 +184,14 @@ export default function App() {
                   <IconDatabase />
                 </div>
                 <h4>Real data model</h4>
-                <p>26 Prisma models, PostgreSQL on Neon, complex domain logic — actual engineering.</p>
+                <p>26 Prisma models, PostgreSQL on Neon, complex domain logic. Actual engineering.</p>
               </div>
               <div className="about-card">
                 <div className="about-card-icon">
                   <IconLayers />
                 </div>
                 <h4>Full ownership</h4>
-                <p>You will ship features end to end — schema to API to UI — not just tickets.</p>
+                <p>You'll ship features end to end. Schema to API to UI. Not just tickets.</p>
               </div>
               <div className="about-card">
                 <div className="about-card-icon">
@@ -208,31 +210,31 @@ export default function App() {
           <p className="section-label">The role</p>
           <h2 className="section-title">What you will work on</h2>
           <p className="section-body">
-            You will join as the sole intern on the engineering team and work on building
-            out the operational platform alongside the technical lead.
+            You'll join as the sole intern on the engineering team and work directly
+            with the technical lead on the operational platform.
           </p>
 
           <div className="role-grid">
             <div className="role-col">
-              <h3>What you will build</h3>
+              <h3>What you'll build</h3>
               <ul className="role-list">
-                <li>REST API endpoints using Hono on Node.js — service cases, quotes, invoices, inventory</li>
-                <li>Admin dashboard UI in React — repair case management, technician assignment, financial views</li>
-                <li>Customer portal — organizations view their device history and approve quotes</li>
-                <li>Database migrations and schema evolution in Prisma + PostgreSQL</li>
-                <li>Auth flows — JWT access / refresh tokens, role-based middleware</li>
-                <li>Monitoring dashboards, structured logging, Prometheus metrics</li>
+                <li>REST API endpoints using Hono on Node.js. Service cases, quotes, invoices, inventory.</li>
+                <li>Admin dashboard UI in React. Repair case management, technician assignment, financial views.</li>
+                <li>Customer portal where organisations view their device history and approve quotes.</li>
+                <li>Database migrations and schema evolution in Prisma and PostgreSQL.</li>
+                <li>Auth flows. JWT access and refresh tokens, role-based middleware.</li>
+                <li>Monitoring dashboards, structured logging, Prometheus metrics.</li>
               </ul>
             </div>
             <div className="role-col">
               <h3>What we need from you</h3>
               <ul className="role-list">
-                <li>Solid React — you can build a complex multi-view dashboard without hand-holding</li>
-                <li>Comfortable with Node.js and building REST APIs — route design, validation, error handling</li>
-                <li>You have used PostgreSQL before and understand relational data modelling</li>
-                <li>TypeScript — not just tolerating it, actually writing typed code</li>
-                <li>You write code that other people can read and maintain</li>
-                <li>You are available for regular calls and can work independently between them</li>
+                <li>Solid React. You can build a complex multi-view dashboard without hand-holding.</li>
+                <li>Comfortable with Node.js and building REST APIs. Route design, validation, error handling.</li>
+                <li>You've used PostgreSQL before and understand relational data modelling.</li>
+                <li>TypeScript. Not just tolerating it, actually writing typed code.</li>
+                <li>You write code that other people can read and maintain.</li>
+                <li>You're available for regular calls and can work independently between them.</li>
               </ul>
 
               <p style={{ marginTop: 28, marginBottom: 12, fontSize: 13, fontWeight: 700, color: "var(--grey-700)" }}>
@@ -253,8 +255,8 @@ export default function App() {
           <p className="section-label">Apply</p>
           <h2 className="section-title">Ready? Fill in the form below.</h2>
           <p className="section-body">
-            No cover letter required. Just answer the questions honestly.
-            We review every application personally.
+            No cover letter needed. Just answer the questions honestly.
+            We go through every application ourselves.
           </p>
           <ApplicationForm onSuccess={() => setSubmitted(true)} />
         </div>
@@ -262,10 +264,10 @@ export default function App() {
 
       <footer className="footer">
         <p>
-          <span>Welfo Fiber Optics</span> — Rishikesh, Uttarakhand, India
+          <span>Welfo Fiber Optics</span> · Rishikesh, Uttarakhand, India
         </p>
         <p style={{ marginTop: 4 }}>
-          Medical fiber optics & endoscopy repair — building the operations platform from scratch
+          Medical fiber optics and endoscopy repair. Building the operations platform from scratch.
         </p>
       </footer>
     </>

@@ -13,7 +13,7 @@ SERVICE="${1:-}"
 cd "$REPO_ROOT"
 
 if [ -z "$SERVICE" ]; then
-    echo "Starting full stack..."
+    echo "Starting full stack..."das
     docker compose up -d
     echo "Stack is up. Run 'make logs' to follow logs."
 else
