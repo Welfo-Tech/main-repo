@@ -1,0 +1,28 @@
+{
+  "name": "@welfo/careers",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "check-types": "tsc --noEmit",
+    "preview": "vite preview",
+    "lint": "eslint --max-warnings 0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "eslint": "^9.39.1",
+    "typescript": "5.9.2",
+    "vite": "^6.3.5"
+  }
+}
