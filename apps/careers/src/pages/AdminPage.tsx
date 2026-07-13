@@ -11,10 +11,10 @@ type Session = Awaited<
 >["data"]["session"];
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending:    { label: "Pending",    color: "#94a3b8" },
-  reviewing:  { label: "Reviewing",  color: "#f59e0b" },
-  selected:   { label: "Selected",   color: "#22c55e" },
-  rejected:   { label: "Rejected",   color: "#ef4444" },
+  pending:   { label: "Pending",   color: "#94a3b8" },
+  reviewing: { label: "Reviewing", color: "#f59e0b" },
+  selected:  { label: "Selected",  color: "#22c55e" },
+  rejected:  { label: "Rejected",  color: "#ef4444" },
 };
 
 const STATUS_ORDER = ["pending", "reviewing", "selected", "rejected"];
@@ -29,7 +29,7 @@ function StatusBadge({ status }: { status: string }) {
         fontWeight: 600,
         color: "#fff",
         background: s.color,
-        padding: "2px 10px",
+        padding: "3px 12px",
         borderRadius: 20,
         letterSpacing: ".3px",
       }}
@@ -39,116 +39,171 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function DetailRow({ label, value }: { label: string; value?: string | number | null }) {
-  if (!value && value !== 0) return null;
+function AdminNav({ onBack }: { onBack?: () => void }) {
   return (
-    <div className="adm-detail-row">
-      <span className="adm-detail-label">{label}</span>
-      <span className="adm-detail-value">{value}</span>
-    </div>
+    <nav className="nav">
+      <div className="nav-inner">
+        <a href="/" className="nav-logo">
+          <span className="nav-logo-dot" />
+          Welfo Fiber Optics
+        </a>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {onBack && (
+            <button className="adm-back-btn" onClick={onBack}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Applications
+            </button>
+          )}
+          <span className="nav-badge">Vansh</span>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "var(--grey-500)" }}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </nav>
   );
 }
 
-function DetailLink({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
-  return (
-    <div className="adm-detail-row">
-      <span className="adm-detail-label">{label}</span>
-      <a href={value} target="_blank" rel="noopener noreferrer" className="adm-detail-link">
-        {value}
-      </a>
-    </div>
-  );
-}
-
-function DetailBlock({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
-  return (
-    <div className="adm-detail-block">
-      <span className="adm-detail-label">{label}</span>
-      <p className="adm-detail-text">{value}</p>
-    </div>
-  );
-}
-
-interface PanelProps {
+interface DetailProps {
   app: Application;
-  onClose: () => void;
+  onBack: () => void;
   onStatusChange: (id: string, status: string) => void;
 }
 
-function ApplicationPanel({ app, onClose, onStatusChange }: PanelProps) {
+function ApplicationDetail({ app, onBack, onStatusChange }: DetailProps) {
   const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState(app.status);
 
-  async function changeStatus(status: string) {
+  async function changeStatus(next: string) {
     setSaving(true);
     try {
-      await updateApplicationStatus(app.id, status);
-      onStatusChange(app.id, status);
+      await updateApplicationStatus(app.id, next);
+      setStatus(next);
+      onStatusChange(app.id, next);
     } finally {
       setSaving(false);
     }
   }
 
+  const appliedDate = new Date(app.created_at).toLocaleDateString("en-IN", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+
   return (
     <>
-      <div className="adm-overlay" onClick={onClose} />
-      <div className="adm-panel">
-        <div className="adm-panel-header">
-          <div>
-            <h2 className="adm-panel-name">{app.full_name}</h2>
-            <p className="adm-panel-meta">
-              {app.email} · {app.phone} · Applied {new Date(app.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-            </p>
-          </div>
-          <button className="adm-close" onClick={onClose}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="adm-panel-status-row">
-          <StatusBadge status={app.status} />
-          <div className="adm-status-actions">
-            {STATUS_ORDER.filter((s) => s !== app.status).map((s) => (
-              <button
-                key={s}
-                className="adm-status-btn"
-                style={{ borderColor: STATUS_LABELS[s]?.color, color: STATUS_LABELS[s]?.color }}
-                disabled={saving}
-                onClick={() => changeStatus(s)}
-              >
-                {saving ? "..." : `Mark ${STATUS_LABELS[s]?.label}`}
-              </button>
-            ))}
+      <AdminNav onBack={onBack} />
+      <div className="adm-detail-wrap">
+        <div className="adm-detail-header">
+          <div className="adm-detail-title-row">
+            <div>
+              <h1 className="adm-detail-name">{app.full_name}</h1>
+              <p className="adm-detail-meta">
+                {app.email} &middot; {app.phone} &middot; Applied {appliedDate}
+              </p>
+            </div>
+            <div className="adm-detail-status-row">
+              <StatusBadge status={status} />
+              <div className="adm-status-actions">
+                {STATUS_ORDER.filter((s) => s !== status).map((s) => (
+                  <button
+                    key={s}
+                    className="adm-status-btn"
+                    style={{ borderColor: STATUS_LABELS[s]?.color, color: STATUS_LABELS[s]?.color }}
+                    disabled={saving}
+                    onClick={() => changeStatus(s)}
+                  >
+                    {saving ? "Saving..." : `Mark ${STATUS_LABELS[s]?.label}`}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="adm-panel-body">
-          <div className="adm-section-label">Personal</div>
-          <DetailRow label="College" value={app.college} />
-          <DetailRow label="Degree" value={`${app.degree}, ${app.field_of_study}`} />
-          <DetailRow label="Graduation" value={app.graduation_year} />
-          <DetailLink label="LinkedIn" value={app.linkedin_url} />
-          <DetailLink label="GitHub" value={app.github_url} />
-          <DetailLink label="Portfolio" value={app.portfolio_url} />
+        <div className="adm-detail-body">
+          <div className="adm-detail-grid">
+            <div className="adm-detail-col">
+              <div className="adm-card">
+                <div className="adm-card-label">Personal</div>
+                <div className="adm-card-rows">
+                  <div className="adm-row"><span>College</span><span>{app.college}</span></div>
+                  <div className="adm-row"><span>Degree</span><span>{app.degree}, {app.field_of_study}</span></div>
+                  <div className="adm-row"><span>Graduation</span><span>{app.graduation_year}</span></div>
+                  {app.linkedin_url && (
+                    <div className="adm-row">
+                      <span>LinkedIn</span>
+                      <a href={app.linkedin_url} target="_blank" rel="noopener noreferrer">{app.linkedin_url}</a>
+                    </div>
+                  )}
+                  {app.github_url && (
+                    <div className="adm-row">
+                      <span>GitHub</span>
+                      <a href={app.github_url} target="_blank" rel="noopener noreferrer">{app.github_url}</a>
+                    </div>
+                  )}
+                  {app.portfolio_url && (
+                    <div className="adm-row">
+                      <span>Portfolio</span>
+                      <a href={app.portfolio_url} target="_blank" rel="noopener noreferrer">{app.portfolio_url}</a>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-          <div className="adm-section-label">Role</div>
-          <DetailRow label="Available from" value={app.available_from} />
-          <DetailRow label="Duration" value={app.duration} />
-          <DetailRow label="Work preference" value={app.work_preference} />
-          <DetailLink label="Resume" value={app.resume_link} />
+              <div className="adm-card">
+                <div className="adm-card-label">Role</div>
+                <div className="adm-card-rows">
+                  <div className="adm-row"><span>Available from</span><span>{app.available_from}</span></div>
+                  <div className="adm-row"><span>Duration</span><span>{app.duration}</span></div>
+                  <div className="adm-row"><span>Work preference</span><span>{app.work_preference}</span></div>
+                  <div className="adm-row">
+                    <span>Resume</span>
+                    <a href={app.resume_link} target="_blank" rel="noopener noreferrer">Open resume</a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div className="adm-section-label">Technical</div>
-          <DetailBlock label="Frontend skills" value={app.frontend_skills} />
-          <DetailBlock label="Backend skills" value={app.backend_skills} />
-          <DetailBlock label="Database experience" value={app.db_experience} />
-          <DetailBlock label="Notable projects" value={app.notable_projects} />
+            <div className="adm-detail-col">
+              <div className="adm-card">
+                <div className="adm-card-label">Technical skills</div>
+                <div className="adm-text-section">
+                  <p className="adm-text-label">Frontend</p>
+                  <p className="adm-text-body">{app.frontend_skills}</p>
+                </div>
+                <div className="adm-text-section">
+                  <p className="adm-text-label">Backend</p>
+                  <p className="adm-text-body">{app.backend_skills}</p>
+                </div>
+                <div className="adm-text-section">
+                  <p className="adm-text-label">Databases</p>
+                  <p className="adm-text-body">{app.db_experience}</p>
+                </div>
+              </div>
 
-          <div className="adm-section-label">About this role</div>
-          <DetailBlock label="Why Welfo?" value={app.why_welfo} />
-          <DetailBlock label="Additional notes" value={app.additional_notes} />
+              <div className="adm-card">
+                <div className="adm-card-label">Notable projects</div>
+                <p className="adm-text-body" style={{ marginTop: 4 }}>{app.notable_projects}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="adm-card adm-card-full">
+            <div className="adm-card-label">Why Welfo?</div>
+            <p className="adm-text-body" style={{ marginTop: 4 }}>{app.why_welfo}</p>
+          </div>
+
+          {app.additional_notes && (
+            <div className="adm-card adm-card-full">
+              <div className="adm-card-label">Additional notes</div>
+              <p className="adm-text-body" style={{ marginTop: 4 }}>{app.additional_notes}</p>
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -241,7 +296,6 @@ export default function AdminPage() {
     setApplications((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status } : a)),
     );
-    if (selected?.id === id) setSelected((prev) => prev ? { ...prev, status } : prev);
   }
 
   if (loadingAuth) {
@@ -254,6 +308,16 @@ export default function AdminPage() {
 
   if (!session) return <LoginForm />;
 
+  if (selected) {
+    return (
+      <ApplicationDetail
+        app={selected}
+        onBack={() => setSelected(null)}
+        onStatusChange={handleStatusChange}
+      />
+    );
+  }
+
   const filtered = filter === "all"
     ? applications
     : applications.filter((a) => a.status === filter);
@@ -265,24 +329,7 @@ export default function AdminPage() {
 
   return (
     <>
-      <nav className="nav">
-        <div className="nav-inner">
-          <a href="/" className="nav-logo">
-            <span className="nav-logo-dot" />
-            Welfo Fiber Optics
-          </a>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <span className="nav-badge">Admin</span>
-            <button
-              onClick={() => supabase.auth.signOut()}
-              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "var(--grey-500)" }}
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </nav>
-
+      <AdminNav />
       <div className="adm-wrap">
         <div className="adm-toolbar">
           <div>
@@ -330,11 +377,7 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {filtered.map((app) => (
-                  <tr
-                    key={app.id}
-                    onClick={() => setSelected(app)}
-                    className={selected?.id === app.id ? "selected" : ""}
-                  >
+                  <tr key={app.id} onClick={() => setSelected(app)}>
                     <td className="adm-name-cell">{app.full_name}</td>
                     <td>{app.email}</td>
                     <td>{app.college}</td>
@@ -353,14 +396,6 @@ export default function AdminPage() {
           </div>
         )}
       </div>
-
-      {selected && (
-        <ApplicationPanel
-          app={selected}
-          onClose={() => setSelected(null)}
-          onStatusChange={handleStatusChange}
-        />
-      )}
     </>
   );
 }
