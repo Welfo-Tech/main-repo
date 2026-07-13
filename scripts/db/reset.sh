@@ -14,5 +14,6 @@ if [ "${NODE_ENV:-}" = "production" ] || [ "${NODE_ENV:-}" = "staging" ]; then
 fi
 
 echo "Resetting database (dev only)..."
+cd "$REPO_ROOT/packages/db"
 npx prisma migrate reset --force
 echo "Database reset and seeded."

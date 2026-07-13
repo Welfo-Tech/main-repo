@@ -2,8 +2,8 @@ SHELL := /usr/bin/env bash
 
 .PHONY: up down build rebuild restart logs logs-service ps \
         test test-unit test-integration test-e2e \
-        db-migrate db-seed db-reset \
-        health monitoring-up monitoring-down
+        db-generate db-migrate db-seed db-reset \
+        health monitoring-up monitoring-down install
 
 ## Stack controls
 
@@ -44,7 +44,15 @@ test-integration:
 test-e2e:
 	bash scripts/testing/run-e2e.sh
 
+## Dependencies
+
+install:
+	bash scripts/install.sh
+
 ## Database
+
+db-generate:
+	npm run db:generate --workspace=@repo/db
 
 db-migrate:
 	bash scripts/db/migrate.sh
