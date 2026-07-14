@@ -2,6 +2,7 @@ import { useState } from "react";
 import ApplicationForm from "./components/ApplicationForm.js";
 import SuccessState from "./components/SuccessState.js";
 import AdminPage from "./pages/AdminPage.js";
+import logo from "./images/logo.png";
 
 function IconBriefcase() {
   return (
@@ -98,8 +99,7 @@ export default function App() {
       <nav className="nav">
         <div className="nav-inner">
           <a href="#" className="nav-logo">
-            <span className="nav-logo-dot" />
-            Welfo Fiber Optics
+              <img src={logo} className="nav-logo-image" />
           </a>
           <span className="nav-badge">Internship 2026</span>
         </div>
