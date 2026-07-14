@@ -1049,3 +1049,9 @@ img {
     font-size: 24px;
   }
 }
+
+.nav-logo-image {
+  height: 60px;
+  width: auto;
+  display: block;
+}
