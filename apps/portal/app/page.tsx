@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
@@ -19,14 +21,14 @@ export default function Home() {
       setError("");
 
       const response = await fetch(
-       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/portal/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/portal/auth/login`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ email, password }),
-        }
+        },
       );
 
       const payload = await response.json();
@@ -50,20 +52,26 @@ export default function Home() {
     <main className="relative min-h-[calc(100vh_-_72px)] flex justify-center items-center px-[70px] py-[60px] overflow-hidden bg-[linear-gradient(135deg,_#2d1b75_0%,_#3b2295_45%,_#4a29c4_100%)] max-[900px]:px-[25px] max-[900px]:py-[40px] max-[600px]:px-[18px] max-[600px]:py-[30px]">
       <section className="w-full max-w-[1400px] grid grid-cols-[1.15fr_0.85fr] gap-[70px] items-center max-[900px]:grid-cols-1 max-[900px]:gap-[50px] max-[1200px]:gap-[50px]">
         <div className="text-white max-[900px]:text-center">
-          <span className="inline-block text-white text-[20px] font-medium mb-[18px]">Advanced</span>
+          <span className="inline-block text-white text-[20px] font-medium mb-[18px]">
+            Advanced
+          </span>
           <h1 className="text-[74px] font-[800] leading-[0.95] text-white mb-[32px] max-[1200px]:text-[60px] max-[600px]:text-[42px] max-[600px]:leading-[1.05]">
             Endoscopy and Laparoscopy Equipments
           </h1>
           <p className="text-[20px] leading-[1.7] text-white text-opacity-95 max-w-[620px] mb-[24px] max-[1200px]:text-[18px] max-[900px]:max-w-full max-[600px]:text-[16px]">
-            At Endovision, we are dedicated to providing healthcare professionals
-            across India with top-tier endoscopy-related medical equipments.
+            At Endovision, we are dedicated to providing healthcare
+            professionals across India with top-tier endoscopy-related medical
+            equipments.
           </p>
           <p className="text-[20px] leading-[1.7] text-white text-opacity-95 max-w-[620px] mb-[24px] max-[1200px]:text-[18px] max-[900px]:max-w-full max-[600px]:text-[16px]">
-            Our mission is to empower surgeons, specialists, and medical facilities
-            with cutting-edge technology that enhances precision, safety, and
-            efficiency in every procedure.
+            Our mission is to empower surgeons, specialists, and medical
+            facilities with cutting-edge technology that enhances precision,
+            safety, and efficiency in every procedure.
           </p>
-          <a href="#" className="inline-block mt-[10px] text-white text-[20px] font-medium no-underline max-[900px]:mx-auto">
+          <a
+            href="#"
+            className="inline-block mt-[10px] text-white text-[20px] font-medium no-underline max-[900px]:mx-auto"
+          >
             Contact Us
           </a>
         </div>
@@ -71,7 +79,10 @@ export default function Home() {
         <div className="flex justify-start items-center max-[900px]:justify-center">
           <div className="w-full max-w-[470px]">
             <div className="mb-[18px]">
-              <label htmlFor="email" className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]">
+              <label
+                htmlFor="email"
+                className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]"
+              >
                 Email*
               </label>
               <input
@@ -86,7 +97,10 @@ export default function Home() {
             </div>
 
             <div className="mb-[18px]">
-              <label htmlFor="password" className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]">
+              <label
+                htmlFor="password"
+                className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]"
+              >
                 Password*
               </label>
               <input
@@ -100,15 +114,37 @@ export default function Home() {
               />
             </div>
 
-            {error ? <p className="text-[#ffb3b3] text-[14px] mb-[14px]">{error}</p> : null}
+            {error ? (
+              <p className="text-[#ffb3b3] text-[14px] mb-[14px]">{error}</p>
+            ) : null}
 
-            <button
-              type="button"
-              className="w-[200px] h-[58px] rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5 max-[600px]:w-full"
-              onClick={handleSignIn}
-            >
-              Sign In
-            </button>
+            <div className="flex items-center justify-between w-full mb-8">
+              <button
+                type="button"
+                className="w-[200px] h-[58px] rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5"
+                onClick={handleSignIn}
+              >
+                Sign In
+              </button>
+
+              <button
+                type="button"
+                className="text-sm text-white/80 hover:text-white hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
+            <div>
+              <p className="text-white/80 text-sm mb-3">New customer?</p>
+
+              <Link
+                href="/register"
+                className="mt-3 flex w-[200px] h-[58px] items-center justify-center rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5 max-[600px]:w-full"
+              >
+                Register
+              </Link>
+            </div>
           </div>
         </div>
       </section>
