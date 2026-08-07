@@ -8,5 +8,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 echo "Seeding database..."
+cd "$REPO_ROOT/packages/db"
 npx prisma db seed
 echo "Seed complete."

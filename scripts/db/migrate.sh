@@ -8,5 +8,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 echo "Running database migrations..."
+cd "$REPO_ROOT/packages/db"
 npx prisma migrate deploy
 echo "Migrations applied."
