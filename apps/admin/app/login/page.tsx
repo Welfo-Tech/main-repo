@@ -48,14 +48,13 @@ export default function LoginPage() {
       } else {
         router.push("/admin-dashboard");
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       setError("Unable to sign in right now.");
     }
   };
 
   return (
-    <main className="relative min-h-[calc(100vh_-_72px)] flex justify-center items-center px-[70px] py-[60px] overflow-hidden bg-[linear-gradient(135deg,_#2d1b75_0%,_#3b2295_45%,_#4a29c4_100%)] max-[900px]:px-[25px] max-[900px]:py-[40px] max-[600px]:px-[18px] max-[600px]:py-[30px]">
+    <main className="relative min-h-[calc(100vh_-_72px)] flex justify-center items-center px-[70px] py-[60px] overflow-hidden bg-[linear-gradient(135deg,_#0a3560_0%,_#0F4C81_45%,_#1a6aab_100%)] max-[900px]:px-[25px] max-[900px]:py-[40px] max-[600px]:px-[18px] max-[600px]:py-[30px]">
       <section className="w-full max-w-[1400px] grid grid-cols-[1.15fr_0.85fr] gap-[70px] items-center max-[900px]:grid-cols-1 max-[900px]:gap-[50px] max-[1200px]:gap-[50px]">
         
         <div className="text-white max-[900px]:text-center">
@@ -113,7 +112,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="w-[200px] h-[58px] rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5 max-[600px]:w-full"
+              className="w-[200px] h-[58px] rounded-[12px] border-0 bg-[#0F4C81] text-white text-[18px] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#0a3560] hover:-translate-y-0.5 max-[600px]:w-full"
               onClick={handleSignIn}
             >
               Sign In
@@ -123,7 +122,7 @@ export default function LoginPage() {
       </section>
       <a
         href="#"
-        className="fixed right-0 top-1/2 -translate-y-1/2 no-underline text-white bg-[#24145d] px-[18px] py-[16px] text-[18px] font-medium rounded-l-[8px] shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#1c0f49] [writing-mode:vertical-rl] [text-orientation:mixed] max-[900px]:top-auto max-[900px]:bottom-[20px] max-[900px]:right-[20px] max-[900px]:translate-y-0 max-[900px]:rounded-[8px] max-[900px]:py-[14px] max-[900px]:px-[24px] max-[900px]:[writing-mode:horizontal-tb]"
+        className="fixed right-0 top-1/2 -translate-y-1/2 no-underline text-white bg-[#0F4C81] px-[18px] py-[16px] text-[18px] font-medium rounded-l-[8px] shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#0a3560] [writing-mode:vertical-rl] [text-orientation:mixed] max-[900px]:top-auto max-[900px]:bottom-[20px] max-[900px]:right-[20px] max-[900px]:translate-y-0 max-[900px]:rounded-[8px] max-[900px]:py-[14px] max-[900px]:px-[24px] max-[900px]:[writing-mode:horizontal-tb]"
       >
         Book Appointment
       </a>

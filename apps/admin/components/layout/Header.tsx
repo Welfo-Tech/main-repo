@@ -20,7 +20,7 @@ export function SiteHeader() {
         </a>
 
         <nav className="flex items-center gap-6 md:gap-4" aria-label="Main navigation">
-          <a href="/" className="text-purple-700 flex items-center no-underline transition-colors duration-150 hover:text-violet-900" aria-label="Home">
+          <a href="/" className="text-[#0F4C81] flex items-center no-underline transition-colors duration-150 hover:text-[#0a3560]" aria-label="Home">
             <svg
               width="18"
               height="18"
@@ -36,7 +36,7 @@ export function SiteHeader() {
             <a 
               key={link.label} 
               href={link.href} 
-              className="text-purple-700 text-base font-semibold no-underline bg-none border-none cursor-pointer p-0 font-inherit flex items-center gap-1 whitespace-nowrap transition-colors duration-150 hover:text-violet-900 hover:underline hover:underline-offset-1 md:text-sm"
+              className="text-[#0F4C81] text-base font-semibold no-underline bg-none border-none cursor-pointer p-0 font-inherit flex items-center gap-1 whitespace-nowrap transition-colors duration-150 hover:text-[#0a3560] hover:underline hover:underline-offset-1 md:text-sm"
             >
               {link.label}
             </a>
@@ -44,7 +44,7 @@ export function SiteHeader() {
 
           <a 
             href="/cart" 
-            className="text-purple-700 text-base font-semibold no-underline bg-none border-none cursor-pointer p-0 font-inherit flex items-center gap-1 whitespace-nowrap transition-colors duration-150 hover:text-violet-900 hover:underline hover:underline-offset-1 md:text-sm"
+            className="text-[#0F4C81] text-base font-semibold no-underline bg-none border-none cursor-pointer p-0 font-inherit flex items-center gap-1 whitespace-nowrap transition-colors duration-150 hover:text-[#0a3560] hover:underline hover:underline-offset-1 md:text-sm"
           >
             my Cart( 0 )
           </a>
