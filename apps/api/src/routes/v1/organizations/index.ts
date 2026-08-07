@@ -3,6 +3,7 @@ import { validate } from "../../../lib/validate.js";
 import { requireAuth } from "../../../middleware/auth.js";
 import { requireRole } from "../../../middleware/require-role.js";
 import * as orgService from "../../../services/organization.service.js";
+import { contactsRouter } from "./contacts/index.js";
 import { CreateOrgSchema, ListOrgsQuerySchema, UpdateOrgSchema } from "./schema.js";
 
 export const organizationsRouter = new Hono();
@@ -54,3 +55,5 @@ organizationsRouter.delete(
     return c.body(null, 204);
   },
 );
+
+organizationsRouter.route("/:orgId/contacts", contactsRouter);
