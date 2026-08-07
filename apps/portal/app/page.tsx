@@ -1,102 +1,159 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+"use client";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
-
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/docs/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-        <div className={styles.ctas}>
+  const handleSignIn = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter your email and password.");
+      return;
+    }
+
+    try {
+      setError("");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/portal/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      const payload = await response.json();
+      console.log(payload);
+
+      if (!response.ok) {
+        setError(payload?.error || "Unable to sign in.");
+        return;
+      }
+
+      localStorage.setItem("portalAccessToken", payload.accessToken);
+      localStorage.setItem("portalRefreshToken", payload.refreshToken);
+      localStorage.setItem("portalUser", JSON.stringify(payload.contact));
+      router.push("/customer-dashboard");
+    } catch {
+      setError("Unable to sign in right now.");
+    }
+  };
+
+  return (
+    <main className="relative min-h-[calc(100vh_-_72px)] flex justify-center items-center px-[70px] py-[60px] overflow-hidden bg-[linear-gradient(135deg,_#2d1b75_0%,_#3b2295_45%,_#4a29c4_100%)] max-[900px]:px-[25px] max-[900px]:py-[40px] max-[600px]:px-[18px] max-[600px]:py-[30px]">
+      <section className="w-full max-w-[1400px] grid grid-cols-[1.15fr_0.85fr] gap-[70px] items-center max-[900px]:grid-cols-1 max-[900px]:gap-[50px] max-[1200px]:gap-[50px]">
+        <div className="text-white max-[900px]:text-center">
+          <span className="inline-block text-white text-[20px] font-medium mb-[18px]">
+            Advanced
+          </span>
+          <h1 className="text-[74px] font-[800] leading-[0.95] text-white mb-[32px] max-[1200px]:text-[60px] max-[600px]:text-[42px] max-[600px]:leading-[1.05]">
+            Endoscopy and Laparoscopy Equipments
+          </h1>
+          <p className="text-[20px] leading-[1.7] text-white text-opacity-95 max-w-[620px] mb-[24px] max-[1200px]:text-[18px] max-[900px]:max-w-full max-[600px]:text-[16px]">
+            At Endovision, we are dedicated to providing healthcare
+            professionals across India with top-tier endoscopy-related medical
+            equipments.
+          </p>
+          <p className="text-[20px] leading-[1.7] text-white text-opacity-95 max-w-[620px] mb-[24px] max-[1200px]:text-[18px] max-[900px]:max-w-full max-[600px]:text-[16px]">
+            Our mission is to empower surgeons, specialists, and medical
+            facilities with cutting-edge technology that enhances precision,
+            safety, and efficiency in every procedure.
+          </p>
           <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
+            className="inline-block mt-[10px] text-white text-[20px] font-medium no-underline max-[900px]:mx-auto"
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
+            Contact Us
           </a>
         </div>
-        <Button appName="docs" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
-    </div>
+
+        <div className="flex justify-start items-center max-[900px]:justify-center">
+          <div className="w-full max-w-[470px]">
+            <div className="mb-[18px]">
+              <label
+                htmlFor="email"
+                className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]"
+              >
+                Email*
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Email"
+                className="w-full h-[58px] px-[20px] rounded-[12px] border border-white/45 bg-transparent text-white text-[17px] outline-none placeholder-white/95 max-[600px]:h-[54px] max-[600px]:text-[16px]"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </div>
+
+            <div className="mb-[18px]">
+              <label
+                htmlFor="password"
+                className="block text-[rgba(255,255,255,0.95)] text-[16px] mb-[12px]"
+              >
+                Password*
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Password"
+                className="w-full h-[58px] px-[20px] rounded-[12px] border border-white/45 bg-transparent text-white text-[17px] outline-none placeholder-white/95 max-[600px]:h-[54px] max-[600px]:text-[16px]"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </div>
+
+            {error ? (
+              <p className="text-[#ffb3b3] text-[14px] mb-[14px]">{error}</p>
+            ) : null}
+
+            <div className="flex items-center justify-between w-full mb-8">
+              <button
+                type="button"
+                className="w-[200px] h-[58px] rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold cursor-pointer transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5"
+                onClick={handleSignIn}
+              >
+                Sign In
+              </button>
+
+              <button
+                type="button"
+                className="text-sm text-white/80 hover:text-white hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
+            <div>
+              <p className="text-white/80 text-sm mb-3">New customer?</p>
+
+              <Link
+                href="/register"
+                className="mt-3 flex w-[200px] h-[58px] items-center justify-center rounded-[12px] border-0 bg-[#25155e] text-white text-[18px] font-semibold transition-all duration-200 hover:bg-[#1f114d] hover:-translate-y-0.5 max-[600px]:w-full"
+              >
+                Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      <a
+        href="#"
+        className="fixed right-0 top-1/2 -translate-y-1/2 no-underline text-white bg-[#24145d] px-[14px] py-[22px] text-[18px] font-medium shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition-colors duration-200 hover:bg-[#1c0f49] [writing-mode:vertical-rl] [text-orientation:mixed] [border-radius:8px_0_0_8px] max-[900px]:top-auto max-[900px]:bottom-[20px] max-[900px]:right-[20px] max-[900px]:translate-y-0 max-[900px]:[border-radius:8px] max-[900px]:py-[14px] max-[900px]:px-[24px] max-[900px]:[writing-mode:horizontal-tb]"
+      >
+        Book Appointment
+      </a>
+    </main>
   );
 }
