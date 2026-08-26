@@ -19,8 +19,9 @@ export default function LoginPage() {
     try {
       setError("");
 
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`,
+        `${apiUrl}/api/v1/auth/login`,
         {
           method: "POST",
           headers: {

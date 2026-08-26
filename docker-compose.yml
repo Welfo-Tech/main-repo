@@ -3,6 +3,29 @@ name: welfo
 services:
 
   # ---------------------------------------------------------------------------
+  # database (local dev — swap DATABASE_URL in .env for Neon in production)
+  # ---------------------------------------------------------------------------
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: welfo
+      POSTGRES_PASSWORD: welfo
+      POSTGRES_DB: welfo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - welfo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U welfo -d welfo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
   # backends
   # ---------------------------------------------------------------------------
 
@@ -16,11 +39,14 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://welfo:welfo@postgres:5432/welfo
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
       JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - welfo
     healthcheck:
@@ -39,7 +65,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4001
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://welfo:welfo@postgres:5432/welfo
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - welfo
     healthcheck:
@@ -56,12 +85,13 @@ services:
     build:
       context: .
       dockerfile: infra/docker/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api:4000}
     networks:
       - welfo
 
@@ -196,6 +226,7 @@ services:
 # ---------------------------------------------------------------------------
 
 volumes:
+  postgres_data:
   prometheus_data:
   grafana_data:
   loki_data:
