@@ -15,13 +15,17 @@ RUN npm ci
 FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
+RUN npm run db:generate --workspace=@repo/db
 RUN npm run build --workspace=@welfo/api
 
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 welfo
+COPY --from=builder --chown=welfo:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=welfo:nodejs /app/packages ./packages
 COPY --from=builder --chown=welfo:nodejs /app/apps/api/dist ./dist
+COPY --from=builder --chown=welfo:nodejs /app/apps/api/package.json ./package.json
 USER welfo
 EXPOSE 4000
 CMD ["node", "dist/index.js"]

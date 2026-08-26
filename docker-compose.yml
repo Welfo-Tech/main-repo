@@ -17,6 +17,10 @@ services:
       NODE_ENV: production
       PORT: 4000
       DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     networks:
       - welfo
     healthcheck:
@@ -156,12 +160,34 @@ services:
     restart: unless-stopped
     ports:
       - "9093:9093"
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-placeholder}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-0}
     volumes:
-      - ./infra/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./infra/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager-template.yml:ro
       - alertmanager_data:/alertmanager
-    command:
-      - "--config.file=/etc/alertmanager/alertmanager.yml"
-      - "--storage.path=/alertmanager"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        if [ "$$TELEGRAM_CHAT_ID" = "0" ] || [ -z "$$TELEGRAM_CHAT_ID" ]; then
+          cat > /tmp/alertmanager.yml << 'AMEOF'
+        global:
+          resolve_timeout: 5m
+        route:
+          receiver: "null"
+        receivers:
+          - name: "null"
+        AMEOF
+        else
+          sed -e "s|\$${TELEGRAM_BOT_TOKEN}|$$TELEGRAM_BOT_TOKEN|g" \
+              -e "s|\$${TELEGRAM_CHAT_ID}|$$TELEGRAM_CHAT_ID|g" \
+              -e "s|\$${TELEGRAM_RECEIVER}|telegram|g" \
+              /etc/alertmanager/alertmanager-template.yml > /tmp/alertmanager.yml
+        fi
+        exec /bin/alertmanager \
+          --config.file=/tmp/alertmanager.yml \
+          --storage.path=/alertmanager
     networks:
       - welfo
 

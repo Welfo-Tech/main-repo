@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "../../../components/layout/AdminLayout";
 import { api } from "../../../lib/api";
-import type { Quote, QuoteLineItemType, QuoteStatus } from "../../../types/quote";
+import type { GstType, Quote, QuoteLineItemType, QuoteStatus } from "../../../types/quote";
 import { ITEM_TYPE_LABELS, STATUS_COLORS, STATUS_LABELS, formatINR } from "../../../types/quote";
 
 const STATUS_ACTIONS: Partial<Record<QuoteStatus, { label: string; next: QuoteStatus }[]>> = {
@@ -23,16 +23,27 @@ const STATUS_ACTIONS: Partial<Record<QuoteStatus, { label: string; next: QuoteSt
 
 const ALL_TYPES: QuoteLineItemType[] = ["LABOR", "PART", "SHIPPING", "OTHER"];
 
-const emptyItem = {
-  itemType: "LABOR" as QuoteLineItemType,
+interface ItemForm {
+  itemType: QuoteLineItemType;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  discountPct: number;
+  taxRate: number;
+  hsnCode: string;
+  gstType: GstType;
+}
+
+const emptyItem = (): ItemForm => ({
+  itemType: "LABOR",
   description: "",
   quantity: 1,
   unitPrice: 0,
   discountPct: 0,
   taxRate: 18,
   hsnCode: "",
-  gstType: "CGST_SGST" as const,
-};
+  gstType: "CGST_SGST",
+});
 
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -47,7 +58,7 @@ export default function QuoteDetailPage() {
   const [pendingStatus, setPendingStatus] = useState<QuoteStatus | null>(null);
 
   const [showAddItem, setShowAddItem] = useState(false);
-  const [itemForm, setItemForm] = useState(emptyItem);
+  const [itemForm, setItemForm] = useState<ItemForm>(emptyItem);
   const [addingItem, setAddingItem] = useState(false);
   const [addItemError, setAddItemError] = useState("");
 
@@ -102,7 +113,7 @@ export default function QuoteDetailPage() {
         ...(itemForm.hsnCode.trim() ? { hsnCode: itemForm.hsnCode.trim() } : {}),
         gstType: itemForm.gstType,
       });
-      setItemForm(emptyItem);
+      setItemForm(emptyItem());
       setShowAddItem(false);
       await fetchQuote();
     } catch (err) {
@@ -206,7 +217,7 @@ export default function QuoteDetailPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">GST Type</label>
-                  <select value={itemForm.gstType} onChange={e => setItemForm(f => ({ ...f, gstType: e.target.value as "CGST_SGST" | "IGST" | "EXEMPT" }))}
+                  <select value={itemForm.gstType} onChange={e => setItemForm(f => ({ ...f, gstType: e.target.value as GstType }))}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#00B4D8]">
                     <option value="CGST_SGST">CGST + SGST</option>
                     <option value="IGST">IGST</option>
