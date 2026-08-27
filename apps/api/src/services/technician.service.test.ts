@@ -1,6 +1,7 @@
 import { UserRole } from "@repo/db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
+import * as password from "../lib/password.js";
 import * as userRepo from "../repositories/user.repository.js";
 import * as techRepo from "../repositories/technician.repository.js";
 import {
@@ -12,6 +13,7 @@ import {
 
 vi.mock("../repositories/user.repository.js");
 vi.mock("../repositories/technician.repository.js");
+vi.mock("../lib/password.js");
 
 const actor = { id: "user-1", role: UserRole.ADMIN };
 
@@ -19,10 +21,8 @@ const mockUser = {
   id: "user-2",
   name: "Ravi Kumar",
   email: "ravi@welfo.local",
-  role: UserRole.ADMIN,
+  role: UserRole.TECHNICIAN,
   isActive: true,
-  passwordHash: "hash",
-  lastLoginAt: null,
 };
 
 const mockTech = {
@@ -68,43 +68,54 @@ describe("getTechnician", () => {
 });
 
 describe("createTechnicianProfile", () => {
-  it("creates profile when user exists and has no profile", async () => {
-    vi.mocked(userRepo.findUserById).mockResolvedValue(mockUser);
-    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(null);
+  const input = {
+    name: "Ravi Kumar",
+    email: "ravi@welfo.local",
+    password: "secret123",
+    employeeId: "EMP-001",
+    specializations: ["ENDOSCOPE"],
+  };
+
+  it("creates user and profile when email is not taken", async () => {
+    vi.mocked(userRepo.findUserByEmail).mockResolvedValue(null);
+    vi.mocked(password.hashPassword).mockResolvedValue("hashed");
+    vi.mocked(userRepo.createUser).mockResolvedValue(mockUser);
     vi.mocked(techRepo.createTechnician).mockResolvedValue(mockTech);
 
-    const result = await createTechnicianProfile(
-      { userId: "user-2", employeeId: "EMP-001", specializations: ["ENDOSCOPE"] },
-      actor,
+    const result = await createTechnicianProfile(input, actor);
+
+    expect(userRepo.findUserByEmail).toHaveBeenCalledWith("ravi@welfo.local");
+    expect(password.hashPassword).toHaveBeenCalledWith("secret123");
+    expect(userRepo.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "ravi@welfo.local", role: "TECHNICIAN" }),
     );
-
+    expect(techRepo.createTechnician).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: "user-2", employeeId: "EMP-001" }),
+    );
     expect(result.employeeId).toBe("EMP-001");
-    expect(techRepo.createTechnician).toHaveBeenCalled();
   });
 
-  it("throws NotFoundError when user does not exist", async () => {
-    vi.mocked(userRepo.findUserById).mockResolvedValue(null);
-    await expect(
-      createTechnicianProfile({ userId: "missing", employeeId: "EMP-001" }, actor),
-    ).rejects.toBeInstanceOf(NotFoundError);
-  });
+  it("throws ValidationError when email is already in use", async () => {
+    vi.mocked(userRepo.findUserByEmail).mockResolvedValue({
+      id: "other-user",
+      name: "Someone",
+      email: "ravi@welfo.local",
+      role: UserRole.TECHNICIAN,
+      isActive: true,
+      passwordHash: "hash",
+      lastLoginAt: null,
+    });
 
-  it("throws ValidationError when user already has a profile", async () => {
-    vi.mocked(userRepo.findUserById).mockResolvedValue(mockUser);
-    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(mockTech);
-    await expect(
-      createTechnicianProfile({ userId: "user-2", employeeId: "EMP-002" }, actor),
-    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(createTechnicianProfile(input, actor)).rejects.toBeInstanceOf(ValidationError);
+    expect(userRepo.createUser).not.toHaveBeenCalled();
+    expect(techRepo.createTechnician).not.toHaveBeenCalled();
   });
 });
 
 describe("editTechnician", () => {
   it("updates technician when found", async () => {
     vi.mocked(techRepo.findTechnicianById).mockResolvedValue(mockTech);
-    vi.mocked(techRepo.updateTechnician).mockResolvedValue({
-      ...mockTech,
-      isActive: false,
-    });
+    vi.mocked(techRepo.updateTechnician).mockResolvedValue({ ...mockTech, isActive: false });
 
     const result = await editTechnician("tech-1", { isActive: false }, actor);
     expect(result.isActive).toBe(false);

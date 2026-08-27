@@ -1,8 +1,8 @@
-import { NotFoundError, ValidationError } from "../lib/errors.js";
+import { UserRole } from "@repo/db";
+import { ValidationError, NotFoundError } from "../lib/errors.js";
+import { hashPassword } from "../lib/password.js";
 import type { AuthUser } from "../middleware/auth.js";
-import { findUserById } from "../repositories/user.repository.js";
 import {
-  type CreateTechnicianData,
   type TechnicianFilters,
   type UpdateTechnicianData,
   createTechnician,
@@ -11,6 +11,10 @@ import {
   findTechnicians,
   updateTechnician,
 } from "../repositories/technician.repository.js";
+import {
+  createUser,
+  findUserByEmail,
+} from "../repositories/user.repository.js";
 
 async function requireTechnician(id: string) {
   const tech = await findTechnicianById(id);
@@ -27,16 +31,28 @@ export async function getTechnician(id: string, _actor: AuthUser) {
 }
 
 export async function createTechnicianProfile(
-  data: Omit<CreateTechnicianData, never>,
+  data: {
+    name: string;
+    email: string;
+    password: string;
+    employeeId: string;
+    phone?: string;
+    specializations?: string[];
+  },
   _actor: AuthUser,
 ) {
-  const user = await findUserById(data.userId);
-  if (!user) throw new NotFoundError("user not found");
+  const existing = await findUserByEmail(data.email);
+  if (existing) throw new ValidationError("email already in use");
 
-  const existing = await findTechnicianByUserId(data.userId);
-  if (existing) throw new ValidationError("user already has a technician profile");
+  const passwordHash = await hashPassword(data.password);
+  const user = await createUser({ name: data.name, email: data.email, passwordHash, role: UserRole.TECHNICIAN });
 
-  return createTechnician(data);
+  return createTechnician({
+    userId: user.id,
+    employeeId: data.employeeId,
+    phone: data.phone,
+    specializations: data.specializations,
+  });
 }
 
 export async function editTechnician(

@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 export const CreateTechnicianSchema = z.object({
-  userId: z.string().uuid(),
+  name: z.string().min(1).max(255),
+  email: z.string().email(),
+  password: z.string().min(8),
   employeeId: z.string().min(1).max(50),
   phone: z.string().max(50).optional(),
   specializations: z.array(z.string()).optional(),
