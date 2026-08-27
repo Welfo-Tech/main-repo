@@ -1,5 +1,5 @@
 import { InvoiceStatus } from "@repo/db";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const CreateInvoiceSchema = z.object({
   caseId: z.string().uuid(),

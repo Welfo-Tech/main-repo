@@ -116,3 +116,27 @@ export interface UpdateCaseData {
 export async function updateCase(id: string, data: UpdateCaseData) {
   return prisma.serviceCase.update({ where: { id }, data, select: caseSelect });
 }
+
+export async function assignTechnicianToCase(
+  caseId: string,
+  technicianId: string,
+  assignedBy: string,
+  reason?: string,
+) {
+  return prisma.$transaction(async (tx) => {
+    await tx.technicianAssignment.updateMany({
+      where: { caseId, unassignedAt: null },
+      data: { unassignedAt: new Date() },
+    });
+
+    await tx.technicianAssignment.create({
+      data: { caseId, technicianId, assignedBy, reason },
+    });
+
+    return tx.serviceCase.update({
+      where: { id: caseId },
+      data: { assignedTechnicianId: technicianId },
+      select: caseSelect,
+    });
+  });
+}

@@ -33,7 +33,7 @@ describe("listProducts", () => {
     const result = await listProducts({}, actor);
 
     expect(result).toHaveLength(1);
-    expect(result[0].serialNumber).toBe("WF-2024-00001");
+    expect(result[0]!.serialNumber).toBe("WF-2024-00001");
     expect(productRepo.findProducts).toHaveBeenCalledWith({});
   });
 

@@ -1,5 +1,5 @@
-import { CasePriority, ServiceCaseStatus, ServiceCaseType } from "@repo/db";
-import { z } from "zod/v4";
+import { CasePriority, DispatchDirection, DispatchStatus, RepairEventType, ServiceCaseStatus, ServiceCaseType } from "@repo/db";
+import { z } from "zod";
 
 export const CreateCaseSchema = z.object({
   organizationId: z.string().uuid(),
@@ -29,4 +29,33 @@ export const ListCasesQuerySchema = z.object({
   priority: z.nativeEnum(CasePriority).optional(),
   orgId: z.string().uuid().optional(),
   technicianId: z.string().uuid().optional(),
+});
+
+export const AssignTechnicianSchema = z.object({
+  technicianId: z.string().uuid(),
+  reason: z.string().optional(),
+});
+
+export const CreateRepairEventSchema = z.object({
+  eventType: z.nativeEnum(RepairEventType),
+  description: z.string().min(1),
+  eventAt: z.coerce.date().optional(),
+});
+
+export const CreateDispatchSchema = z.object({
+  direction: z.nativeEnum(DispatchDirection),
+  courierName: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  dispatchDate: z.string().optional(),
+  expectedDelivery: z.string().optional(),
+  fromAddress: z.record(z.string()).optional(),
+  toAddress: z.record(z.string()).optional(),
+  conditionNotes: z.string().optional(),
+});
+
+export const UpdateDispatchSchema = z.object({
+  status: z.nativeEnum(DispatchStatus).optional(),
+  trackingNumber: z.string().optional(),
+  actualDelivery: z.string().optional(),
+  conditionNotes: z.string().optional(),
 });

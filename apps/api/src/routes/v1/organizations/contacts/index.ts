@@ -10,13 +10,13 @@ export const contactsRouter = new Hono();
 contactsRouter.use(requireAuth);
 
 contactsRouter.get("/", async (c) => {
-  const orgId = c.req.param("orgId");
+  const orgId = c.req.param("orgId")!;
   const contacts = await contactService.listContacts(orgId, c.get("user"));
   return c.json(contacts, 200);
 });
 
 contactsRouter.get("/:contactId", async (c) => {
-  const orgId = c.req.param("orgId");
+  const orgId = c.req.param("orgId")!;
   const contactId = c.req.param("contactId");
   const contact = await contactService.getContact(contactId, orgId, c.get("user"));
   return c.json(contact, 200);
@@ -27,7 +27,7 @@ contactsRouter.post(
   requireRole("ADMIN", "OPERATIONS"),
   validate("json", CreateContactSchema),
   async (c) => {
-    const orgId = c.req.param("orgId");
+    const orgId = c.req.param("orgId")!;
     const data = c.req.valid("json");
     const contact = await contactService.addContact(orgId, data, c.get("user"));
     return c.json(contact, 201);
@@ -39,7 +39,7 @@ contactsRouter.patch(
   requireRole("ADMIN", "OPERATIONS"),
   validate("json", UpdateContactSchema),
   async (c) => {
-    const orgId = c.req.param("orgId");
+    const orgId = c.req.param("orgId")!;
     const contactId = c.req.param("contactId");
     const data = c.req.valid("json");
     const contact = await contactService.editContact(contactId, orgId, data, c.get("user"));
@@ -51,7 +51,7 @@ contactsRouter.delete(
   "/:contactId",
   requireRole("ADMIN"),
   async (c) => {
-    const orgId = c.req.param("orgId");
+    const orgId = c.req.param("orgId")!;
     const contactId = c.req.param("contactId");
     await contactService.removeContact(contactId, orgId, c.get("user"));
     return c.body(null, 204);

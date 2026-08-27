@@ -36,7 +36,7 @@ const mockQuote = {
 
 const adminToken = "Bearer valid-token";
 
-function mockValidAuth(role = UserRole.ADMIN) {
+function mockValidAuth(role: UserRole = UserRole.ADMIN) {
   vi.mocked(tokenLib.verifyToken).mockResolvedValue({ sub: "user-1", role, type: "access" } as never);
 }
 

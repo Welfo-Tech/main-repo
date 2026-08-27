@@ -47,12 +47,12 @@ beforeEach(() => vi.clearAllMocks());
 
 describe("listTickets", () => {
   it("returns all tickets", async () => {
-    vi.mocked(ticketRepo.findTickets).mockResolvedValue([mockTicket]);
+    vi.mocked(ticketRepo.findTickets).mockResolvedValue([mockTicket] as never);
 
     const result = await listTickets({}, actor);
 
     expect(result).toHaveLength(1);
-    expect(result[0].ticketNumber).toBe("TKT-2026-0001");
+    expect(result[0]!.ticketNumber).toBe("TKT-2026-0001");
     expect(ticketRepo.findTickets).toHaveBeenCalledWith({});
   });
 
@@ -70,7 +70,7 @@ describe("listTickets", () => {
 
 describe("getTicket", () => {
   it("returns ticket when found", async () => {
-    vi.mocked(ticketRepo.findTicketById).mockResolvedValue(mockTicket);
+    vi.mocked(ticketRepo.findTicketById).mockResolvedValue(mockTicket as never);
 
     const result = await getTicket("ticket-1", actor);
 
@@ -88,7 +88,7 @@ describe("getTicket", () => {
 describe("openTicket", () => {
   it("creates ticket after validating org", async () => {
     vi.mocked(orgRepo.findOrganizationById).mockResolvedValue(mockOrg);
-    vi.mocked(ticketRepo.createTicket).mockResolvedValue(mockTicket);
+    vi.mocked(ticketRepo.createTicket).mockResolvedValue(mockTicket as never);
 
     const result = await openTicket(
       {
@@ -117,11 +117,11 @@ describe("openTicket", () => {
 
 describe("editTicket", () => {
   it("updates ticket status", async () => {
-    vi.mocked(ticketRepo.findTicketById).mockResolvedValue(mockTicket);
+    vi.mocked(ticketRepo.findTicketById).mockResolvedValue(mockTicket as never);
     vi.mocked(ticketRepo.updateTicket).mockResolvedValue({
       ...mockTicket,
       status: TicketStatus.INTAKE_RECEIVED,
-    });
+    } as never);
 
     const result = await editTicket(
       "ticket-1",

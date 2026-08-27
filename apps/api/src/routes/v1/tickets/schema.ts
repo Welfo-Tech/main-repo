@@ -1,5 +1,5 @@
 import { TicketStatus, TicketUrgency } from "@repo/db";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const CreateTicketSchema = z.object({
   organizationId: z.string().uuid(),

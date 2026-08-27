@@ -1,5 +1,5 @@
 import { ApprovalMethod, QuoteStatus } from "@repo/db";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const LineItemSchema = z.object({
   sortOrder: z.number().int().optional(),
