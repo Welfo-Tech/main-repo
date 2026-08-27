@@ -2,41 +2,56 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Building2,
+  Package,
+  Wrench,
+  Ticket,
+  FileText,
+  Receipt,
+} from "lucide-react";
 
-const menuItems = [
-  { label: "Dashboard", href: "/admin-dashboard" },
-  { label: "Organizations", href: "/organizations" },
-  { label: "Product Models", href: "/product-models" },
-  { label: "Products", href: "/products" },
-  { label: "Service Cases", href: "/service-cases" },
-  { label: "Tickets", href: "/tickets" },
-  { label: "Quotes", href: "/quotes" },
-  { label: "Invoices", href: "/invoices" },
-  { label: "Dispatch", href: "/dispatch" },
-  { label: "Spare Parts", href: "/spare-parts" },
-  { label: "Users", href: "/users" },
-  { label: "Settings", href: "/settings" },
+const NAV = [
+  { href: "/admin-dashboard", label: "Dashboard",      icon: LayoutDashboard },
+  { href: "/organizations",   label: "Organizations",  icon: Building2 },
+  { href: "/products",        label: "Products",        icon: Package },
+  { href: "/service-cases",   label: "Service Cases",   icon: Wrench },
+  { href: "/tickets",         label: "Tickets",         icon: Ticket },
+  { href: "/quotes",          label: "Quotes",          icon: FileText },
+  { href: "/invoices",        label: "Invoices",        icon: Receipt },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-60 border-r border-slate-200 bg-white overflow-y-auto">
-      <nav className="flex flex-col gap-1 p-3">
-        {menuItems.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    <aside
+      className="fixed top-0 left-0 bottom-0 bg-ink flex flex-col z-40"
+      style={{ width: "var(--w-sidebar-w)", paddingTop: "48px" }}
+    >
+      <nav className="flex-1 overflow-y-auto py-2">
+        {NAV.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
-              key={item.href}
-              href={item.href}
-              className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-[#0F4C81] text-white"
-                  : "text-slate-700 hover:bg-slate-100"
-              }`}
+              key={href}
+              href={href}
+              className="flex items-center gap-2 px-4 transition-colors duration-fast"
+              style={{
+                height: "36px",
+                color: active ? "var(--w-text-invert)" : "var(--w-text-invert-2)",
+                background: active ? "var(--w-ink-raised)" : "transparent",
+                textDecoration: "none",
+              }}
             >
-              {item.label}
+              <Icon size={18} strokeWidth={1.5} />
+              <span
+                className="font-head font-medium"
+                style={{ fontSize: "13px", letterSpacing: "0.02em" }}
+              >
+                {label}
+              </span>
             </Link>
           );
         })}

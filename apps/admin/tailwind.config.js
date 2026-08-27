@@ -1,26 +1,81 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+const config = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
-        },
+    colors: {
+      transparent: "transparent",
+      current: "currentColor",
+      canvas: "var(--w-canvas)",
+      plate: "var(--w-plate)",
+      sunken: "var(--w-sunken)",
+      ink: { DEFAULT: "var(--w-ink)", raised: "var(--w-ink-raised)" },
+      border: {
+        DEFAULT: "var(--w-border)",
+        soft: "var(--w-border-soft)",
+        strong: "var(--w-border-strong)",
+        ink: "var(--w-border-ink)",
+        focus: "var(--w-border-focus)",
       },
+      fg: {
+        1: "var(--w-text-1)",
+        2: "var(--w-text-2)",
+        mute: "var(--w-text-mute)",
+        invert: "var(--w-text-invert)",
+        "invert-2": "var(--w-text-invert-2)",
+      },
+      accent: {
+        DEFAULT: "var(--w-accent)",
+        strong: "var(--w-accent-strong)",
+        deep: "var(--w-accent-deep)",
+        tint: "var(--w-accent-tint)",
+        "tint-2": "var(--w-accent-tint-2)",
+      },
+      brand: "var(--w-brand)",
+      link: "var(--w-link)",
+      neutral:   { dot: "var(--w-neutral-dot)",   tint: "var(--w-neutral-tint)",   edge: "var(--w-neutral-edge)",   fg: "var(--w-neutral-fg)" },
+      progress:  { dot: "var(--w-progress-dot)",  tint: "var(--w-progress-tint)",  edge: "var(--w-progress-edge)",  fg: "var(--w-progress-fg)" },
+      waiting:   { dot: "var(--w-waiting-dot)",   tint: "var(--w-waiting-tint)",   edge: "var(--w-waiting-edge)",   fg: "var(--w-waiting-fg)" },
+      attention: { dot: "var(--w-attention-dot)", tint: "var(--w-attention-tint)", edge: "var(--w-attention-edge)", fg: "var(--w-attention-fg)", solid: "var(--w-attention-solid)" },
+      success:   { dot: "var(--w-success-dot)",   tint: "var(--w-success-tint)",   edge: "var(--w-success-edge)",   fg: "var(--w-success-fg)" },
+      terminal:  { dot: "var(--w-terminal-dot)",  tint: "var(--w-terminal-tint)",  edge: "var(--w-terminal-edge)",  fg: "var(--w-terminal-fg)" },
+      prio: { critical: "var(--w-prio-critical)", high: "var(--w-prio-high)", normal: "var(--w-prio-normal)", low: "var(--w-prio-low)" },
+      row: { hover: "var(--w-row-hover)", selected: "var(--w-row-selected)" },
+    },
+    fontFamily: {
+      head: ["var(--w-font-head)"],
+      sans: ["var(--w-font-body)"],
+    },
+    fontSize: {
+      metric:     ["var(--w-fs-metric)",     { lineHeight: "1" }],
+      page:       ["var(--w-fs-page)",       { lineHeight: "1.15" }],
+      section:    ["var(--w-fs-section)",    { lineHeight: "1.2" }],
+      subsection: ["var(--w-fs-subsection)", { lineHeight: "1.25" }],
+      body:       ["var(--w-fs-body)",       { lineHeight: "1.5" }],
+      cell:       ["var(--w-fs-cell)",       { lineHeight: "1.35" }],
+      caption:    ["var(--w-fs-caption)",    { lineHeight: "1.4" }],
+      label:      ["var(--w-fs-label)",      { lineHeight: "1.3" }],
+      eyebrow:    ["var(--w-fs-eyebrow)",    { lineHeight: "1.2", letterSpacing: "0.09em" }],
+      badge:      ["var(--w-fs-badge)",      { lineHeight: "1",   letterSpacing: "0.04em" }],
+    },
+    spacing: {
+      0: "0", px: "1px",
+      1: "var(--w-s-1)",  2: "var(--w-s-2)",  3: "var(--w-s-3)",
+      4: "var(--w-s-4)",  5: "var(--w-s-5)",  6: "var(--w-s-6)",  7: "var(--w-s-7)",
+      row: "var(--w-row-h)", control: "var(--w-control-h)", sidebar: "var(--w-sidebar-w)",
+    },
+    borderRadius: { none: "0", DEFAULT: "var(--w-radius)", full: "var(--w-radius-full)" },
+    boxShadow: { none: "none", sm: "var(--w-shadow-sm)", md: "var(--w-shadow-md)", lg: "var(--w-shadow-lg)" },
+    transitionDuration: { fast: "var(--w-dur-fast)", DEFAULT: "var(--w-dur)", slow: "var(--w-dur-slow)" },
+    transitionTimingFunction: { DEFAULT: "var(--w-ease)" },
+    extend: {
+      maxWidth: { page: "var(--w-page-max)" },
+      height: { row: "var(--w-row-h)", control: "var(--w-control-h)" },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [],
 };
+
+export default config;

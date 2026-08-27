@@ -3,13 +3,26 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
+import StatusBadge from "../../components/common/StatusBadge";
 import { api } from "../../lib/api";
 import type { Quote, QuoteStatus } from "../../types/quote";
-import { STATUS_COLORS, STATUS_LABELS, formatINR } from "../../types/quote";
+import { STATUS_LABELS, formatINR } from "../../types/quote";
 
-const ALL_STATUSES: QuoteStatus[] = [
-  "DRAFT", "UNDER_REVIEW", "SENT", "APPROVED", "REJECTED", "EXPIRED",
-];
+const ALL_STATUSES: QuoteStatus[] = ["DRAFT", "UNDER_REVIEW", "SENT", "APPROVED", "REJECTED", "EXPIRED"];
+
+const TH_STYLE: React.CSSProperties = {
+  fontSize: "var(--w-fs-eyebrow)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.09em",
+  color: "var(--w-text-2)",
+  padding: "0 var(--w-s-3)",
+  height: "var(--w-row-h)",
+  borderBottom: "1px solid var(--w-border)",
+  textAlign: "left",
+  whiteSpace: "nowrap" as const,
+};
 
 export default function QuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -35,76 +48,87 @@ export default function QuotesPage() {
 
   useEffect(() => { fetchQuotes(); }, [fetchQuotes]);
 
+  const btnBase: React.CSSProperties = { height: "24px", paddingInline: "var(--w-s-3)", fontSize: "var(--w-fs-eyebrow)", fontFamily: "var(--w-font-head)", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer", border: "1px solid var(--w-border)" };
+
   return (
     <AdminLayout>
-      <div className="p-8 space-y-6">
-        <div className="flex items-center justify-between">
+      <div style={{ padding: "var(--w-s-5) var(--w-s-6)", maxWidth: "var(--w-page-max)" }}>
+
+        <div className="flex items-center justify-between" style={{ marginBottom: "var(--w-s-5)" }}>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-800">Quotes</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <h1 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-page)", color: "var(--w-text-1)" }}>Quotes</h1>
+            <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", marginTop: "var(--w-s-1)" }}>
               {loading ? "Loading…" : `${quotes.length} quote${quotes.length !== 1 ? "s" : ""}`}
             </p>
           </div>
-          <p className="text-sm text-slate-400">Create quotes from a Service Case detail page.</p>
+          <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>
+            Create quotes from a Service Case detail page.
+          </p>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => setStatusFilter("")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${statusFilter === "" ? "bg-[#0F4C81] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
-          >All</button>
-          {ALL_STATUSES.map(s => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s === statusFilter ? "" : s)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${statusFilter === s ? "bg-[#0F4C81] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
-            >{STATUS_LABELS[s]}</button>
+        <div className="flex gap-2 flex-wrap" style={{ marginBottom: "var(--w-s-4)" }}>
+          {(["", ...ALL_STATUSES] as (QuoteStatus | "")[]).map(s => (
+            <button key={s} onClick={() => setStatusFilter(s)} className="font-head font-semibold uppercase"
+              style={{
+                ...btnBase,
+                background: statusFilter === s ? "var(--w-accent-strong)" : "var(--w-plate)",
+                color: statusFilter === s ? "#fff" : "var(--w-text-2)",
+                borderColor: statusFilter === s ? "var(--w-accent-strong)" : "var(--w-border)",
+              }}>
+              {s === "" ? "All" : STATUS_LABELS[s as QuoteStatus]}
+            </button>
           ))}
         </div>
 
-        {error && <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div>}
+        {error && (
+          <div style={{ background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", color: "var(--w-attention-fg)", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "var(--w-fs-body)", marginBottom: "var(--w-s-4)" }}>
+            {error}
+          </div>
+        )}
 
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Quote #</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Case</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Organization</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Ver.</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Total</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Status</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Created</th>
-                <th className="px-6 py-4" />
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-400">Loading…</td></tr>
-              ) : quotes.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-12 text-center text-slate-400">No quotes found. Open a Service Case and create a quote from there.</td></tr>
-              ) : quotes.map(q => (
-                <tr key={q.id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                  <td className="px-6 py-4 font-mono font-medium text-slate-900">{q.quoteNumber}</td>
-                  <td className="px-6 py-4">
-                    <Link href={`/service-cases/${q.caseId}`} className="font-mono text-[#0F4C81] hover:underline text-xs">{q.case.caseNumber}</Link>
-                  </td>
-                  <td className="px-6 py-4 text-slate-700">{q.case.organization.name}</td>
-                  <td className="px-6 py-4 text-slate-500">v{q.version}</td>
-                  <td className="px-6 py-4 font-medium text-slate-800">{formatINR(q.totalAmount)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_COLORS[q.status]}`}>
-                      {STATUS_LABELS[q.status]}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">{new Date(q.createdAt).toLocaleDateString("en-IN")}</td>
-                  <td className="px-6 py-4">
-                    <Link href={`/quotes/${q.id}`} className="text-[#0F4C81] text-xs font-semibold hover:underline">View →</Link>
-                  </td>
+        <div className="bg-plate border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--w-sunken)" }}>
+                  {["Quote #", "Case", "Organization", "Ver.", "Total", "Status", "Created", ""].map(h => (
+                    <th key={h} style={TH_STYLE}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={8} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>Loading…</td></tr>
+                ) : quotes.length === 0 ? (
+                  <tr><td colSpan={8} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>No quotes found. Open a Service Case and create a quote from there.</td></tr>
+                ) : quotes.map((q, i) => (
+                  <tr key={q.id} className="hover:bg-row-hover transition-colors duration-fast"
+                    style={{ borderBottom: i < quotes.length - 1 ? "1px solid var(--w-border-soft)" : undefined }}>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontFamily: "var(--w-font-head)", fontWeight: 600, whiteSpace: "nowrap" }}>{q.quoteNumber}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                      <Link href={`/service-cases/${q.caseId}`} style={{ fontSize: "var(--w-fs-cell)", color: "var(--w-link)", textDecoration: "none", fontFamily: "monospace" }}>
+                        {q.case.caseNumber}
+                      </Link>
+                    </td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)" }}>{q.case.organization.name}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>v{q.version}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontWeight: 500 }}>{formatINR(q.totalAmount)}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                      <StatusBadge status={q.status} variant="row" />
+                    </td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)", whiteSpace: "nowrap" }}>
+                      {new Date(q.createdAt).toLocaleDateString("en-IN")}
+                    </td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                      <Link href={`/quotes/${q.id}`} style={{ color: "var(--w-link)", fontSize: "var(--w-fs-caption)", fontFamily: "var(--w-font-head)", fontWeight: 600, textDecoration: "none", letterSpacing: "0.04em" }}>
+                        View →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </AdminLayout>
