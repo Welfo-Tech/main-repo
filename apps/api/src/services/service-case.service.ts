@@ -6,11 +6,13 @@ import {
   type CaseFilters,
   type CreateCaseData,
   type UpdateCaseData,
+  assignTechnicianToCase,
   createCase,
   findCaseById,
   findCases,
   updateCase,
 } from "../repositories/service-case.repository.js";
+import { findTechnicianById } from "../repositories/technician.repository.js";
 
 async function requireOrg(orgId: string) {
   const org = await findOrganizationById(orgId);
@@ -69,4 +71,16 @@ export async function editCase(
 ) {
   await requireCase(id);
   return updateCase(id, data).catch(handleTriggerError);
+}
+
+export async function assignTechnician(
+  caseId: string,
+  data: { technicianId: string; reason?: string },
+  actor: AuthUser,
+) {
+  await requireCase(caseId);
+  const tech = await findTechnicianById(data.technicianId);
+  if (!tech) throw new NotFoundError("technician not found");
+  if (!tech.isActive) throw new ValidationError("technician is not active");
+  return assignTechnicianToCase(caseId, data.technicianId, actor.id, data.reason);
 }
