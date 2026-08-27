@@ -53,11 +53,25 @@ const TD_STYLE: React.CSSProperties = {
   borderBottom: "1px solid var(--w-border)",
 };
 
+const EMPTY_FORM = {
+  name: "",
+  email: "",
+  password: "",
+  employeeId: "",
+  phone: "",
+  specializations: "",
+};
+
 export default function TechniciansPage() {
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState<"" | "true" | "false">("");
+
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const fetchTechnicians = useCallback(async () => {
     setLoading(true);
@@ -77,7 +91,36 @@ export default function TechniciansPage() {
 
   useEffect(() => { fetchTechnicians(); }, [fetchTechnicians]);
 
-  const visible = technicians;
+  async function handleAddSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFormError("");
+    setSubmitting(true);
+    try {
+      await api.post("/api/v1/technicians", {
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        employeeId: form.employeeId.trim(),
+        ...(form.phone.trim() && { phone: form.phone.trim() }),
+        ...(form.specializations.trim() && {
+          specializations: form.specializations.split(",").map(s => s.trim()).filter(Boolean),
+        }),
+      });
+      setForm(EMPTY_FORM);
+      setShowForm(false);
+      await fetchTechnicians();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Failed to create technician");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleCancel() {
+    setShowForm(false);
+    setForm(EMPTY_FORM);
+    setFormError("");
+  }
 
   return (
     <AdminLayout>
@@ -87,10 +130,155 @@ export default function TechniciansPage() {
           <h1 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-page)", color: "var(--w-text-1)" }}>
             Technicians
           </h1>
-          <span style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)", fontFamily: "var(--w-font-head)" }}>
-            {technicians.length} total
-          </span>
+          <div className="flex items-center gap-3">
+            <span style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)", fontFamily: "var(--w-font-head)" }}>
+              {technicians.length} total
+            </span>
+            <button
+              onClick={() => { setShowForm(v => !v); setFormError(""); }}
+              className="font-head font-semibold uppercase"
+              style={{
+                height: "var(--w-control-h)",
+                paddingInline: "var(--w-s-4)",
+                fontSize: "var(--w-fs-label)",
+                letterSpacing: "0.06em",
+                background: showForm ? "var(--w-surface)" : "var(--w-accent-strong)",
+                color: showForm ? "var(--w-text-2)" : "#fff",
+                border: showForm ? "1px solid var(--w-border)" : "none",
+                cursor: "pointer",
+              }}
+            >
+              {showForm ? "Cancel" : "+ Add Technician"}
+            </button>
+          </div>
         </div>
+
+        {showForm && (
+          <form
+            onSubmit={handleAddSubmit}
+            style={{
+              background: "var(--w-plate)",
+              border: "1px solid var(--w-border)",
+              padding: "var(--w-s-5)",
+              marginBottom: "var(--w-s-5)",
+            }}
+          >
+            <p className="font-head font-semibold uppercase" style={{ fontSize: "var(--w-fs-eyebrow)", letterSpacing: "0.09em", color: "var(--w-text-2)", marginBottom: "var(--w-s-4)" }}>
+              New Technician
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+              <div>
+                <label style={labelStyle}>Full Name *</label>
+                <input
+                  style={inputStyle}
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Ravi Kumar"
+                  required
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Email *</label>
+                <input
+                  type="email"
+                  style={inputStyle}
+                  value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="ravi@welfo.local"
+                  required
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Password *</label>
+                <input
+                  type="password"
+                  style={inputStyle}
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  placeholder="Min 8 characters"
+                  minLength={8}
+                  required
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Employee ID *</label>
+                <input
+                  style={inputStyle}
+                  value={form.employeeId}
+                  onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))}
+                  placeholder="EMP-001"
+                  required
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone</label>
+                <input
+                  style={inputStyle}
+                  value={form.phone}
+                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                  placeholder="+91-98765-43210"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Specializations</label>
+                <input
+                  style={inputStyle}
+                  value={form.specializations}
+                  onChange={e => setForm(f => ({ ...f, specializations: e.target.value }))}
+                  placeholder="fiber-optic-repair, endoscope-cleaning"
+                />
+                <span style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)", marginTop: "4px", display: "block" }}>
+                  Comma-separated
+                </span>
+              </div>
+            </div>
+
+            {formError && (
+              <p style={{ color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-2) var(--w-s-3)", fontSize: "var(--w-fs-body)", marginBottom: "var(--w-s-4)" }}>
+                {formError}
+              </p>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="font-head font-semibold uppercase"
+                style={{
+                  height: "var(--w-control-h)",
+                  paddingInline: "var(--w-s-4)",
+                  fontSize: "var(--w-fs-label)",
+                  letterSpacing: "0.06em",
+                  background: "var(--w-accent-strong)",
+                  color: "#fff",
+                  border: "none",
+                  cursor: submitting ? "not-allowed" : "pointer",
+                  opacity: submitting ? 0.6 : 1,
+                }}
+              >
+                {submitting ? "Creating…" : "Create Technician"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="font-head font-semibold uppercase"
+                style={{
+                  height: "var(--w-control-h)",
+                  paddingInline: "var(--w-s-3)",
+                  fontSize: "var(--w-fs-label)",
+                  letterSpacing: "0.06em",
+                  background: "transparent",
+                  color: "var(--w-text-2)",
+                  border: "1px solid var(--w-border)",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
 
         <div className="flex items-center gap-3" style={{ marginBottom: "var(--w-s-4)" }}>
           {(["", "true", "false"] as const).map(v => (
@@ -122,7 +310,7 @@ export default function TechniciansPage() {
 
         {loading ? (
           <p style={{ color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>Loading…</p>
-        ) : visible.length === 0 ? (
+        ) : technicians.length === 0 ? (
           <p style={{ color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>No technicians found.</p>
         ) : (
           <div style={{ overflowX: "auto" }}>
@@ -138,10 +326,10 @@ export default function TechniciansPage() {
                 </tr>
               </thead>
               <tbody>
-                {visible.map(tech => (
+                {technicians.map(tech => (
                   <tr key={tech.id} style={{ background: "var(--w-surface)" }}>
                     <td style={TD_STYLE}>
-                      <span className="w-num font-head font-semibold" style={{ fontFamily: "monospace", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontWeight: 600 }}>
                         {tech.employeeId}
                       </span>
                     </td>

@@ -92,7 +92,9 @@ describe("POST /api/v1/technicians", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: "00000000-0000-0000-0000-000000000001",
+        name: "Ravi Sharma",
+        email: "ravi@welfo.local",
+        password: "secret123",
         employeeId: "EMP-001",
         phone: "+91-9876543210",
         specializations: ["fiber-repair"],
@@ -114,7 +116,9 @@ describe("POST /api/v1/technicians", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: "user-1",
+        name: "Ravi Sharma",
+        email: "ravi@welfo.local",
+        password: "secret123",
         employeeId: "EMP-001",
       }),
     });
@@ -135,7 +139,9 @@ describe("POST /api/v1/technicians", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: "00000000-0000-0000-0000-000000000001",
+        name: "Ravi Sharma",
+        email: "ravi@welfo.local",
+        password: "secret123",
         employeeId: "EMP-002",
       }),
     });

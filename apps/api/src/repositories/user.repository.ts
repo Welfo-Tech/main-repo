@@ -1,4 +1,4 @@
-import { prisma } from "@repo/db";
+import { type UserRole, prisma } from "@repo/db";
 
 export async function findUserByEmail(email: string) {
   return prisma.user.findUnique({
@@ -26,6 +26,18 @@ export async function findUserById(id: string) {
       isActive: true,
       lastLoginAt: true,
     },
+  });
+}
+
+export async function createUser(data: {
+  name: string;
+  email: string;
+  passwordHash: string;
+  role: UserRole;
+}) {
+  return prisma.user.create({
+    data,
+    select: { id: true, name: true, email: true, role: true, isActive: true },
   });
 }
 
