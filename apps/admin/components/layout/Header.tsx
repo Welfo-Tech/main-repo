@@ -13,16 +13,9 @@ export default function Header() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 bg-ink border-b border-border-ink"
-      style={{ height: "48px" }}
+      className="fixed top-0 right-0 z-40 flex items-center justify-end px-4 bg-ink border-b border-border-ink"
+      style={{ height: "48px", left: "var(--w-sidebar-w)" }}
     >
-      <span
-        className="text-subsection font-head font-semibold tracking-wide"
-        style={{ color: "var(--w-brand)" }}
-      >
-        WELFO
-      </span>
-
       <button
         onClick={handleLogout}
         className="flex items-center gap-1 text-caption text-fg-invert-2 hover:text-fg-invert transition-colors duration-fast"
