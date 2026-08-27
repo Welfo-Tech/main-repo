@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +11,7 @@ import {
   Ticket,
   FileText,
   Receipt,
+  Users,
 } from "lucide-react";
 
 const NAV = [
@@ -20,6 +22,7 @@ const NAV = [
   { href: "/tickets",         label: "Tickets",         icon: Ticket },
   { href: "/quotes",          label: "Quotes",          icon: FileText },
   { href: "/invoices",        label: "Invoices",        icon: Receipt },
+  { href: "/technicians",     label: "Technicians",     icon: Users },
 ];
 
 export default function Sidebar() {
@@ -27,9 +30,19 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed top-0 left-0 bottom-0 bg-ink flex flex-col z-40"
-      style={{ width: "var(--w-sidebar-w)", paddingTop: "48px" }}
+      className="fixed top-0 left-0 bottom-0 bg-ink flex flex-col z-50"
+      style={{ width: "var(--w-sidebar-w)" }}
     >
+      <div
+        className="flex items-center px-4 shrink-0"
+        style={{
+          height: "48px",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <Image src="/logo.png" alt="Welfo" height={28} width={120} style={{ height: "28px", width: "auto" }} priority />
+      </div>
+
       <nav className="flex-1 overflow-y-auto py-2">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
