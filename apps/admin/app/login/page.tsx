@@ -22,12 +22,12 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json() as { token?: string; error?: string };
+      const data = await res.json() as { accessToken?: string; error?: string };
       if (!res.ok) {
         setError(data.error ?? "Login failed");
         return;
       }
-      localStorage.setItem("accessToken", data.token ?? "");
+      localStorage.setItem("accessToken", data.accessToken ?? "");
       router.push("/admin-dashboard");
     } catch {
       setError("Cannot reach the server. Check your connection.");

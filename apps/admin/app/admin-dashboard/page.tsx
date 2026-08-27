@@ -72,18 +72,18 @@ export default function AdminDashboardPage() {
     async function load() {
       try {
         const [cases, quotes, invoices, orgs] = await Promise.all([
-          api.get<{ cases: Case[]; total: number }>("/api/v1/service-cases?limit=10"),
-          api.get<{ total: number }>("/api/v1/quotes?status=PENDING_APPROVAL&limit=1"),
-          api.get<{ total: number }>("/api/v1/invoices?status=OVERDUE&limit=1"),
-          api.get<{ total: number }>("/api/v1/organizations?limit=1"),
+          api.get<Case[]>("/api/v1/service-cases?limit=10"),
+          api.get<unknown[]>("/api/v1/quotes?status=UNDER_REVIEW"),
+          api.get<unknown[]>("/api/v1/invoices?status=OVERDUE"),
+          api.get<unknown[]>("/api/v1/organizations"),
         ]);
         setStats({
-          openCases: cases.total,
-          pendingQuotes: quotes.total,
-          unpaidInvoices: invoices.total,
-          totalOrganizations: orgs.total,
+          openCases: cases.length,
+          pendingQuotes: quotes.length,
+          unpaidInvoices: invoices.length,
+          totalOrganizations: orgs.length,
         });
-        setRecentCases(cases.cases ?? []);
+        setRecentCases(cases);
       } catch {
         setStats({ openCases: 0, pendingQuotes: 0, unpaidInvoices: 0, totalOrganizations: 0 });
       } finally {
