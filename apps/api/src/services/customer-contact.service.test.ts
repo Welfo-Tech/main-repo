@@ -49,7 +49,7 @@ describe("listContacts", () => {
     const result = await listContacts(orgId, actor);
 
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("Dr. Sharma");
+    expect(result[0]!.name).toBe("Dr. Sharma");
     expect(contactRepo.findContactsByOrgId).toHaveBeenCalledWith(orgId);
   });
 

@@ -29,7 +29,7 @@ describe("listProductModels", () => {
     const result = await listProductModels({}, actor);
 
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("Olympus CF-HQ190");
+    expect(result[0]!.name).toBe("Olympus CF-HQ190");
     expect(productModelRepo.findProductModels).toHaveBeenCalledWith({});
   });
 

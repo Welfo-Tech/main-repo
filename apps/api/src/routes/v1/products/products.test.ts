@@ -27,7 +27,7 @@ const mockProduct = {
 const adminToken = "Bearer valid-token";
 const adminPayload = { sub: "user-1", role: UserRole.ADMIN, type: "access" };
 
-function mockValidAuth(role = UserRole.ADMIN) {
+function mockValidAuth(role: UserRole = UserRole.ADMIN) {
   vi.mocked(tokenLib.verifyToken).mockResolvedValue({
     ...adminPayload,
     role,

@@ -79,7 +79,7 @@ describe("listCases", () => {
     const result = await listCases({}, actor);
 
     expect(result).toHaveLength(1);
-    expect(result[0].caseNumber).toBe("WFC-2026-0001");
+    expect(result[0]!.caseNumber).toBe("WFC-2026-0001");
     expect(caseRepo.findCases).toHaveBeenCalledWith({});
   });
 

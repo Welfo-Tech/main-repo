@@ -67,16 +67,16 @@ beforeEach(() => vi.clearAllMocks());
 
 describe("listInvoices", () => {
   it("returns all invoices", async () => {
-    vi.mocked(invoiceRepo.findInvoices).mockResolvedValue([mockInvoice]);
+    vi.mocked(invoiceRepo.findInvoices).mockResolvedValue([mockInvoice] as never);
     const result = await listInvoices({}, actor);
     expect(result).toHaveLength(1);
-    expect(result[0].invoiceNumber).toBe("INV-2026-0001");
+    expect(result[0]!.invoiceNumber).toBe("INV-2026-0001");
   });
 });
 
 describe("getInvoice", () => {
   it("returns invoice with payments", async () => {
-    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, payments: [mockPayment] });
+    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, payments: [mockPayment] } as never);
     const result = await getInvoice(INV_ID, actor);
     expect(result.payments).toHaveLength(1);
   });
@@ -90,7 +90,7 @@ describe("getInvoice", () => {
 describe("openInvoice", () => {
   it("creates blank invoice for a case", async () => {
     vi.mocked(caseRepo.findCaseById).mockResolvedValue(mockCase);
-    vi.mocked(invoiceRepo.createInvoice).mockResolvedValue(mockInvoice);
+    vi.mocked(invoiceRepo.createInvoice).mockResolvedValue(mockInvoice as never);
 
     const result = await openInvoice({ caseId: CASE_ID }, actor);
     expect(result.invoiceNumber).toBe("INV-2026-0001");
@@ -116,15 +116,15 @@ describe("openInvoice", () => {
 
 describe("editInvoice", () => {
   it("updates DRAFT invoice", async () => {
-    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue(mockInvoice);
-    vi.mocked(invoiceRepo.updateInvoice).mockResolvedValue({ ...mockInvoice, status: "ISSUED" as const });
+    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue(mockInvoice as never);
+    vi.mocked(invoiceRepo.updateInvoice).mockResolvedValue({ ...mockInvoice, status: "ISSUED" as const } as never);
 
     const result = await editInvoice(INV_ID, { status: "ISSUED" }, actor);
     expect(result.status).toBe("ISSUED");
   });
 
   it("throws ValidationError when invoice is CANCELLED", async () => {
-    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, status: "CANCELLED" as const });
+    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, status: "CANCELLED" as const } as never);
     await expect(editInvoice(INV_ID, { status: "ISSUED" }, actor)).rejects.toThrow(ValidationError);
   });
 });
@@ -135,8 +135,8 @@ describe("addPayment", () => {
       ...mockInvoice,
       status: "ISSUED" as const,
       totalAmount: "5900.00" as unknown as number,
-    });
-    vi.mocked(invoiceRepo.recordPayment).mockResolvedValue(mockPayment);
+    } as never);
+    vi.mocked(invoiceRepo.recordPayment).mockResolvedValue(mockPayment as never);
 
     const result = await addPayment(
       INV_ID,
@@ -150,14 +150,14 @@ describe("addPayment", () => {
   });
 
   it("throws ValidationError when invoice is PAID", async () => {
-    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, status: "PAID" as const });
+    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, status: "PAID" as const } as never);
     await expect(
       addPayment(INV_ID, { amount: 100, paymentDate: new Date(), method: "CASH" }, actor),
     ).rejects.toThrow(ValidationError);
   });
 
   it("throws ValidationError when invoice is CANCELLED", async () => {
-    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, status: "CANCELLED" as const });
+    vi.mocked(invoiceRepo.findInvoiceById).mockResolvedValue({ ...mockInvoice, status: "CANCELLED" as const } as never);
     await expect(
       addPayment(INV_ID, { amount: 100, paymentDate: new Date(), method: "CASH" }, actor),
     ).rejects.toThrow(ValidationError);
