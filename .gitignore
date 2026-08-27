@@ -37,11 +37,12 @@ yarn-error.log*
 .DS_Store
 *.pem
 
-# Documentations 
+# Documentations
 agent_docs/
 company_docs/
 tech_docs/
-# session_docs are tracked — they are the substitute for inline comments
-# session_docs/
-claude_docs/
+session_docs/
+design-system-for-ui-claude-code/
+docs/
+/claude_docs/
 CLAUDE.md
