@@ -21,10 +21,10 @@ const TIER_LABELS: Record<OrganizationTier, string> = {
   ENTERPRISE: "Enterprise",
 };
 
-const TIER_COLORS: Record<OrganizationTier, string> = {
-  STANDARD: "bg-slate-100 text-slate-600",
-  PREMIUM: "bg-blue-50 text-blue-700",
-  ENTERPRISE: "bg-teal-50 text-teal-700",
+const TIER_STYLES: Record<OrganizationTier, { bg: string; fg: string; edge: string }> = {
+  STANDARD: { bg: "var(--w-neutral-tint)", fg: "var(--w-neutral-fg)", edge: "var(--w-neutral-edge)" },
+  PREMIUM:  { bg: "var(--w-progress-tint)", fg: "var(--w-progress-fg)", edge: "var(--w-progress-edge)" },
+  ENTERPRISE: { bg: "var(--w-success-tint)", fg: "var(--w-success-fg)", edge: "var(--w-success-edge)" },
 };
 
 const emptyForm = {
@@ -36,6 +36,30 @@ const emptyForm = {
   paymentTermsDays: "30",
   website: "",
   notes: "",
+};
+
+const inputStyle: React.CSSProperties = {
+  height: "var(--w-control-h)",
+  padding: "0 var(--w-s-2)",
+  fontSize: "var(--w-fs-body)",
+  fontFamily: "var(--w-font-body)",
+  border: "1px solid var(--w-border)",
+  background: "var(--w-sunken)",
+  color: "var(--w-text-1)",
+  borderRadius: "var(--w-radius)",
+  outline: "none",
+  width: "100%",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "var(--w-fs-label)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 500,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "var(--w-text-2)",
+  display: "block",
+  marginBottom: "var(--w-s-1)",
 };
 
 export default function OrganizationsPage() {
@@ -67,16 +91,11 @@ export default function OrganizationsPage() {
     }
   }, [search, typeFilter]);
 
-  useEffect(() => {
-    fetchOrgs();
-  }, [fetchOrgs]);
+  useEffect(() => { fetchOrgs(); }, [fetchOrgs]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim() || !form.type) {
-      setFormError("Name and type are required.");
-      return;
-    }
+    if (!form.name.trim() || !form.type) { setFormError("Name and type are required."); return; }
     setSubmitting(true);
     setFormError("");
     try {
@@ -100,20 +119,47 @@ export default function OrganizationsPage() {
     }
   }
 
+  const TH_STYLE: React.CSSProperties = {
+    fontSize: "var(--w-fs-eyebrow)",
+    fontFamily: "var(--w-font-head)",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.09em",
+    color: "var(--w-text-2)",
+    padding: "0 var(--w-s-3)",
+    height: "var(--w-row-h)",
+    borderBottom: "1px solid var(--w-border)",
+    textAlign: "left",
+    whiteSpace: "nowrap" as const,
+  };
+
   return (
     <AdminLayout>
-      <div className="p-8 space-y-6">
+      <div style={{ padding: "var(--w-s-5) var(--w-s-6)", maxWidth: "var(--w-page-max)" }}>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" style={{ marginBottom: "var(--w-s-5)" }}>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-800">Organizations</h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <h1 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-page)", color: "var(--w-text-1)" }}>
+              Organizations
+            </h1>
+            <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", marginTop: "var(--w-s-1)" }}>
               {loading ? "Loading…" : `${orgs.length} organization${orgs.length !== 1 ? "s" : ""}`}
             </p>
           </div>
           <button
             onClick={() => { setShowForm(!showForm); setFormError(""); }}
-            className="rounded-xl bg-[#0F4C81] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0a3560]"
+            className="font-head font-semibold uppercase"
+            style={{
+              height: "var(--w-control-h)",
+              paddingInline: "var(--w-s-4)",
+              background: "var(--w-accent-strong)",
+              color: "#fff",
+              border: "none",
+              fontSize: "var(--w-fs-label)",
+              letterSpacing: "0.06em",
+              cursor: "pointer",
+              borderRadius: "var(--w-radius)",
+            }}
           >
             {showForm ? "Cancel" : "+ Add Organization"}
           </button>
@@ -122,202 +168,142 @@ export default function OrganizationsPage() {
         {showForm && (
           <form
             onSubmit={handleCreate}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5"
+            className="bg-plate border border-border"
+            style={{ padding: "var(--w-s-5)", marginBottom: "var(--w-s-5)" }}
           >
-            <h2 className="text-lg font-semibold text-slate-800">New Organization</h2>
+            <h2 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-section)", color: "var(--w-text-1)", marginBottom: "var(--w-s-4)" }}>
+              New Organization
+            </h2>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--w-s-4)" }}>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g. Apollo Hospitals Delhi"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                />
+                <label style={labelStyle}>Name *</label>
+                <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Apollo Hospitals Delhi" style={inputStyle} />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Type *</label>
-                <select
-                  required
-                  value={form.type}
-                  onChange={e => setForm(f => ({ ...f, type: e.target.value as OrganizationType }))}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                >
+                <label style={labelStyle}>Type *</label>
+                <select required value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as OrganizationType }))} style={{ ...inputStyle }}>
                   <option value="">Select type…</option>
-                  {Object.entries(TYPE_LABELS).map(([val, label]) => (
-                    <option key={val} value={val}>{label}</option>
-                  ))}
+                  {Object.entries(TYPE_LABELS).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tier</label>
-                <select
-                  value={form.tier}
-                  onChange={e => setForm(f => ({ ...f, tier: e.target.value as OrganizationTier }))}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                >
+                <label style={labelStyle}>Tier</label>
+                <select value={form.tier} onChange={e => setForm(f => ({ ...f, tier: e.target.value as OrganizationTier }))} style={{ ...inputStyle }}>
                   <option value="">Standard (default)</option>
-                  {Object.entries(TIER_LABELS).map(([val, label]) => (
-                    <option key={val} value={val}>{label}</option>
-                  ))}
+                  {Object.entries(TIER_LABELS).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Payment Terms (days)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={365}
-                  value={form.paymentTermsDays}
-                  onChange={e => setForm(f => ({ ...f, paymentTermsDays: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                />
+                <label style={labelStyle}>Payment Terms (days)</label>
+                <input type="number" min={0} max={365} value={form.paymentTermsDays} onChange={e => setForm(f => ({ ...f, paymentTermsDays: e.target.value }))} style={inputStyle} />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">GST Number</label>
-                <input
-                  value={form.gstNumber}
-                  onChange={e => setForm(f => ({ ...f, gstNumber: e.target.value }))}
-                  placeholder="22AAAAA0000A1Z5"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                />
+                <label style={labelStyle}>GST Number</label>
+                <input value={form.gstNumber} onChange={e => setForm(f => ({ ...f, gstNumber: e.target.value }))} placeholder="22AAAAA0000A1Z5" style={inputStyle} />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">PAN Number</label>
-                <input
-                  value={form.panNumber}
-                  onChange={e => setForm(f => ({ ...f, panNumber: e.target.value }))}
-                  placeholder="AAAAA0000A"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                />
+                <label style={labelStyle}>PAN Number</label>
+                <input value={form.panNumber} onChange={e => setForm(f => ({ ...f, panNumber: e.target.value }))} placeholder="AAAAA0000A" style={inputStyle} />
               </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Website</label>
-                <input
-                  type="url"
-                  value={form.website}
-                  onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
-                  placeholder="https://example.com"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                />
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Website</label>
+                <input type="url" value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} placeholder="https://example.com" style={inputStyle} />
               </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
-                <textarea
-                  rows={2}
-                  value={form.notes}
-                  onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                />
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Notes</label>
+                <textarea rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} style={{ ...inputStyle, height: "auto", padding: "var(--w-s-2)" }} />
               </div>
             </div>
 
-            {formError && <p className="text-sm text-red-600">{formError}</p>}
+            {formError && (
+              <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-2) var(--w-s-3)", marginTop: "var(--w-s-3)" }}>
+                {formError}
+              </p>
+            )}
 
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="rounded-xl bg-[#0F4C81] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0a3560] disabled:opacity-60"
-              >
+            <div className="flex gap-3" style={{ marginTop: "var(--w-s-4)" }}>
+              <button type="submit" disabled={submitting} className="font-head font-semibold uppercase"
+                style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-5)", background: submitting ? "var(--w-text-mute)" : "var(--w-accent-strong)", color: "#fff", border: "none", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: submitting ? "not-allowed" : "pointer" }}>
                 {submitting ? "Saving…" : "Create Organization"}
               </button>
-              <button
-                type="button"
-                onClick={() => { setShowForm(false); setForm(emptyForm); setFormError(""); }}
-                className="rounded-xl border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-              >
+              <button type="button" onClick={() => { setShowForm(false); setForm(emptyForm); setFormError(""); }} className="font-head font-medium uppercase"
+                style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", background: "transparent", color: "var(--w-text-2)", border: "1px solid var(--w-border)", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: "pointer" }}>
                 Cancel
               </button>
             </div>
           </form>
         )}
 
-        <div className="flex flex-wrap gap-3">
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name…"
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] w-60"
-          />
-          <select
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value as OrganizationType | "")}
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:border-[#00B4D8]"
-          >
+        <div className="flex gap-3" style={{ marginBottom: "var(--w-s-4)" }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name…" style={{ ...inputStyle, width: "220px", flex: "none" }} />
+          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value as OrganizationType | "")} style={{ ...inputStyle, width: "auto", flex: "none" }}>
             <option value="">All types</option>
-            {Object.entries(TYPE_LABELS).map(([val, label]) => (
-              <option key={val} value={val}>{label}</option>
-            ))}
+            {Object.entries(TYPE_LABELS).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
           </select>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+          <div style={{ background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", color: "var(--w-attention-fg)", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "var(--w-fs-body)", marginBottom: "var(--w-s-4)" }}>
             {error}
           </div>
         )}
 
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Name</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Type</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Tier</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">GST Number</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Payment Terms</th>
-                <th className="px-6 py-4 text-left font-semibold text-slate-600">Status</th>
-                <th className="px-6 py-4" />
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400">Loading…</td>
+        <div className="bg-plate border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--w-sunken)" }}>
+                  {["Name", "Type", "Tier", "GST No.", "Payment Terms", "Status", ""].map(h => (
+                    <th key={h} style={TH_STYLE}>{h}</th>
+                  ))}
                 </tr>
-              ) : orgs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400">No organizations found.</td>
-                </tr>
-              ) : orgs.map(org => (
-                <tr key={org.id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                  <td className="px-6 py-4 font-medium text-slate-900">{org.name}</td>
-                  <td className="px-6 py-4 text-slate-600">{TYPE_LABELS[org.type]}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${TIER_COLORS[org.tier]}`}>
-                      {TIER_LABELS[org.tier]}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500 font-mono text-xs">{org.gstNumber ?? "—"}</td>
-                  <td className="px-6 py-4 text-slate-600">{org.paymentTermsDays} days</td>
-                  <td className="px-6 py-4">
-                    {org.isActive
-                      ? <span className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">Active</span>
-                      : <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">Inactive</span>
-                    }
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => router.push(`/organizations/${org.id}`)}
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={7} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>Loading…</td></tr>
+                ) : orgs.length === 0 ? (
+                  <tr><td colSpan={7} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>No organizations found.</td></tr>
+                ) : orgs.map((org, i) => {
+                  const ts = TIER_STYLES[org.tier];
+                  return (
+                    <tr key={org.id} className="hover:bg-row-hover transition-colors duration-fast"
+                      style={{ borderBottom: i < orgs.length - 1 ? "1px solid var(--w-border-soft)" : undefined }}>
+                      <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontWeight: 500 }}>
+                        {org.name}
+                      </td>
+                      <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>
+                        {TYPE_LABELS[org.type]}
+                      </td>
+                      <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                        <span style={{ background: ts.bg, color: ts.fg, border: `1px solid ${ts.edge}`, fontSize: "var(--w-fs-badge)", fontFamily: "var(--w-font-body)", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", padding: "2px 6px" }}>
+                          {TIER_LABELS[org.tier]}
+                        </span>
+                      </td>
+                      <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)", fontFamily: "monospace" }}>
+                        {org.gstNumber ?? "—"}
+                      </td>
+                      <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>
+                        {org.paymentTermsDays != null ? `${org.paymentTermsDays} days` : "—"}
+                      </td>
+                      <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                        <span className="flex items-center gap-1">
+                          <span style={{ width: "8px", height: "8px", borderRadius: "var(--w-radius-full)", background: org.isActive ? "var(--w-success-dot)" : "var(--w-neutral-dot)", display: "inline-block" }} />
+                          <span style={{ fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{org.isActive ? "Active" : "Inactive"}</span>
+                        </span>
+                      </td>
+                      <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                        <button onClick={() => router.push(`/organizations/${org.id}`)} className="font-head font-medium uppercase"
+                          style={{ height: "24px", paddingInline: "var(--w-s-3)", background: "transparent", color: "var(--w-link)", border: "1px solid var(--w-border)", fontSize: "var(--w-fs-caption)", letterSpacing: "0.04em", cursor: "pointer" }}>
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </AdminLayout>

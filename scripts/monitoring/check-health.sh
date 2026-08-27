@@ -19,9 +19,12 @@ check_service() {
     fi
 }
 
-check_service "Backend API"    "http://localhost:3001/health"
+check_service "Admin UI"       "http://localhost:3000"
+check_service "Portal"         "http://localhost:3001"
+check_service "API"            "http://localhost:4000/health"
+check_service "Services"       "http://localhost:4001/health"
 check_service "Prometheus"     "http://localhost:9090/-/healthy"
-check_service "Grafana"        "http://localhost:3000/api/health"
+check_service "Grafana"        "http://localhost:9080/api/health"
 check_service "Alertmanager"   "http://localhost:9093/-/healthy"
 
 echo "Health check done."

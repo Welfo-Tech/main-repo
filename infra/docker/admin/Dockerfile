@@ -15,6 +15,8 @@ RUN npm ci
 FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN npm run build --workspace=@welfo/admin
 
 FROM base AS runner

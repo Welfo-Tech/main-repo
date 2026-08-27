@@ -4,15 +4,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "../../../components/layout/AdminLayout";
+import StatusBadge from "../../../components/common/StatusBadge";
+import PriorityBar from "../../../components/common/PriorityBar";
 import { api } from "../../../lib/api";
 import type { ServiceCase, ServiceCaseStatus } from "../../../types/service-case";
-import {
-  PRIORITY_COLORS,
-  PRIORITY_LABELS,
-  STATUS_COLORS,
-  STATUS_LABELS,
-  TYPE_LABELS,
-} from "../../../types/service-case";
+import { PRIORITY_LABELS, STATUS_LABELS, TYPE_LABELS } from "../../../types/service-case";
 
 const STATUS_TRANSITIONS: Record<ServiceCaseStatus, ServiceCaseStatus[]> = {
   DRAFT: ["INTAKE", "CANCELLED"],
@@ -35,11 +31,39 @@ const STATUS_TRANSITIONS: Record<ServiceCaseStatus, ServiceCaseStatus[]> = {
   CANCELLED: [],
 };
 
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
+const inputStyle: React.CSSProperties = {
+  height: "var(--w-control-h)",
+  padding: "0 var(--w-s-2)",
+  fontSize: "var(--w-fs-body)",
+  fontFamily: "var(--w-font-body)",
+  border: "1px solid var(--w-border)",
+  background: "var(--w-sunken)",
+  color: "var(--w-text-1)",
+  borderRadius: "var(--w-radius)",
+  outline: "none",
+  width: "100%",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "var(--w-fs-label)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 500,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "var(--w-text-2)",
+  display: "block",
+  marginBottom: "var(--w-s-1)",
+};
+
+function FieldGroup({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-medium text-slate-800">{value ?? "—"}</p>
+      <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-text-2)", letterSpacing: "0.06em", marginBottom: "2px" }}>
+        {label}
+      </p>
+      <div style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-1)", fontWeight: 500 }}>
+        {value ?? <span style={{ color: "var(--w-text-mute)" }}>—</span>}
+      </div>
     </div>
   );
 }
@@ -49,7 +73,6 @@ export default function ServiceCaseDetailPage() {
   const [sc, setSc] = useState<ServiceCase | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [updating, setUpdating] = useState(false);
   const [updateError, setUpdateError] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<ServiceCaseStatus | "">("");
@@ -70,9 +93,7 @@ export default function ServiceCaseDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => {
-    fetchCase();
-  }, [fetchCase]);
+  useEffect(() => { fetchCase(); }, [fetchCase]);
 
   async function handleStatusUpdate(e: React.FormEvent) {
     e.preventDefault();
@@ -82,9 +103,7 @@ export default function ServiceCaseDetailPage() {
     try {
       await api.patch(`/api/v1/service-cases/${id}`, {
         status: selectedStatus,
-        ...(selectedStatus === "CANCELLED" && cancellationReason
-          ? { cancellationReason }
-          : {}),
+        ...(selectedStatus === "CANCELLED" && cancellationReason ? { cancellationReason } : {}),
         ...(selectedStatus === "ON_HOLD" && holdReason ? { holdReason } : {}),
       });
       await fetchCase();
@@ -100,7 +119,7 @@ export default function ServiceCaseDetailPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="p-8 text-slate-400">Loading…</div>
+        <div style={{ padding: "var(--w-s-6)", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>Loading…</div>
       </AdminLayout>
     );
   }
@@ -108,11 +127,11 @@ export default function ServiceCaseDetailPage() {
   if (error || !sc) {
     return (
       <AdminLayout>
-        <div className="p-8">
-          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div style={{ padding: "var(--w-s-6)" }}>
+          <p style={{ color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "var(--w-fs-body)" }}>
             {error || "Case not found."}
-          </div>
-          <Link href="/service-cases" className="mt-4 inline-block text-sm text-[#0F4C81] hover:underline">
+          </p>
+          <Link href="/service-cases" style={{ display: "inline-block", marginTop: "var(--w-s-4)", color: "var(--w-link)", fontSize: "var(--w-fs-body)", textDecoration: "none" }}>
             ← Back to Service Cases
           </Link>
         </div>
@@ -124,116 +143,90 @@ export default function ServiceCaseDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8 space-y-8 max-w-4xl">
-        <div className="flex items-start justify-between gap-6">
+      <div style={{ padding: "var(--w-s-5) var(--w-s-6)", maxWidth: "960px" }}>
+
+        <div className="flex items-center gap-2" style={{ marginBottom: "var(--w-s-4)" }}>
+          <Link href="/service-cases" style={{ color: "var(--w-link)", fontSize: "var(--w-fs-caption)", textDecoration: "none" }}>Service Cases</Link>
+          <span style={{ color: "var(--w-text-mute)" }}>/</span>
+          <span className="w-num" style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", fontFamily: "var(--w-font-head)", fontWeight: 600 }}>{sc.caseNumber}</span>
+        </div>
+
+        <div className="flex items-start justify-between" style={{ marginBottom: "var(--w-s-5)" }}>
           <div>
-            <Link href="/service-cases" className="text-xs text-slate-400 hover:text-[#0F4C81]">
-              ← Service Cases
-            </Link>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 font-mono">
+            <h1 className="w-num font-head font-semibold" style={{ fontSize: "var(--w-fs-page)", color: "var(--w-text-1)", fontFamily: "monospace" }}>
               {sc.caseNumber}
             </h1>
-            <p className="mt-1 text-sm text-slate-500">{TYPE_LABELS[sc.type]}</p>
+            <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-2)", marginTop: "var(--w-s-1)" }}>{TYPE_LABELS[sc.type]}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold ${STATUS_COLORS[sc.status]}`}
-            >
-              {STATUS_LABELS[sc.status]}
-            </span>
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${PRIORITY_COLORS[sc.priority]}`}
-            >
-              {PRIORITY_LABELS[sc.priority]} priority
-            </span>
+            <StatusBadge status={sc.status} variant="chip" />
+            <PriorityBar priority={sc.priority} showLabel />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-3">
-          <Field label="Organization" value={sc.organization.name} />
-          <Field
-            label="Product"
-            value={
-              <span className="font-mono">
-                {sc.product.serialNumber}
-                {sc.product.model ? ` · ${sc.product.model.name}` : ""}
+        <div className="bg-plate border border-border" style={{ padding: "var(--w-s-5)", marginBottom: "var(--w-s-5)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--w-s-4)" }}>
+            <FieldGroup label="Organization" value={sc.organization.name} />
+            <FieldGroup label="Product" value={
+              <span className="w-num" style={{ fontFamily: "monospace" }}>
+                {sc.product.serialNumber}{sc.product.model ? ` · ${sc.product.model.name}` : ""}
               </span>
-            }
-          />
-          <Field
-            label="Contact"
-            value={sc.contact ? `${sc.contact.name}${sc.contact.phone ? ` · ${sc.contact.phone}` : ""}` : null}
-          />
-          <Field
-            label="Technician"
-            value={sc.technician ? sc.technician.user.name : null}
-          />
-          <Field label="Billable" value={sc.isBillable ? "Yes" : "No"} />
-          <Field
-            label="SLA Deadline"
-            value={
-              sc.slaDeadline
-                ? new Date(sc.slaDeadline).toLocaleDateString("en-IN")
-                : null
-            }
-          />
-          {sc.ticket && (
-            <Field label="From Ticket" value={sc.ticket.ticketNumber} />
-          )}
-          <Field
-            label="Opened"
-            value={new Date(sc.createdAt).toLocaleDateString("en-IN")}
-          />
-          {sc.closedAt && (
-            <Field
-              label="Closed"
-              value={new Date(sc.closedAt).toLocaleDateString("en-IN")}
-            />
-          )}
+            } />
+            <FieldGroup label="Contact" value={sc.contact ? `${sc.contact.name}${sc.contact.phone ? ` · ${sc.contact.phone}` : ""}` : null} />
+            <FieldGroup label="Technician" value={sc.technician?.user.name ?? null} />
+            <FieldGroup label="Billable" value={sc.isBillable ? "Yes" : "No"} />
+            <FieldGroup label="SLA Deadline" value={sc.slaDeadline ? new Date(sc.slaDeadline).toLocaleDateString("en-IN") : null} />
+            {sc.ticket && <FieldGroup label="From Ticket" value={sc.ticket.ticketNumber} />}
+            <FieldGroup label="Opened" value={new Date(sc.createdAt).toLocaleDateString("en-IN")} />
+            {sc.closedAt && <FieldGroup label="Closed" value={new Date(sc.closedAt).toLocaleDateString("en-IN")} />}
+          </div>
         </div>
 
         {sc.intakeCondition && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-2">
+          <div className="bg-plate border border-border" style={{ padding: "var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+            <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-text-2)", letterSpacing: "0.06em", marginBottom: "var(--w-s-2)" }}>
               Intake Condition
             </p>
-            <p className="text-sm text-slate-700 whitespace-pre-wrap">{sc.intakeCondition}</p>
+            <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-1)", whiteSpace: "pre-wrap" }}>{sc.intakeCondition}</p>
           </div>
         )}
 
         {sc.holdReason && (
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-orange-500 mb-2">
-              Hold Reason
-            </p>
-            <p className="text-sm text-orange-800">{sc.holdReason}</p>
+          <div style={{ background: "var(--w-waiting-tint)", border: "1px solid var(--w-waiting-edge)", padding: "var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+            <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-waiting-fg)", letterSpacing: "0.06em", marginBottom: "var(--w-s-2)" }}>Hold Reason</p>
+            <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-waiting-fg)" }}>{sc.holdReason}</p>
           </div>
         )}
 
         {sc.cancellationReason && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-            <p className="text-xs font-medium uppercase tracking-wide text-red-500 mb-2">
-              Cancellation Reason
-            </p>
-            <p className="text-sm text-red-800">{sc.cancellationReason}</p>
+          <div style={{ background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+            <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-attention-fg)", letterSpacing: "0.06em", marginBottom: "var(--w-s-2)" }}>Cancellation Reason</p>
+            <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-attention-fg)" }}>{sc.cancellationReason}</p>
           </div>
         )}
 
         {nextStatuses.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-800 mb-4">Update Status</h2>
-            <form onSubmit={handleStatusUpdate} className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {nextStatuses.map((s) => (
+          <div className="bg-plate border border-border" style={{ padding: "var(--w-s-5)" }}>
+            <h2 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-subsection)", color: "var(--w-text-1)", marginBottom: "var(--w-s-4)" }}>Update Status</h2>
+            <form onSubmit={handleStatusUpdate}>
+              <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--w-s-3)" }}>
+                {nextStatuses.map(s => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => setSelectedStatus(s === selectedStatus ? "" : s)}
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold border transition ${
-                      selectedStatus === s
-                        ? "bg-[#0F4C81] text-white border-[#0F4C81]"
-                        : "border-slate-300 text-slate-600 hover:border-[#0F4C81] hover:text-[#0F4C81]"
-                    }`}
+                    className="font-head font-semibold uppercase"
+                    style={{
+                      height: "var(--w-control-h)",
+                      paddingInline: "var(--w-s-4)",
+                      fontSize: "var(--w-fs-label)",
+                      letterSpacing: "0.06em",
+                      border: `1px solid ${selectedStatus === s ? "var(--w-accent-strong)" : "var(--w-border)"}`,
+                      background: selectedStatus === s ? "var(--w-accent-strong)" : "transparent",
+                      color: selectedStatus === s ? "#fff" : "var(--w-text-2)",
+                      cursor: "pointer",
+                      transition: "all var(--w-dur-fast)",
+                    }}
                   >
                     {STATUS_LABELS[s]}
                   </button>
@@ -241,43 +234,28 @@ export default function ServiceCaseDetailPage() {
               </div>
 
               {selectedStatus === "CANCELLED" && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Cancellation Reason
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={cancellationReason}
-                    onChange={(e) => setCancellationReason(e.target.value)}
-                    placeholder="Why is this case being cancelled?"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                  />
+                <div style={{ marginBottom: "var(--w-s-3)" }}>
+                  <label style={labelStyle}>Cancellation Reason</label>
+                  <textarea rows={2} value={cancellationReason} onChange={e => setCancellationReason(e.target.value)} placeholder="Why is this case being cancelled?" style={{ ...inputStyle, height: "auto", padding: "var(--w-s-2)" }} />
                 </div>
               )}
 
               {selectedStatus === "ON_HOLD" && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Hold Reason
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={holdReason}
-                    onChange={(e) => setHoldReason(e.target.value)}
-                    placeholder="Why is this case being put on hold?"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                  />
+                <div style={{ marginBottom: "var(--w-s-3)" }}>
+                  <label style={labelStyle}>Hold Reason</label>
+                  <textarea rows={2} value={holdReason} onChange={e => setHoldReason(e.target.value)} placeholder="Why is this case being put on hold?" style={{ ...inputStyle, height: "auto", padding: "var(--w-s-2)" }} />
                 </div>
               )}
 
-              {updateError && <p className="text-sm text-red-600">{updateError}</p>}
+              {updateError && (
+                <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-2) var(--w-s-3)", marginBottom: "var(--w-s-3)" }}>
+                  {updateError}
+                </p>
+              )}
 
               {selectedStatus && (
-                <button
-                  type="submit"
-                  disabled={updating}
-                  className="rounded-xl bg-[#0F4C81] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0a3560] disabled:opacity-60"
-                >
+                <button type="submit" disabled={updating} className="font-head font-semibold uppercase"
+                  style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-5)", background: updating ? "var(--w-text-mute)" : "var(--w-accent-strong)", color: "#fff", border: "none", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: updating ? "not-allowed" : "pointer" }}>
                   {updating ? "Updating…" : `Move to ${STATUS_LABELS[selectedStatus]}`}
                 </button>
               )}

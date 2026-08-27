@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { prisma } from "../src/client.js";
 
 const HASHES = {
@@ -65,7 +66,7 @@ async function main() {
     create: {
       id: "00000000-0000-0000-0000-000000000003",
       name: "Olympus CF-HQ190L",
-      category: "COLONOSCOPE",
+      category: "ENDOSCOPE",
       manufacturer: "Olympus",
       description: "High-definition colonoscope with NBI",
       isActive: true,
@@ -94,7 +95,7 @@ async function main() {
       organizationId: org.id,
       productId: product.id,
       contactId: "00000000-0000-0000-0000-000000000002",
-      status: "DIAGNOSIS",
+      status: "UNDER_ASSESSMENT",
       priority: "NORMAL",
       intakeCondition: "Blurry image, light guide connector damaged",
       createdBy: adminUser.id,

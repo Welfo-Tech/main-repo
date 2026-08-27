@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "../../../components/layout/AdminLayout";
+import StatusBadge from "../../../components/common/StatusBadge";
 import { api } from "../../../lib/api";
 import type { Invoice, InvoiceStatus, PaymentMethod } from "../../../types/invoice";
-import { METHOD_LABELS, STATUS_COLORS, STATUS_LABELS, formatINR, paidPercent } from "../../../types/invoice";
+import { METHOD_LABELS, STATUS_LABELS, formatINR, paidPercent } from "../../../types/invoice";
 
 const STATUS_ACTIONS: Partial<Record<InvoiceStatus, InvoiceStatus[]>> = {
   DRAFT: ["ISSUED"],
@@ -41,6 +42,43 @@ const emptyPayment = (): RecordPaymentForm => ({
   referenceNumber: "",
   notes: "",
 });
+
+const inputStyle: React.CSSProperties = {
+  height: "var(--w-control-h)",
+  padding: "0 var(--w-s-2)",
+  fontSize: "var(--w-fs-body)",
+  fontFamily: "var(--w-font-body)",
+  border: "1px solid var(--w-border)",
+  background: "var(--w-sunken)",
+  color: "var(--w-text-1)",
+  borderRadius: "var(--w-radius)",
+  outline: "none",
+  width: "100%",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "var(--w-fs-label)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 500,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "var(--w-text-2)",
+  display: "block",
+  marginBottom: "var(--w-s-1)",
+};
+
+const TH_STYLE: React.CSSProperties = {
+  fontSize: "var(--w-fs-eyebrow)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.09em",
+  color: "var(--w-text-2)",
+  padding: "0 var(--w-s-3)",
+  height: "var(--w-row-h)",
+  borderBottom: "1px solid var(--w-border)",
+  whiteSpace: "nowrap" as const,
+};
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -117,8 +155,8 @@ export default function InvoiceDetailPage() {
     }
   }
 
-  if (loading) return <AdminLayout><div className="p-8 text-slate-400">Loading…</div></AdminLayout>;
-  if (error && !invoice) return <AdminLayout><div className="p-8 text-red-600">{error}</div></AdminLayout>;
+  if (loading) return <AdminLayout><div style={{ padding: "var(--w-s-6)", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>Loading…</div></AdminLayout>;
+  if (error && !invoice) return <AdminLayout><div style={{ padding: "var(--w-s-6)", color: "var(--w-attention-fg)", fontSize: "var(--w-fs-body)" }}>{error}</div></AdminLayout>;
   if (!invoice) return null;
 
   const pct = paidPercent(invoice);
@@ -128,67 +166,62 @@ export default function InvoiceDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8 space-y-8 max-w-5xl">
-        <div className="flex items-start justify-between">
+      <div style={{ padding: "var(--w-s-5) var(--w-s-6)", maxWidth: "1100px" }}>
+
+        <div className="flex items-start justify-between" style={{ marginBottom: "var(--w-s-5)" }}>
           <div>
-            <div className="flex items-center gap-3">
-              <Link href="/invoices" className="text-sm text-slate-400 hover:text-slate-700">← Invoices</Link>
-              <span className="text-slate-200">|</span>
-              <span className="font-mono text-xs text-slate-400">
-                from case{" "}
-                <Link href={`/service-cases/${invoice.caseId}`} className="text-[#0F4C81] hover:underline">
-                  {invoice.case.caseNumber}
-                </Link>
-              </span>
+            <div className="flex items-center gap-2" style={{ marginBottom: "var(--w-s-2)" }}>
+              <Link href="/invoices" style={{ color: "var(--w-link)", fontSize: "var(--w-fs-caption)", textDecoration: "none" }}>Invoices</Link>
+              <span style={{ color: "var(--w-text-mute)" }}>/</span>
+              <span className="w-num" style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", fontFamily: "var(--w-font-head)", fontWeight: 600 }}>{invoice.invoiceNumber}</span>
+              <span style={{ color: "var(--w-text-mute)" }}>·</span>
+              <Link href={`/service-cases/${invoice.caseId}`} style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-link)", textDecoration: "none", fontFamily: "monospace" }}>
+                {invoice.case.caseNumber}
+              </Link>
             </div>
-            <h1 className="mt-2 text-2xl font-semibold text-slate-900 font-mono">{invoice.invoiceNumber}</h1>
-            <p className="text-sm text-slate-500">{invoice.organization.name}</p>
+            <h1 className="w-num font-head font-semibold" style={{ fontSize: "var(--w-fs-page)", color: "var(--w-text-1)" }}>{invoice.invoiceNumber}</h1>
+            <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-2)", marginTop: "var(--w-s-1)" }}>{invoice.organization.name}</p>
           </div>
-          <span className={`rounded-full px-3 py-1.5 text-sm font-semibold ${STATUS_COLORS[invoice.status]}`}>
-            {STATUS_LABELS[invoice.status]}
-          </span>
+          <StatusBadge status={invoice.status} variant="chip" />
         </div>
 
-        {error && <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div>}
+        {error && (
+          <div style={{ background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", color: "var(--w-attention-fg)", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "var(--w-fs-body)", marginBottom: "var(--w-s-4)" }}>
+            {error}
+          </div>
+        )}
 
-        <div className="grid grid-cols-3 gap-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs text-slate-400 mb-1">Total Amount</p>
-            <p className="text-2xl font-bold text-slate-900">{formatINR(invoice.totalAmount)}</p>
-            <p className="text-xs text-slate-400 mt-1">
-              {formatINR(invoice.subtotal)} + {formatINR(invoice.taxAmount)} GST
-            </p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs text-slate-400 mb-1">Paid</p>
-            <p className="text-2xl font-bold text-emerald-600">{formatINR(invoice.paidAmount)}</p>
-            <div className="mt-2 flex items-center gap-2">
-              <div className="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="text-xs text-slate-500">{pct}%</span>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--w-s-4)", marginBottom: "var(--w-s-5)" }}>
+          {[
+            { label: "Total Amount", value: formatINR(invoice.totalAmount), sub: `${formatINR(invoice.subtotal)} + ${formatINR(invoice.taxAmount)} GST`, color: "var(--w-text-1)" },
+            { label: "Paid", value: formatINR(invoice.paidAmount), color: "var(--w-success-fg)" },
+            { label: "Outstanding", value: formatINR(outstanding), sub: invoice.dueDate ? `Due ${new Date(invoice.dueDate).toLocaleDateString("en-IN")}` : undefined, color: outstanding > 0 ? "var(--w-attention-fg)" : "var(--w-text-mute)" },
+          ].map(card => (
+            <div key={card.label} className="bg-plate border border-border" style={{ padding: "var(--w-s-4)" }}>
+              <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-text-2)", letterSpacing: "0.06em", marginBottom: "var(--w-s-2)" }}>{card.label}</p>
+              <p className="w-num font-head font-semibold" style={{ fontSize: "var(--w-fs-metric)", color: card.color }}>{card.value}</p>
+              {card.label === "Paid" && (
+                <div className="flex items-center gap-2" style={{ marginTop: "var(--w-s-2)" }}>
+                  <div style={{ flex: 1, height: "4px", background: "var(--w-sunken)", border: "1px solid var(--w-border)", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: "var(--w-success-dot)", transition: "width var(--w-dur)" }} />
+                  </div>
+                  <span className="w-num" style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>{pct}%</span>
+                </div>
+              )}
+              {card.sub && (
+                <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)", marginTop: "var(--w-s-1)" }}>{card.sub}</p>
+              )}
             </div>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs text-slate-400 mb-1">Outstanding</p>
-            <p className={`text-2xl font-bold ${outstanding > 0 ? "text-red-600" : "text-slate-400"}`}>
-              {formatINR(outstanding)}
-            </p>
-            {invoice.dueDate && (
-              <p className="text-xs text-slate-400 mt-1">
-                Due {new Date(invoice.dueDate).toLocaleDateString("en-IN")}
-              </p>
-            )}
-          </div>
+          ))}
         </div>
 
         {nextStatuses.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Status Actions</p>
+          <div className="bg-plate border border-border" style={{ padding: "var(--w-s-4)", marginBottom: "var(--w-s-5)" }}>
+            <p className="font-head font-semibold uppercase" style={{ fontSize: "var(--w-fs-eyebrow)", color: "var(--w-text-2)", letterSpacing: "0.09em", marginBottom: "var(--w-s-3)" }}>Status Actions</p>
             <div className="flex gap-3">
               {nextStatuses.map(s => (
-                <button key={s} onClick={() => updateStatus(s)} disabled={statusBusy}
-                  className="rounded-lg px-4 py-2 text-sm font-semibold bg-[#0F4C81] text-white hover:bg-[#0a3a63] disabled:opacity-50 transition">
+                <button key={s} onClick={() => updateStatus(s)} disabled={statusBusy} className="font-head font-semibold uppercase"
+                  style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", background: "var(--w-accent-strong)", color: "#fff", border: "none", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: statusBusy ? "not-allowed" : "pointer" }}>
                   Mark as {STATUS_LABELS[s]}
                 </button>
               ))}
@@ -196,161 +229,148 @@ export default function InvoiceDetailPage() {
           </div>
         )}
 
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50">
-            <h2 className="font-semibold text-slate-800">Line Items</h2>
+        <div className="bg-plate border border-border overflow-hidden" style={{ marginBottom: "var(--w-s-5)" }}>
+          <div className="flex items-center border-b border-border bg-sunken" style={{ height: "var(--w-row-h)", paddingInline: "var(--w-s-4)" }}>
+            <span className="font-head font-semibold uppercase" style={{ fontSize: "var(--w-fs-eyebrow)", color: "var(--w-text-2)", letterSpacing: "0.09em" }}>Line Items</span>
           </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">#</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Description</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500">Qty</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500">Unit Price</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500">Disc%</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500">GST%</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.lineItems.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-400 text-sm">No line items yet.</td></tr>
-              ) : invoice.lineItems.map(item => (
-                <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="px-6 py-3 text-slate-400">{item.sortOrder}</td>
-                  <td className="px-6 py-3 text-slate-500">{item.itemType}</td>
-                  <td className="px-6 py-3 text-slate-700">{item.description}</td>
-                  <td className="px-6 py-3 text-right text-slate-600">{Number(item.quantity)}</td>
-                  <td className="px-6 py-3 text-right text-slate-600">{formatINR(item.unitPrice)}</td>
-                  <td className="px-6 py-3 text-right text-slate-500">{Number(item.discountPct)}%</td>
-                  <td className="px-6 py-3 text-right text-slate-500">{Number(item.taxRate)}%</td>
-                  <td className="px-6 py-3 text-right font-medium text-slate-800">{formatINR(item.lineTotal)}</td>
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--w-sunken)" }}>
+                  {["#", "Type", "Description", "Qty", "Unit Price", "Disc%", "GST%", "Total"].map((h, hi) => (
+                    <th key={h} style={{ ...TH_STYLE, textAlign: hi >= 3 ? "right" : "left" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-            <tfoot className="border-t border-slate-200 bg-slate-50">
-              <tr>
-                <td colSpan={7} className="px-6 py-2 text-right text-xs text-slate-500 font-medium">Subtotal</td>
-                <td className="px-6 py-2 text-right text-sm font-semibold text-slate-700">{formatINR(invoice.subtotal)}</td>
-              </tr>
-              <tr>
-                <td colSpan={7} className="px-6 py-2 text-right text-xs text-slate-500 font-medium">GST</td>
-                <td className="px-6 py-2 text-right text-sm font-semibold text-slate-700">{formatINR(invoice.taxAmount)}</td>
-              </tr>
-              <tr>
-                <td colSpan={7} className="px-6 py-3 text-right text-sm font-bold text-slate-800">Total</td>
-                <td className="px-6 py-3 text-right text-base font-bold text-slate-900">{formatINR(invoice.totalAmount)}</td>
-              </tr>
-            </tfoot>
-          </table>
+              </thead>
+              <tbody>
+                {invoice.lineItems.length === 0 ? (
+                  <tr><td colSpan={8} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>No line items yet.</td></tr>
+                ) : invoice.lineItems.map((item, i) => (
+                  <tr key={item.id} className="hover:bg-row-hover transition-colors duration-fast"
+                    style={{ borderBottom: i < invoice.lineItems.length - 1 ? "1px solid var(--w-border-soft)" : undefined }}>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-mute)" }}>{item.sortOrder}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>{item.itemType}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)" }}>{item.description}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)", textAlign: "right" }}>{Number(item.quantity)}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)", textAlign: "right" }}>{formatINR(item.unitPrice)}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-mute)", textAlign: "right" }}>{Number(item.discountPct)}%</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-mute)", textAlign: "right" }}>{Number(item.taxRate)}%</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontWeight: 500, textAlign: "right" }}>{formatINR(item.lineTotal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr style={{ borderTop: "2px solid var(--w-border)" }}>
+                  <td colSpan={7} style={{ padding: "var(--w-s-2) var(--w-s-3)", textAlign: "right", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>Subtotal</td>
+                  <td className="w-num" style={{ padding: "var(--w-s-2) var(--w-s-3)", textAlign: "right", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontWeight: 500 }}>{formatINR(invoice.subtotal)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={7} style={{ padding: "var(--w-s-2) var(--w-s-3)", textAlign: "right", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>GST</td>
+                  <td className="w-num" style={{ padding: "var(--w-s-2) var(--w-s-3)", textAlign: "right", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{formatINR(invoice.taxAmount)}</td>
+                </tr>
+                <tr style={{ background: "var(--w-sunken)" }}>
+                  <td colSpan={7} style={{ padding: "var(--w-s-3) var(--w-s-3)", textAlign: "right", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)", fontWeight: 600 }}>Total</td>
+                  <td className="w-num" style={{ padding: "var(--w-s-3) var(--w-s-3)", textAlign: "right", fontSize: "var(--w-fs-section)", color: "var(--w-text-1)", fontWeight: 700 }}>{formatINR(invoice.totalAmount)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-            <h2 className="font-semibold text-slate-800">Payments</h2>
+        <div className="bg-plate border border-border overflow-hidden" style={{ marginBottom: "var(--w-s-5)" }}>
+          <div className="flex items-center justify-between border-b border-border bg-sunken" style={{ height: "var(--w-row-h)", paddingInline: "var(--w-s-4)" }}>
+            <span className="font-head font-semibold uppercase" style={{ fontSize: "var(--w-fs-eyebrow)", color: "var(--w-text-2)", letterSpacing: "0.09em" }}>Payments</span>
             {canRecord && (
-              <button onClick={() => setShowPaymentForm(v => !v)}
-                className="rounded-lg px-4 py-1.5 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+              <button onClick={() => setShowPaymentForm(v => !v)} className="font-head font-semibold uppercase"
+                style={{ height: "24px", paddingInline: "var(--w-s-3)", fontSize: "var(--w-fs-eyebrow)", background: showPaymentForm ? "transparent" : "var(--w-accent-strong)", color: showPaymentForm ? "var(--w-text-2)" : "#fff", border: showPaymentForm ? "1px solid var(--w-border)" : "none", letterSpacing: "0.06em", cursor: "pointer" }}>
                 {showPaymentForm ? "Cancel" : "Record Payment"}
               </button>
             )}
           </div>
 
           {showPaymentForm && (
-            <div className="px-6 py-5 border-b border-slate-100 bg-emerald-50 space-y-4">
-              <p className="text-sm font-semibold text-emerald-800">Record a payment</p>
-              {paymentError && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{paymentError}</div>}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Amount (INR) *</label>
-                  <input type="number" min="0.01" step="0.01"
-                    value={paymentForm.amount}
-                    onChange={e => setPaymentForm(f => ({ ...f, amount: e.target.value }))}
-                    placeholder={`Outstanding: ${outstanding.toFixed(2)}`}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <div style={{ padding: "var(--w-s-4)", borderBottom: "1px solid var(--w-border)", background: "var(--w-accent-tint)" }}>
+              <p className="font-head font-semibold uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-text-2)", letterSpacing: "0.06em", marginBottom: "var(--w-s-3)" }}>Record a Payment</p>
+              {paymentError && (
+                <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-2) var(--w-s-3)", marginBottom: "var(--w-s-3)" }}>
+                  {paymentError}
+                </p>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--w-s-3)" }}>
+                <div>
+                  <label style={labelStyle}>Amount (INR) *</label>
+                  <input type="number" min="0.01" step="0.01" value={paymentForm.amount} onChange={e => setPaymentForm(f => ({ ...f, amount: e.target.value }))} placeholder={`Outstanding: ${outstanding.toFixed(2)}`} style={inputStyle} />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Method *</label>
-                  <select value={paymentForm.method}
-                    onChange={e => setPaymentForm(f => ({ ...f, method: e.target.value as PaymentMethod }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <div>
+                  <label style={labelStyle}>Method *</label>
+                  <select value={paymentForm.method} onChange={e => setPaymentForm(f => ({ ...f, method: e.target.value as PaymentMethod }))} style={{ ...inputStyle }}>
                     {ALL_METHODS.map(m => <option key={m} value={m}>{METHOD_LABELS[m]}</option>)}
                   </select>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Payment Date *</label>
-                  <input type="date" value={paymentForm.paymentDate}
-                    onChange={e => setPaymentForm(f => ({ ...f, paymentDate: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <div>
+                  <label style={labelStyle}>Payment Date *</label>
+                  <input type="date" value={paymentForm.paymentDate} onChange={e => setPaymentForm(f => ({ ...f, paymentDate: e.target.value }))} style={inputStyle} />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Reference / UTR No.</label>
-                  <input type="text" value={paymentForm.referenceNumber}
-                    onChange={e => setPaymentForm(f => ({ ...f, referenceNumber: e.target.value }))}
-                    placeholder="Cheque no., UTR, etc."
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <div>
+                  <label style={labelStyle}>Reference / UTR No.</label>
+                  <input type="text" value={paymentForm.referenceNumber} onChange={e => setPaymentForm(f => ({ ...f, referenceNumber: e.target.value }))} placeholder="Cheque no., UTR, etc." style={inputStyle} />
                 </div>
-                <div className="col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Notes</label>
-                  <input type="text" value={paymentForm.notes}
-                    onChange={e => setPaymentForm(f => ({ ...f, notes: e.target.value }))}
-                    placeholder="Optional notes"
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <div style={{ gridColumn: "span 2" }}>
+                  <label style={labelStyle}>Notes</label>
+                  <input type="text" value={paymentForm.notes} onChange={e => setPaymentForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional notes" style={inputStyle} />
                 </div>
               </div>
-              <button onClick={recordPayment} disabled={paymentBusy || !paymentForm.amount}
-                className="rounded-lg px-5 py-2 text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition">
+              <button onClick={recordPayment} disabled={paymentBusy || !paymentForm.amount} className="font-head font-semibold uppercase"
+                style={{ marginTop: "var(--w-s-3)", height: "var(--w-control-h)", paddingInline: "var(--w-s-5)", background: paymentBusy ? "var(--w-text-mute)" : "var(--w-accent-strong)", color: "#fff", border: "none", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: paymentBusy ? "not-allowed" : "pointer" }}>
                 {paymentBusy ? "Saving…" : "Save Payment"}
               </button>
             </div>
           )}
 
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Method</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Reference</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500">Notes</th>
-                <th className="px-6 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.payments.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-8 text-center text-slate-400">No payments recorded yet.</td></tr>
-              ) : invoice.payments.map(pay => (
-                <tr key={pay.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="px-6 py-3 text-slate-600">{new Date(pay.paymentDate).toLocaleDateString("en-IN")}</td>
-                  <td className="px-6 py-3 text-slate-600">{METHOD_LABELS[pay.method]}</td>
-                  <td className="px-6 py-3 text-right font-semibold text-emerald-700">{formatINR(pay.amount)}</td>
-                  <td className="px-6 py-3 text-slate-500 font-mono text-xs">{pay.referenceNumber ?? "—"}</td>
-                  <td className="px-6 py-3">
-                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-600">
-                      {PAYMENT_STATUS_LABELS[pay.status] ?? pay.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-slate-400 text-xs">{pay.notes ?? "—"}</td>
-                  <td className="px-6 py-3">
-                    {pay.status === "RECORDED" && (
-                      <button onClick={() => verifyPayment(pay.id)} disabled={verifyingId === pay.id}
-                        className="text-xs font-semibold text-[#0F4C81] hover:underline disabled:opacity-50">
-                        {verifyingId === pay.id ? "…" : "Verify"}
-                      </button>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--w-sunken)" }}>
+                  {["Date", "Method", "Amount", "Reference", "Status", "Notes", ""].map((h, hi) => (
+                    <th key={h} style={{ ...TH_STYLE, textAlign: hi === 2 ? "right" : "left" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {invoice.payments.length === 0 ? (
+                  <tr><td colSpan={7} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>No payments recorded yet.</td></tr>
+                ) : invoice.payments.map((pay, i) => (
+                  <tr key={pay.id} className="hover:bg-row-hover transition-colors duration-fast"
+                    style={{ borderBottom: i < invoice.payments.length - 1 ? "1px solid var(--w-border-soft)" : undefined }}>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)", whiteSpace: "nowrap" }}>{new Date(pay.paymentDate).toLocaleDateString("en-IN")}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{METHOD_LABELS[pay.method]}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-success-fg)", fontWeight: 600, textAlign: "right" }}>{formatINR(pay.amount)}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)", fontFamily: "monospace" }}>{pay.referenceNumber ?? "—"}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                      <span style={{ fontSize: "var(--w-fs-badge)", background: "var(--w-neutral-tint)", color: "var(--w-neutral-fg)", border: "1px solid var(--w-neutral-edge)", padding: "2px 6px", fontFamily: "var(--w-font-body)", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                        {PAYMENT_STATUS_LABELS[pay.status] ?? pay.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>{pay.notes ?? "—"}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                      {pay.status === "RECORDED" && (
+                        <button onClick={() => verifyPayment(pay.id)} disabled={verifyingId === pay.id} className="font-head font-semibold uppercase"
+                          style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-link)", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.04em" }}>
+                          {verifyingId === pay.id ? "…" : "Verify"}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5 text-xs text-slate-400 space-y-1">
+        <div style={{ background: "var(--w-sunken)", border: "1px solid var(--w-border)", padding: "var(--w-s-4)", fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>
           <p>Created by: {invoice.createdBy} · {new Date(invoice.createdAt).toLocaleString("en-IN")}</p>
-          {invoice.paymentTerms && <p>Payment terms: {invoice.paymentTerms}</p>}
-          {invoice.cancellationReason && <p>Cancellation reason: {invoice.cancellationReason}</p>}
+          {invoice.paymentTerms && <p style={{ marginTop: "2px" }}>Payment terms: {invoice.paymentTerms}</p>}
+          {invoice.cancellationReason && <p style={{ marginTop: "2px" }}>Cancellation reason: {invoice.cancellationReason}</p>}
         </div>
       </div>
     </AdminLayout>

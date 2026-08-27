@@ -24,6 +24,44 @@ const TIER_LABELS: Record<OrganizationTier, string> = {
 
 const emptyContactForm = { name: "", designation: "", email: "", phone: "", isPrimary: false };
 
+const inputStyle: React.CSSProperties = {
+  height: "var(--w-control-h)",
+  padding: "0 var(--w-s-2)",
+  fontSize: "var(--w-fs-body)",
+  fontFamily: "var(--w-font-body)",
+  border: "1px solid var(--w-border)",
+  background: "var(--w-sunken)",
+  color: "var(--w-text-1)",
+  borderRadius: "var(--w-radius)",
+  outline: "none",
+  width: "100%",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "var(--w-fs-label)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 500,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "var(--w-text-2)",
+  display: "block",
+  marginBottom: "var(--w-s-1)",
+};
+
+const TH_STYLE: React.CSSProperties = {
+  fontSize: "var(--w-fs-eyebrow)",
+  fontFamily: "var(--w-font-head)",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.09em",
+  color: "var(--w-text-2)",
+  padding: "0 var(--w-s-3)",
+  height: "var(--w-row-h)",
+  borderBottom: "1px solid var(--w-border)",
+  textAlign: "left",
+  whiteSpace: "nowrap" as const,
+};
+
 export default function OrganizationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -55,16 +93,11 @@ export default function OrganizationDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   async function handleAddContact(e: React.FormEvent) {
     e.preventDefault();
-    if (!contactForm.name.trim()) {
-      setContactFormError("Name is required.");
-      return;
-    }
+    if (!contactForm.name.trim()) { setContactFormError("Name is required."); return; }
     setSubmitting(true);
     setContactFormError("");
     try {
@@ -88,7 +121,7 @@ export default function OrganizationDetailPage() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="p-8 text-slate-400">Loading…</div>
+        <div style={{ padding: "var(--w-s-6)", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>Loading…</div>
       </AdminLayout>
     );
   }
@@ -96,12 +129,9 @@ export default function OrganizationDetailPage() {
   if (error || !org) {
     return (
       <AdminLayout>
-        <div className="p-8">
-          <p className="text-red-600 text-sm">{error || "Organization not found."}</p>
-          <button
-            onClick={() => router.push("/organizations")}
-            className="mt-4 text-sm text-[#0F4C81] hover:underline"
-          >
+        <div style={{ padding: "var(--w-s-6)" }}>
+          <p style={{ color: "var(--w-attention-fg)", fontSize: "var(--w-fs-body)" }}>{error || "Organization not found."}</p>
+          <button onClick={() => router.push("/organizations")} style={{ marginTop: "var(--w-s-4)", color: "var(--w-link)", fontSize: "var(--w-fs-body)", background: "none", border: "none", cursor: "pointer" }}>
             ← Back to Organizations
           </button>
         </div>
@@ -111,189 +141,146 @@ export default function OrganizationDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="p-8 space-y-6">
+      <div style={{ padding: "var(--w-s-5) var(--w-s-6)", maxWidth: "var(--w-page-max)" }}>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push("/organizations")}
-            className="text-sm text-slate-500 hover:text-slate-800 transition"
-          >
-            ← Organizations
+        <div className="flex items-center gap-2" style={{ marginBottom: "var(--w-s-4)" }}>
+          <button onClick={() => router.push("/organizations")} style={{ color: "var(--w-link)", fontSize: "var(--w-fs-caption)", background: "none", border: "none", cursor: "pointer" }}>
+            Organizations
           </button>
-          <span className="text-slate-300">/</span>
-          <span className="text-sm font-medium text-slate-800">{org.name}</span>
+          <span style={{ color: "var(--w-text-mute)" }}>/</span>
+          <span style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>{org.name}</span>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-start justify-between">
+        <div className="bg-plate border border-border" style={{ padding: "var(--w-s-5)", marginBottom: "var(--w-s-5)" }}>
+          <div className="flex items-start justify-between" style={{ marginBottom: "var(--w-s-5)" }}>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-800">{org.name}</h1>
-              <p className="mt-1 text-sm text-slate-500">
+              <h1 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-page)", color: "var(--w-text-1)" }}>
+                {org.name}
+              </h1>
+              <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-2)", marginTop: "var(--w-s-1)" }}>
                 {TYPE_LABELS[org.type]} · {TIER_LABELS[org.tier]}
               </p>
             </div>
-            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${org.isActive ? "bg-teal-50 text-teal-700" : "bg-slate-100 text-slate-500"}`}>
-              {org.isActive ? "Active" : "Inactive"}
+            <span className="flex items-center gap-1">
+              <span style={{ width: "8px", height: "8px", borderRadius: "var(--w-radius-full)", background: org.isActive ? "var(--w-success-dot)" : "var(--w-neutral-dot)", display: "inline-block" }} />
+              <span style={{ fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{org.isActive ? "Active" : "Inactive"}</span>
             </span>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4 text-sm">
-            <div>
-              <p className="text-slate-500">GST Number</p>
-              <p className="mt-1 font-medium text-slate-800 font-mono">{org.gstNumber ?? "—"}</p>
-            </div>
-            <div>
-              <p className="text-slate-500">PAN Number</p>
-              <p className="mt-1 font-medium text-slate-800 font-mono">{org.panNumber ?? "—"}</p>
-            </div>
-            <div>
-              <p className="text-slate-500">Payment Terms</p>
-              <p className="mt-1 font-medium text-slate-800">{org.paymentTermsDays} days</p>
-            </div>
-            <div>
-              <p className="text-slate-500">Website</p>
-              {org.website
-                ? <a href={org.website} target="_blank" rel="noreferrer" className="mt-1 font-medium text-[#0F4C81] hover:underline block truncate">{org.website}</a>
-                : <p className="mt-1 font-medium text-slate-800">—</p>
-              }
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--w-s-4)", borderTop: "1px solid var(--w-border-soft)", paddingTop: "var(--w-s-4)" }}>
+            {[
+              { label: "GST Number", value: org.gstNumber ?? "—", mono: true },
+              { label: "PAN Number", value: org.panNumber ?? "—", mono: true },
+              { label: "Payment Terms", value: org.paymentTermsDays != null ? `${org.paymentTermsDays} days` : "—" },
+              { label: "Website", value: org.website ?? "—" },
+            ].map(({ label, value, mono }) => (
+              <div key={label}>
+                <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-text-2)", letterSpacing: "0.06em", marginBottom: "var(--w-s-1)" }}>
+                  {label}
+                </p>
+                <p className="w-num" style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-1)", fontFamily: mono ? "monospace" : undefined }}>
+                  {value}
+                </p>
+              </div>
+            ))}
           </div>
 
           {org.notes && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <p className="text-sm text-slate-500">Notes</p>
-              <p className="mt-1 text-sm text-slate-700">{org.notes}</p>
+            <div style={{ marginTop: "var(--w-s-4)", paddingTop: "var(--w-s-4)", borderTop: "1px solid var(--w-border-soft)" }}>
+              <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-text-2)", letterSpacing: "0.06em", marginBottom: "var(--w-s-1)" }}>Notes</p>
+              <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-1)" }}>{org.notes}</p>
             </div>
           )}
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-800">Contacts</h2>
-              <p className="text-sm text-slate-500">{contacts.length} contact{contacts.length !== 1 ? "s" : ""}</p>
-            </div>
-            <button
-              onClick={() => { setShowContactForm(!showContactForm); setContactFormError(""); }}
-              className="rounded-xl bg-[#0F4C81] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0a3560]"
-            >
-              {showContactForm ? "Cancel" : "+ Add Contact"}
-            </button>
+        <div className="flex items-center justify-between" style={{ marginBottom: "var(--w-s-3)" }}>
+          <div>
+            <h2 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-section)", color: "var(--w-text-1)" }}>Contacts</h2>
+            <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", marginTop: "2px" }}>{contacts.length} contact{contacts.length !== 1 ? "s" : ""}</p>
           </div>
+          <button onClick={() => { setShowContactForm(!showContactForm); setContactFormError(""); }} className="font-head font-semibold uppercase"
+            style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", background: "var(--w-accent-strong)", color: "#fff", border: "none", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: "pointer" }}>
+            {showContactForm ? "Cancel" : "+ Add Contact"}
+          </button>
+        </div>
 
-          {showContactForm && (
-            <form
-              onSubmit={handleAddContact}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
-            >
-              <h3 className="text-base font-semibold text-slate-800">New Contact</h3>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
-                  <input
-                    required
-                    value={contactForm.name}
-                    onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="Dr. Priya Sharma"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Designation</label>
-                  <input
-                    value={contactForm.designation}
-                    onChange={e => setContactForm(f => ({ ...f, designation: e.target.value }))}
-                    placeholder="Head of Procurement"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={contactForm.email}
-                    onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
-                    placeholder="priya@hospital.in"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                  <input
-                    value={contactForm.phone}
-                    onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))}
-                    placeholder="+91-9876543210"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]"
-                  />
-                </div>
+        {showContactForm && (
+          <form onSubmit={handleAddContact} className="bg-plate border border-border" style={{ padding: "var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+            <h3 className="font-head font-semibold" style={{ fontSize: "var(--w-fs-subsection)", color: "var(--w-text-1)", marginBottom: "var(--w-s-3)" }}>New Contact</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--w-s-3)" }}>
+              <div>
+                <label style={labelStyle}>Name *</label>
+                <input required value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} placeholder="Dr. Priya Sharma" style={inputStyle} />
               </div>
-
-              <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={contactForm.isPrimary}
-                  onChange={e => setContactForm(f => ({ ...f, isPrimary: e.target.checked }))}
-                  className="rounded border-slate-300 text-[#0F4C81] focus:ring-[#00B4D8]"
-                />
-                Set as primary contact
-              </label>
-
-              {contactFormError && <p className="text-sm text-red-600">{contactFormError}</p>}
-
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-xl bg-[#0F4C81] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0a3560] disabled:opacity-60"
-                >
-                  {submitting ? "Saving…" : "Add Contact"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setShowContactForm(false); setContactForm(emptyContactForm); setContactFormError(""); }}
-                  className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
+              <div>
+                <label style={labelStyle}>Designation</label>
+                <input value={contactForm.designation} onChange={e => setContactForm(f => ({ ...f, designation: e.target.value }))} placeholder="Head of Procurement" style={inputStyle} />
               </div>
-            </form>
-          )}
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} placeholder="priya@hospital.in" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone</label>
+                <input value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91-9876543210" style={inputStyle} />
+              </div>
+            </div>
+            <label className="flex items-center gap-2" style={{ marginTop: "var(--w-s-3)", fontSize: "var(--w-fs-body)", color: "var(--w-text-2)", cursor: "pointer" }}>
+              <input type="checkbox" checked={contactForm.isPrimary} onChange={e => setContactForm(f => ({ ...f, isPrimary: e.target.checked }))} />
+              Set as primary contact
+            </label>
+            {contactFormError && (
+              <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-2) var(--w-s-3)", marginTop: "var(--w-s-2)" }}>
+                {contactFormError}
+              </p>
+            )}
+            <div className="flex gap-3" style={{ marginTop: "var(--w-s-3)" }}>
+              <button type="submit" disabled={submitting} className="font-head font-semibold uppercase"
+                style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", background: submitting ? "var(--w-text-mute)" : "var(--w-accent-strong)", color: "#fff", border: "none", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: submitting ? "not-allowed" : "pointer" }}>
+                {submitting ? "Saving…" : "Add Contact"}
+              </button>
+              <button type="button" onClick={() => { setShowContactForm(false); setContactForm(emptyContactForm); }} className="font-head font-medium uppercase"
+                style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-3)", background: "transparent", color: "var(--w-text-2)", border: "1px solid var(--w-border)", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", cursor: "pointer" }}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
 
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+        <div className="bg-plate border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50">
-                  <th className="px-6 py-4 text-left font-semibold text-slate-600">Name</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-600">Designation</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-600">Email</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-600">Phone</th>
-                  <th className="px-6 py-4 text-left font-semibold text-slate-600">Status</th>
+                <tr style={{ background: "var(--w-sunken)" }}>
+                  {["Name", "Designation", "Email", "Phone", "Status"].map(h => (
+                    <th key={h} style={TH_STYLE}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {contacts.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-slate-400">No contacts yet.</td>
-                  </tr>
-                ) : contacts.map(c => (
-                  <tr key={c.id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-slate-900">{c.name}</span>
+                  <tr><td colSpan={5} style={{ padding: "var(--w-s-6)", textAlign: "center", color: "var(--w-text-mute)", fontSize: "var(--w-fs-body)" }}>No contacts yet.</td></tr>
+                ) : contacts.map((c, i) => (
+                  <tr key={c.id} className="hover:bg-row-hover transition-colors duration-fast"
+                    style={{ borderBottom: i < contacts.length - 1 ? "1px solid var(--w-border-soft)" : undefined }}>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)" }}>
+                      <span className="flex items-center gap-2">
+                        {c.name}
                         {c.isPrimary && (
-                          <span className="inline-flex items-center rounded-full bg-[#0F4C81]/10 px-2 py-0.5 text-xs font-semibold text-[#0F4C81]">Primary</span>
+                          <span style={{ fontSize: "var(--w-fs-badge)", background: "var(--w-progress-tint)", color: "var(--w-progress-fg)", border: "1px solid var(--w-progress-edge)", padding: "1px 5px", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                            Primary
+                          </span>
                         )}
-                      </div>
+                      </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-500">{c.designation ?? "—"}</td>
-                    <td className="px-6 py-4 text-slate-600">{c.email ?? "—"}</td>
-                    <td className="px-6 py-4 text-slate-600">{c.phone ?? "—"}</td>
-                    <td className="px-6 py-4">
-                      {c.isActive
-                        ? <span className="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">Active</span>
-                        : <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">Inactive</span>
-                      }
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{c.designation ?? "—"}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{c.email ?? "—"}</td>
+                    <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{c.phone ?? "—"}</td>
+                    <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)" }}>
+                      <span className="flex items-center gap-1">
+                        <span style={{ width: "8px", height: "8px", borderRadius: "var(--w-radius-full)", background: c.isActive ? "var(--w-success-dot)" : "var(--w-neutral-dot)", display: "inline-block" }} />
+                        <span style={{ fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{c.isActive ? "Active" : "Inactive"}</span>
+                      </span>
                     </td>
                   </tr>
                 ))}
