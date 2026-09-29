@@ -1,22 +1,29 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Footer from "@repo/ui/Footer";
+import SiteNav from "../components/SiteNav";
+import SiteFooter from "../components/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Welfo Fiber Optics",
-  description: "Medical fiber optics, endoscopy systems, and surgical illumination",
+  title: "Welfo Endovision — Endoscopy Equipment and Repair, Rishikesh",
+  description:
+    "Medical fiber optics, endoscopy systems and surgical illumination. Manufactured and repaired in Rishikesh. Raise a repair ticket online.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap"
+        />
+      </head>
+      <body style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <SiteNav />
+        <main style={{ flex: 1 }}>{children}</main>
+        <SiteFooter />
       </body>
     </html>
   );

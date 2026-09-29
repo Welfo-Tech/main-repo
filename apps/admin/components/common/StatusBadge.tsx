@@ -34,6 +34,7 @@ const STATUS_MAP: Record<string, StatusConfig> = {
   OUT_OF_WARRANTY:          { category: "neutral",   label: "Out of Warranty" },
   VERIFIED:                 { category: "success",   label: "Verified" },
   PENDING:                  { category: "waiting",   label: "Pending" },
+  ACKNOWLEDGED:             { category: "progress",  label: "Acknowledged" },
   FAILED:                   { category: "attention", label: "Failed" },
   REFUNDED:                 { category: "terminal",  label: "Refunded" },
 

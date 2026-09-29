@@ -221,6 +221,35 @@ enum SlaEventType {
   RESOLVED
 }
 
+enum WebInquiryStatus {
+  PENDING
+  ACKNOWLEDGED
+  CONVERTED
+  CLOSED
+}
+
+model WebInquiry {
+  id               String           @id @default(uuid()) @db.Uuid
+  inquiryNumber    String           @unique @db.VarChar(20)
+  submitterName    String           @db.VarChar(255)
+  submitterEmail   String           @db.VarChar(255)
+  submitterPhone   String?          @db.VarChar(50)
+  organizationName String           @db.VarChar(255)
+  city             String?          @db.VarChar(100)
+  productModel     String           @db.VarChar(255)
+  serialNumber     String?          @db.VarChar(100)
+  purchaseDate     DateTime?        @db.Date
+  reportedProblem  String           @db.Text
+  urgency          TicketUrgency    @default(NORMAL)
+  status           WebInquiryStatus @default(PENDING)
+  submittedAt      DateTime         @default(now()) @db.Timestamptz
+  updatedAt        DateTime         @updatedAt @db.Timestamptz
+
+  @@index([status])
+  @@index([submittedAt])
+  @@map("web_inquiries")
+}
+
 model User {
   id           String    @id @default(uuid()) @db.Uuid
   email        String    @unique @db.VarChar(255)
