@@ -6,7 +6,7 @@ import {
   findRepairEventsByCaseId,
 } from "../repositories/repair-event.repository.js";
 import { findCaseById } from "../repositories/service-case.repository.js";
-import { findTechnicianById } from "../repositories/technician.repository.js";
+import { findTechnicianByUserId } from "../repositories/technician.repository.js";
 
 const WORKABLE_STATUSES = new Set([
   "ASSIGNED",
@@ -50,7 +50,7 @@ export async function addRepairEvent(
   let technicianId: string;
 
   if (actor.role === "TECHNICIAN") {
-    const tech = await findTechnicianById(actor.id);
+    const tech = await findTechnicianByUserId(actor.id);
     if (!tech) throw new NotFoundError("technician profile not found for this user");
     if (sc.technician?.id !== tech.id) {
       throw new ValidationError("you are not assigned to this case");
