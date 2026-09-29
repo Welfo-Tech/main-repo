@@ -13,6 +13,28 @@ export interface InquiryPayload {
   serialNumber: string;
   reportedProblem: string;
   urgency?: string;
+  photoFileNames?: string[];
+}
+
+export interface UploadTarget {
+  path: string;
+  uploadUrl: string;
+}
+
+export interface SubmitResult {
+  inquiryNumber: string;
+  uploads: UploadTarget[];
+}
+
+export async function uploadPhoto(target: UploadTarget, file: File): Promise<void> {
+  const res = await fetch(target.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": file.type || "application/octet-stream" },
+    body: file,
+  });
+  if (!res.ok) {
+    throw new Error(`Could not upload ${file.name}`);
+  }
 }
 
 export async function verifySerial(serial: string): Promise<SerialCheck> {
@@ -30,7 +52,7 @@ export async function verifySerial(serial: string): Promise<SerialCheck> {
   return res.json() as Promise<SerialCheck>;
 }
 
-export async function submitInquiry(payload: InquiryPayload): Promise<{ inquiryNumber: string }> {
+export async function submitInquiry(payload: InquiryPayload): Promise<SubmitResult> {
   const res = await fetch(`${BASE}/api/v1/portal/inquiries`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -46,5 +68,5 @@ export async function submitInquiry(payload: InquiryPayload): Promise<{ inquiryN
     throw new Error(body.error ?? "Could not submit your request. Please try again or call us.");
   }
 
-  return res.json() as Promise<{ inquiryNumber: string }>;
+  return res.json() as Promise<SubmitResult>;
 }

@@ -24,6 +24,7 @@ export interface WebInquiry {
   reportedProblem: string;
   urgency: InquiryUrgency;
   status: WebInquiryStatus;
+  photoPaths: string[];
   convertedCaseId: string | null;
   submittedAt: string;
   updatedAt: string;

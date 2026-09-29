@@ -13,6 +13,7 @@ const inquirySelect = {
   reportedProblem: true,
   urgency: true,
   status: true,
+  photoPaths: true,
   convertedCaseId: true,
   submittedAt: true,
   updatedAt: true,
@@ -95,6 +96,10 @@ export async function findInquiryById(id: string) {
 
 export async function updateInquiryStatus(id: string, status: WebInquiryStatus) {
   return prisma.webInquiry.update({ where: { id }, data: { status }, select: inquirySelect });
+}
+
+export async function setInquiryPhotoPaths(id: string, photoPaths: string[]) {
+  return prisma.webInquiry.update({ where: { id }, data: { photoPaths }, select: inquirySelect });
 }
 
 export interface ConvertInquiryData {

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UserRole } from "@repo/db";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
+import * as storage from "../lib/storage.js";
 import * as orgRepo from "../repositories/organization.repository.js";
 import * as repo from "../repositories/web-inquiry.repository.js";
 import {
@@ -14,6 +15,7 @@ import {
 
 vi.mock("../repositories/web-inquiry.repository.js");
 vi.mock("../repositories/organization.repository.js");
+vi.mock("../lib/storage.js");
 
 const actor = { id: "user-1", role: UserRole.OPERATIONS };
 
@@ -38,6 +40,7 @@ const mockInquiry = {
   reportedProblem: "Image dark on one side and fogging after autoclave.",
   urgency: "HIGH" as const,
   status: "PENDING" as const,
+  photoPaths: [],
   convertedCaseId: null,
   submittedAt: new Date("2026-09-30"),
   updatedAt: new Date("2026-09-30"),
@@ -100,6 +103,41 @@ describe("submitInquiry", () => {
     vi.mocked(repo.findProductBySerial).mockResolvedValue(null);
     await expect(submitInquiry(input)).rejects.toBeInstanceOf(ValidationError);
     expect(repo.createInquiry).not.toHaveBeenCalled();
+  });
+
+  it("returns no uploads and records no paths when no photos are declared", async () => {
+    vi.mocked(repo.findProductBySerial).mockResolvedValue(mockProduct);
+    vi.mocked(repo.createInquiry).mockResolvedValue(mockInquiry);
+
+    const result = await submitInquiry(input);
+
+    expect(result.uploads).toEqual([]);
+    expect(repo.setInquiryPhotoPaths).not.toHaveBeenCalled();
+  });
+
+  it("records photo paths on the inquiry when uploads are issued", async () => {
+    vi.mocked(repo.findProductBySerial).mockResolvedValue(mockProduct);
+    vi.mocked(repo.createInquiry).mockResolvedValue(mockInquiry);
+    vi.mocked(storage.createUploadTargets).mockResolvedValue([
+      { path: "inquiries/inq-1/1.jpg", uploadUrl: "https://s/u", publicUrl: "https://s/p" },
+    ]);
+
+    const result = await submitInquiry({ ...input, photoFileNames: ["tip.jpg"] });
+
+    expect(result.uploads).toHaveLength(1);
+    expect(repo.setInquiryPhotoPaths).toHaveBeenCalledWith("inq-1", ["inquiries/inq-1/1.jpg"]);
+  });
+
+  it("still succeeds when storage is not configured", async () => {
+    vi.mocked(repo.findProductBySerial).mockResolvedValue(mockProduct);
+    vi.mocked(repo.createInquiry).mockResolvedValue(mockInquiry);
+    vi.mocked(storage.createUploadTargets).mockResolvedValue([]);
+
+    const result = await submitInquiry({ ...input, photoFileNames: ["tip.jpg"] });
+
+    expect(result.inquiryNumber).toBe("WFI-2026-0001");
+    expect(result.uploads).toEqual([]);
+    expect(repo.setInquiryPhotoPaths).not.toHaveBeenCalled();
   });
 });
 

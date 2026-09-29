@@ -13,4 +13,5 @@ export const SubmitInquirySchema = z.object({
   serialNumber: z.string().min(1).max(255),
   reportedProblem: z.string().min(10),
   urgency: z.enum(["LOW", "NORMAL", "HIGH", "CRITICAL"]).optional(),
+  photoFileNames: z.array(z.string().min(1).max(255)).max(5).optional(),
 });

@@ -4,6 +4,7 @@ import { app } from "../../../app.js";
 import { NotFoundError, ValidationError } from "../../../lib/errors.js";
 import * as inquiryService from "../../../services/web-inquiry.service.js";
 import * as tokenLib from "../../../lib/token.js";
+import { resetRateLimits } from "../../../middleware/rate-limit.js";
 
 vi.mock("../../../services/web-inquiry.service.js");
 vi.mock("../../../lib/token.js");
@@ -21,6 +22,7 @@ const mockInquiry = {
   reportedProblem: "Image dark on one side after autoclave.",
   urgency: "HIGH" as const,
   status: "PENDING" as const,
+  photoPaths: [],
   convertedCaseId: null,
   submittedAt: new Date("2026-09-30"),
   updatedAt: new Date("2026-09-30"),
@@ -44,7 +46,10 @@ function mockValidAuth(role: UserRole = UserRole.OPERATIONS) {
   } as never);
 }
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  resetRateLimits();
+});
 
 describe("GET /api/v1/portal/inquiries/verify-serial", () => {
   it("returns valid for a known serial without auth", async () => {
@@ -90,7 +95,10 @@ describe("POST /api/v1/portal/inquiries", () => {
   };
 
   it("returns 201 with the inquiry number and needs no auth", async () => {
-    vi.mocked(inquiryService.submitInquiry).mockResolvedValue(mockInquiry);
+    vi.mocked(inquiryService.submitInquiry).mockResolvedValue({
+      inquiryNumber: "WFI-2026-0001",
+      uploads: [],
+    });
 
     const res = await app.request("/api/v1/portal/inquiries", {
       method: "POST",
@@ -101,6 +109,43 @@ describe("POST /api/v1/portal/inquiries", () => {
     expect(res.status).toBe(201);
     const body = (await res.json()) as { inquiryNumber: string };
     expect(body.inquiryNumber).toBe("WFI-2026-0001");
+  });
+
+  it("returns upload targets when photos are declared", async () => {
+    vi.mocked(inquiryService.submitInquiry).mockResolvedValue({
+      inquiryNumber: "WFI-2026-0001",
+      uploads: [
+        {
+          path: "inquiries/inq-1/1.jpg",
+          uploadUrl: "https://storage.example/upload/signed",
+          publicUrl: "https://storage.example/public/inquiries/inq-1/1.jpg",
+        },
+      ],
+    });
+
+    const res = await app.request("/api/v1/portal/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...validBody, photoFileNames: ["tip.jpg"] }),
+    });
+
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { uploads: { path: string; uploadUrl: string }[] };
+    expect(body.uploads).toHaveLength(1);
+    expect(body.uploads[0]!.path).toBe("inquiries/inq-1/1.jpg");
+  });
+
+  it("rejects more than five photos", async () => {
+    const res = await app.request("/api/v1/portal/inquiries", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...validBody,
+        photoFileNames: ["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg"],
+      }),
+    });
+
+    expect(res.status).toBe(400);
   });
 
   it("returns 400 when the serial is not in our records", async () => {
@@ -136,6 +181,26 @@ describe("POST /api/v1/portal/inquiries", () => {
     });
 
     expect(res.status).toBe(400);
+  });
+
+  it("rate limits repeated submissions from the same address", async () => {
+    vi.mocked(inquiryService.submitInquiry).mockResolvedValue({
+      inquiryNumber: "WFI-2026-0001",
+      uploads: [],
+    });
+
+    const send = () =>
+      app.request("/api/v1/portal/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.9" },
+        body: JSON.stringify(validBody),
+      });
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 7; i += 1) statuses.push((await send()).status);
+
+    expect(statuses.filter(s => s === 201)).toHaveLength(5);
+    expect(statuses.filter(s => s === 429)).toHaveLength(2);
   });
 });
 

@@ -23,9 +23,13 @@ portalInquiriesRouter.post(
   validate("json", SubmitInquirySchema),
   async (c) => {
     const data = c.req.valid("json");
-    const inquiry = await inquiryService.submitInquiry(data);
+    const result = await inquiryService.submitInquiry(data);
     return c.json(
-      { inquiryNumber: inquiry.inquiryNumber, message: "Request submitted successfully" },
+      {
+        inquiryNumber: result.inquiryNumber,
+        uploads: result.uploads.map(u => ({ path: u.path, uploadUrl: u.uploadUrl })),
+        message: "Request submitted successfully",
+      },
       201,
     );
   },

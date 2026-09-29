@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CONTACT } from "../../lib/content";
-import { type SerialCheck, submitInquiry, verifySerial } from "../../lib/api";
+import { type SerialCheck, submitInquiry, uploadPhoto, verifySerial } from "../../lib/api";
+
+const MAX_PHOTOS = 5;
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
+
+interface PickedPhoto {
+  file: File;
+  url: string;
+}
 
 const URGENCY_OPTIONS = [
   { value: "LOW", label: "Low — no rush" },
@@ -34,9 +42,41 @@ export default function ProductSupportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [inquiryNumber, setInquiryNumber] = useState("");
+  const [photos, setPhotos] = useState<PickedPhoto[]>([]);
+  const [photoError, setPhotoError] = useState("");
+  const [photoWarning, setPhotoWarning] = useState("");
 
   function set<K extends keyof typeof EMPTY>(key: K, value: string) {
     setForm(f => ({ ...f, [key]: value }));
+  }
+
+  function handlePhotoPick(e: React.ChangeEvent<HTMLInputElement>) {
+    setPhotoError("");
+    const picked = Array.from(e.target.files ?? []);
+    e.target.value = "";
+
+    const room = MAX_PHOTOS - photos.length;
+    if (picked.length > room) {
+      setPhotoError(`You can attach up to ${MAX_PHOTOS} photos.`);
+    }
+
+    const accepted: PickedPhoto[] = [];
+    for (const file of picked.slice(0, room)) {
+      if (file.size > MAX_PHOTO_BYTES) {
+        setPhotoError(`${file.name} is larger than 8MB and was skipped.`);
+        continue;
+      }
+      accepted.push({ file, url: URL.createObjectURL(file) });
+    }
+    setPhotos(p => [...p, ...accepted]);
+  }
+
+  function removePhoto(index: number) {
+    setPhotos(p => {
+      const target = p[index];
+      if (target) URL.revokeObjectURL(target.url);
+      return p.filter((_, i) => i !== index);
+    });
   }
 
   async function handleVerify() {
@@ -82,7 +122,28 @@ export default function ProductSupportPage() {
         urgency: form.urgency,
         ...(form.submitterPhone.trim() && { submitterPhone: form.submitterPhone.trim() }),
         ...(form.city.trim() && { city: form.city.trim() }),
+        ...(photos.length > 0 && { photoFileNames: photos.map(p => p.file.name) }),
       });
+
+      if (result.uploads.length > 0) {
+        const outcomes = await Promise.allSettled(
+          result.uploads.map((target, i) => {
+            const picked = photos[i];
+            return picked ? uploadPhoto(target, picked.file) : Promise.resolve();
+          }),
+        );
+        const failed = outcomes.filter(o => o.status === "rejected").length;
+        if (failed > 0) {
+          setPhotoWarning(
+            `${failed} of ${result.uploads.length} photos did not upload. Your request was still received — you can send them on WhatsApp.`,
+          );
+        }
+      } else if (photos.length > 0) {
+        setPhotoWarning(
+          "Your request was received, but photo upload is not available right now. Please send them on WhatsApp.",
+        );
+      }
+
       setInquiryNumber(result.inquiryNumber);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -141,6 +202,26 @@ export default function ProductSupportPage() {
               </p>
             </div>
 
+            {photoWarning && (
+              <p
+                role="alert"
+                style={{
+                  background: "var(--w-attention-tint)",
+                  border: "1px solid var(--w-attention-edge)",
+                  color: "var(--w-attention-fg)",
+                  padding: "var(--w-s-3) var(--w-s-4)",
+                  fontSize: "15px",
+                  lineHeight: 1.6,
+                  marginBottom: "var(--w-s-5)",
+                }}
+              >
+                {photoWarning}{" "}
+                <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", fontWeight: 600, textDecoration: "underline" }}>
+                  Open WhatsApp
+                </a>
+              </p>
+            )}
+
             <p style={{ fontSize: "15px", color: "var(--w-text-2)", lineHeight: 1.65, marginBottom: "var(--w-s-5)" }}>
               Our service team will review this and contact you on the details you provided,
               usually within one working day. If it is urgent, call{" "}
@@ -153,6 +234,8 @@ export default function ProductSupportPage() {
               <Link href="/" className="w-btn w-btn--outline">Back to home</Link>
               <button
                 onClick={() => {
+                  photos.forEach(p => URL.revokeObjectURL(p.url));
+                  setPhotos([]); setPhotoWarning(""); setPhotoError("");
                   setForm(EMPTY); setSerial(""); setCheck(null);
                   setInquiryNumber(""); setStep(0);
                 }}
@@ -372,26 +455,95 @@ export default function ProductSupportPage() {
                   border: "1px dashed var(--w-border)",
                   background: "var(--w-canvas)",
                   padding: "var(--w-s-4)",
-                  opacity: 0.85,
                 }}
               >
+                <label className="w-label" htmlFor="photos" style={{ marginBottom: "var(--w-s-2)" }}>
+                  Photos of the fault
+                </label>
+
+                <input
+                  id="photos"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic"
+                  multiple
+                  onChange={handlePhotoPick}
+                  style={{ display: "none" }}
+                />
+
                 <div style={{ display: "flex", alignItems: "center", gap: "var(--w-s-3)", flexWrap: "wrap" }}>
-                  <button type="button" className="w-btn w-btn--outline" disabled aria-describedby="photo-note">
-                    Upload photos
-                  </button>
-                  <span
-                    className="w-eyebrow"
-                    style={{ color: "var(--w-text-mute)", border: "1px solid var(--w-border)", padding: "3px var(--w-s-2)" }}
+                  <button
+                    type="button"
+                    className="w-btn w-btn--outline"
+                    onClick={() => document.getElementById("photos")?.click()}
+                    disabled={photos.length >= MAX_PHOTOS}
                   >
-                    Coming soon
+                    {photos.length === 0 ? "Choose photos" : "Add more"}
+                  </button>
+                  <span className="w-hint">
+                    {photos.length}/{MAX_PHOTOS} selected &middot; JPG, PNG or HEIC up to 8MB each
                   </span>
                 </div>
-                <p id="photo-note" className="w-hint" style={{ marginTop: "var(--w-s-2)", lineHeight: 1.55 }}>
-                  Photo upload is not switched on yet. For now, send pictures of the fault on{" "}
+
+                {photoError && (
+                  <p role="alert" style={{ marginTop: "var(--w-s-2)", color: "var(--w-attention-fg)", fontSize: "14px" }}>
+                    {photoError}
+                  </p>
+                )}
+
+                {photos.length > 0 && (
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      marginTop: "var(--w-s-3)",
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+                      gap: "var(--w-s-3)",
+                    }}
+                  >
+                    {photos.map((p, i) => (
+                      <li key={p.url} style={{ position: "relative" }}>
+                        <img
+                          src={p.url}
+                          alt={p.file.name}
+                          style={{
+                            width: "100%",
+                            aspectRatio: "1",
+                            objectFit: "cover",
+                            border: "1px solid var(--w-border)",
+                            display: "block",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(i)}
+                          aria-label={`Remove ${p.file.name}`}
+                          style={{
+                            position: "absolute",
+                            top: "4px",
+                            right: "4px",
+                            width: "22px",
+                            height: "22px",
+                            border: "none",
+                            background: "rgba(21,33,45,0.82)",
+                            color: "#fff",
+                            cursor: "pointer",
+                            lineHeight: 1,
+                            fontSize: "14px",
+                          }}
+                        >
+                          &times;
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <p className="w-hint" style={{ marginTop: "var(--w-s-2)", lineHeight: 1.55 }}>
+                  A clear photo of the distal tip or the damaged area helps us quote accurately.
+                  You can also send them on{" "}
                   <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--w-accent-strong)", fontWeight: 500 }}>
                     WhatsApp
-                  </a>{" "}
-                  quoting the reference number you get on the next screen.
+                  </a>.
                 </p>
               </div>
             </div>
@@ -410,6 +562,7 @@ export default function ProductSupportPage() {
                   ["Hospital or clinic", form.organizationName],
                   ["City", form.city || "—"],
                   ["Urgency", URGENCY_OPTIONS.find(o => o.value === form.urgency)?.label ?? form.urgency],
+                  ["Photos", photos.length === 0 ? "None attached" : `${photos.length} attached`],
                   ["Problem", form.reportedProblem],
                 ].map(([label, value]) => (
                   <div

@@ -10,6 +10,8 @@ import type { CasePriority, ConvertResult, WebInquiry } from "../../../types/inq
 import { ALL_PRIORITIES, URGENCY_LABELS } from "../../../types/inquiry";
 import type { Organization } from "../../../types/organization";
 
+const STORAGE_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_BUCKET ?? "repair-images"}`;
+
 const labelStyle: React.CSSProperties = {
   fontSize: "var(--w-fs-label)",
   fontFamily: "var(--w-font-head)",
@@ -201,6 +203,38 @@ export default function InquiryDetailPage() {
               {inquiry.reportedProblem}
             </p>
           </div>
+
+          {inquiry.photoPaths.length > 0 && (
+            <div style={{ paddingTop: "var(--w-s-4)" }}>
+              <span style={labelStyle}>Photos from the customer ({inquiry.photoPaths.length})</span>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                  gap: "var(--w-s-3)",
+                }}
+              >
+                {inquiry.photoPaths.map(path => {
+                  const url = `${STORAGE_BASE}/${path}`;
+                  return (
+                    <a key={path} href={url} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={url}
+                        alt="Reported fault"
+                        style={{
+                          width: "100%",
+                          aspectRatio: "1",
+                          objectFit: "cover",
+                          border: "1px solid var(--w-border)",
+                          display: "block",
+                        }}
+                      />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {inquiry.product.ownerOrg && inquiry.organizationName.trim().toLowerCase() !== inquiry.product.ownerOrg.name.trim().toLowerCase() && (

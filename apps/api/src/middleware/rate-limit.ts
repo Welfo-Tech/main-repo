@@ -8,6 +8,10 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 
+export function resetRateLimits() {
+  buckets.clear();
+}
+
 function sweep(now: number) {
   for (const [key, bucket] of buckets) {
     if (bucket.resetAt <= now) buckets.delete(key);

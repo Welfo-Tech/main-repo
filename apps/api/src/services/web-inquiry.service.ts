@@ -1,6 +1,7 @@
 import { type WebInquiryStatus } from "@repo/db";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
 import type { AuthUser } from "../middleware/auth.js";
+import { type UploadTarget, createUploadTargets } from "../lib/storage.js";
 import { findOrganizationById } from "../repositories/organization.repository.js";
 import {
   type InquiryFilters,
@@ -9,6 +10,7 @@ import {
   findInquiries,
   findInquiryById,
   findProductBySerial,
+  setInquiryPhotoPaths,
   updateInquiryStatus,
 } from "../repositories/web-inquiry.repository.js";
 
@@ -41,13 +43,14 @@ export async function submitInquiry(data: {
   serialNumber: string;
   reportedProblem: string;
   urgency?: "LOW" | "NORMAL" | "HIGH" | "CRITICAL";
-}) {
+  photoFileNames?: string[];
+}): Promise<{ inquiryNumber: string; uploads: UploadTarget[] }> {
   const product = await findProductBySerial(data.serialNumber.trim());
   if (!product) {
     throw new ValidationError("serial number not found in our records");
   }
 
-  return createInquiry({
+  const inquiry = await createInquiry({
     submitterName: data.submitterName,
     submitterEmail: data.submitterEmail,
     submitterPhone: data.submitterPhone,
@@ -58,6 +61,18 @@ export async function submitInquiry(data: {
     reportedProblem: data.reportedProblem,
     urgency: data.urgency,
   });
+
+  const fileNames = data.photoFileNames ?? [];
+  if (fileNames.length === 0) {
+    return { inquiryNumber: inquiry.inquiryNumber, uploads: [] };
+  }
+
+  const uploads = await createUploadTargets(inquiry.id, fileNames);
+  if (uploads.length > 0) {
+    await setInquiryPhotoPaths(inquiry.id, uploads.map(u => u.path));
+  }
+
+  return { inquiryNumber: inquiry.inquiryNumber, uploads };
 }
 
 export async function listInquiries(filters: InquiryFilters, _actor: AuthUser) {
