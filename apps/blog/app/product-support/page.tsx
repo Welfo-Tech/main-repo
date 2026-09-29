@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CONTACT } from "../../lib/content";
-import { submitInquiry } from "../../lib/api";
+import { type SerialCheck, submitInquiry, verifySerial } from "../../lib/api";
 
 const URGENCY_OPTIONS = [
   { value: "LOW", label: "Low — no rush" },
@@ -18,17 +18,18 @@ const EMPTY = {
   submitterPhone: "",
   organizationName: "",
   city: "",
-  productModel: "",
-  serialNumber: "",
-  purchaseDate: "",
   reportedProblem: "",
   urgency: "NORMAL",
 };
 
-const STEPS = ["Your details", "The instrument", "Review"];
+const STEPS = ["Verify instrument", "Your details", "The fault", "Review"];
 
-export default function OpenTicketPage() {
+export default function ProductSupportPage() {
   const [step, setStep] = useState(0);
+  const [serial, setSerial] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [check, setCheck] = useState<SerialCheck | null>(null);
+  const [checkError, setCheckError] = useState("");
   const [form, setForm] = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,13 +39,35 @@ export default function OpenTicketPage() {
     setForm(f => ({ ...f, [key]: value }));
   }
 
-  const stepOneValid =
+  async function handleVerify() {
+    const trimmed = serial.trim();
+    if (!trimmed) return;
+    setChecking(true);
+    setCheckError("");
+    setCheck(null);
+    try {
+      const result = await verifySerial(trimmed);
+      setCheck(result);
+    } catch (err) {
+      setCheckError(err instanceof Error ? err.message : "Could not verify that serial number.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  function resetSerial() {
+    setCheck(null);
+    setCheckError("");
+  }
+
+  const verified = check?.valid === true;
+
+  const detailsValid =
     form.submitterName.trim() !== "" &&
     form.submitterEmail.trim() !== "" &&
     form.organizationName.trim() !== "";
 
-  const stepTwoValid =
-    form.productModel.trim() !== "" && form.reportedProblem.trim().length >= 10;
+  const faultValid = form.reportedProblem.trim().length >= 10;
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -54,13 +77,11 @@ export default function OpenTicketPage() {
         submitterName: form.submitterName.trim(),
         submitterEmail: form.submitterEmail.trim().toLowerCase(),
         organizationName: form.organizationName.trim(),
-        productModel: form.productModel.trim(),
+        serialNumber: serial.trim(),
         reportedProblem: form.reportedProblem.trim(),
         urgency: form.urgency,
         ...(form.submitterPhone.trim() && { submitterPhone: form.submitterPhone.trim() }),
         ...(form.city.trim() && { city: form.city.trim() }),
-        ...(form.serialNumber.trim() && { serialNumber: form.serialNumber.trim() }),
-        ...(form.purchaseDate && { purchaseDate: form.purchaseDate }),
       });
       setInquiryNumber(result.inquiryNumber);
     } catch (err) {
@@ -91,11 +112,11 @@ export default function OpenTicketPage() {
             </div>
 
             <h1 style={{ fontSize: "clamp(26px, 4vw, 34px)", marginBottom: "var(--w-s-3)" }}>
-              Ticket received
+              Request received
             </h1>
             <p style={{ fontSize: "16px", color: "var(--w-text-2)", lineHeight: 1.65, marginBottom: "var(--w-s-5)" }}>
-              Your reference number is below. Keep it for your records — quote it when you call
-              or email us about this instrument.
+              Your reference number is below. Keep it — quote it when you call or email us about
+              this instrument.
             </p>
 
             <div
@@ -121,8 +142,8 @@ export default function OpenTicketPage() {
             </div>
 
             <p style={{ fontSize: "15px", color: "var(--w-text-2)", lineHeight: 1.65, marginBottom: "var(--w-s-5)" }}>
-              Our team will review this and contact you on the details you provided, usually
-              within one working day. If it is urgent, call us directly on{" "}
+              Our service team will review this and contact you on the details you provided,
+              usually within one working day. If it is urgent, call{" "}
               <a href={`tel:${CONTACT.phoneRaw}`} style={{ color: "var(--w-accent-strong)", fontWeight: 500 }}>
                 {CONTACT.phone}
               </a>.
@@ -131,7 +152,10 @@ export default function OpenTicketPage() {
             <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--w-s-3)" }}>
               <Link href="/" className="w-btn w-btn--outline">Back to home</Link>
               <button
-                onClick={() => { setForm(EMPTY); setInquiryNumber(""); setStep(0); }}
+                onClick={() => {
+                  setForm(EMPTY); setSerial(""); setCheck(null);
+                  setInquiryNumber(""); setStep(0);
+                }}
                 className="w-btn w-btn--outline"
               >
                 Submit another
@@ -146,24 +170,16 @@ export default function OpenTicketPage() {
   return (
     <section style={{ paddingBlock: "var(--w-s-8)", background: "var(--w-canvas)" }}>
       <div className="w-shell" style={{ maxWidth: "760px" }}>
-        <p className="w-eyebrow">Repair request</p>
+        <p className="w-eyebrow">Product support</p>
         <h1 style={{ fontSize: "clamp(30px, 5vw, 44px)", marginTop: "var(--w-s-2)", marginBottom: "var(--w-s-3)" }}>
-          Open a ticket
+          Request a repair
         </h1>
         <p style={{ fontSize: "17px", color: "var(--w-text-2)", lineHeight: 1.65, marginBottom: "var(--w-s-6)", maxWidth: "60ch" }}>
-          Tell us who you are and what has gone wrong. You do not need an account, and you do
-          not need to know the exact model — describe it as best you can.
+          Start with the serial number on your instrument. We check it against our records so the
+          request reaches the right service history straight away.
         </p>
 
-        <ol
-          style={{
-            listStyle: "none",
-            display: "flex",
-            gap: "var(--w-s-2)",
-            marginBottom: "var(--w-s-6)",
-            flexWrap: "wrap",
-          }}
-        >
+        <ol style={{ listStyle: "none", display: "flex", gap: "var(--w-s-2)", marginBottom: "var(--w-s-6)", flexWrap: "wrap" }}>
           {STEPS.map((label, i) => (
             <li key={label} style={{ display: "flex", alignItems: "center", gap: "var(--w-s-2)" }}>
               <span
@@ -204,107 +220,126 @@ export default function OpenTicketPage() {
           {step === 0 && (
             <div style={{ display: "grid", gap: "var(--w-s-4)" }}>
               <div className="w-field">
-                <label className="w-label" htmlFor="name">Your name *</label>
-                <input
-                  id="name"
-                  className="w-input"
-                  value={form.submitterName}
-                  onChange={e => set("submitterName", e.target.value)}
-                  placeholder="Dr. Anand Mehta"
-                  required
-                />
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--w-s-4)" }}>
-                <div className="w-field">
-                  <label className="w-label" htmlFor="email">Email *</label>
+                <label className="w-label" htmlFor="serial">Serial number *</label>
+                <div style={{ display: "flex", gap: "var(--w-s-2)", flexWrap: "wrap" }}>
                   <input
-                    id="email"
-                    type="email"
+                    id="serial"
                     className="w-input"
-                    value={form.submitterEmail}
-                    onChange={e => set("submitterEmail", e.target.value)}
-                    placeholder="anand@hospital.com"
+                    style={{ flex: "1 1 240px" }}
+                    value={serial}
+                    onChange={e => { setSerial(e.target.value); resetSerial(); }}
+                    onBlur={() => { if (serial.trim() && !check) handleVerify(); }}
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleVerify(); } }}
+                    placeholder="WF-2024-00001"
+                    autoComplete="off"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={handleVerify}
+                    disabled={checking || serial.trim() === ""}
+                    className="w-btn w-btn--outline"
+                  >
+                    {checking ? "Checking…" : "Verify"}
+                  </button>
                 </div>
-                <div className="w-field">
-                  <label className="w-label" htmlFor="phone">Phone</label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    className="w-input"
-                    value={form.submitterPhone}
-                    onChange={e => set("submitterPhone", e.target.value)}
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
+                <span className="w-hint">
+                  Usually etched on the instrument shaft or printed on the connector housing.
+                </span>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--w-s-4)" }}>
-                <div className="w-field">
-                  <label className="w-label" htmlFor="org">Hospital or clinic *</label>
-                  <input
-                    id="org"
-                    className="w-input"
-                    value={form.organizationName}
-                    onChange={e => set("organizationName", e.target.value)}
-                    placeholder="Apollo Hospitals"
-                    required
-                  />
+              {check?.valid === true && (
+                <div
+                  style={{
+                    background: "var(--w-success-tint)",
+                    border: "1px solid var(--w-success-edge)",
+                    padding: "var(--w-s-3) var(--w-s-4)",
+                  }}
+                >
+                  <p className="w-eyebrow" style={{ color: "var(--w-success-fg)", marginBottom: "2px" }}>
+                    Instrument found
+                  </p>
+                  <p style={{ fontSize: "16px", fontWeight: 500, color: "var(--w-success-fg)" }}>
+                    {check.productModel}
+                    {check.manufacturer ? ` · ${check.manufacturer}` : ""}
+                  </p>
                 </div>
-                <div className="w-field">
-                  <label className="w-label" htmlFor="city">City</label>
-                  <input
-                    id="city"
-                    className="w-input"
-                    value={form.city}
-                    onChange={e => set("city", e.target.value)}
-                    placeholder="Dehradun"
-                  />
+              )}
+
+              {check?.valid === false && (
+                <div
+                  role="alert"
+                  style={{
+                    background: "var(--w-attention-tint)",
+                    border: "1px solid var(--w-attention-edge)",
+                    color: "var(--w-attention-fg)",
+                    padding: "var(--w-s-3) var(--w-s-4)",
+                  }}
+                >
+                  <p style={{ fontSize: "15px", fontWeight: 500, marginBottom: "var(--w-s-1)" }}>
+                    We could not find that serial number.
+                  </p>
+                  <p style={{ fontSize: "14px", lineHeight: 1.6 }}>
+                    Check for confusion between 0 and O, or 1 and I. If it still will not verify,
+                    call{" "}
+                    <a href={`tel:${CONTACT.phoneRaw}`} style={{ color: "inherit", fontWeight: 600, textDecoration: "underline" }}>
+                      {CONTACT.phone}
+                    </a>{" "}
+                    or message us on{" "}
+                    <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", fontWeight: 600, textDecoration: "underline" }}>
+                      WhatsApp
+                    </a>{" "}
+                    and we will look it up for you.
+                  </p>
                 </div>
-              </div>
+              )}
+
+              {checkError && (
+                <p role="alert" style={{ background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", color: "var(--w-attention-fg)", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "15px" }}>
+                  {checkError}
+                </p>
+              )}
             </div>
           )}
 
           {step === 1 && (
             <div style={{ display: "grid", gap: "var(--w-s-4)" }}>
               <div className="w-field">
-                <label className="w-label" htmlFor="model">What is the instrument? *</label>
-                <input
-                  id="model"
-                  className="w-input"
-                  value={form.productModel}
-                  onChange={e => set("productModel", e.target.value)}
-                  placeholder="30 degree laparoscope, 10mm"
-                  required
-                />
-                <span className="w-hint">A description is fine if you do not have the exact model name.</span>
+                <label className="w-label" htmlFor="name">Your name *</label>
+                <input id="name" className="w-input" value={form.submitterName}
+                  onChange={e => set("submitterName", e.target.value)} placeholder="Dr. Anand Mehta" required />
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--w-s-4)" }}>
                 <div className="w-field">
-                  <label className="w-label" htmlFor="serial">Serial number</label>
-                  <input
-                    id="serial"
-                    className="w-input"
-                    value={form.serialNumber}
-                    onChange={e => set("serialNumber", e.target.value)}
-                    placeholder="If marked on the instrument"
-                  />
+                  <label className="w-label" htmlFor="email">Email *</label>
+                  <input id="email" type="email" className="w-input" value={form.submitterEmail}
+                    onChange={e => set("submitterEmail", e.target.value)} placeholder="anand@hospital.com" required />
                 </div>
                 <div className="w-field">
-                  <label className="w-label" htmlFor="purchased">Approximate purchase date</label>
-                  <input
-                    id="purchased"
-                    type="date"
-                    className="w-input"
-                    value={form.purchaseDate}
-                    onChange={e => set("purchaseDate", e.target.value)}
-                  />
+                  <label className="w-label" htmlFor="phone">Phone</label>
+                  <input id="phone" type="tel" className="w-input" value={form.submitterPhone}
+                    onChange={e => set("submitterPhone", e.target.value)} placeholder="+91 98765 43210" />
                 </div>
               </div>
 
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--w-s-4)" }}>
+                <div className="w-field">
+                  <label className="w-label" htmlFor="org">Hospital or clinic *</label>
+                  <input id="org" className="w-input" value={form.organizationName}
+                    onChange={e => set("organizationName", e.target.value)} placeholder="Apollo Hospitals" required />
+                </div>
+                <div className="w-field">
+                  <label className="w-label" htmlFor="city">City</label>
+                  <input id="city" className="w-input" value={form.city}
+                    onChange={e => set("city", e.target.value)} placeholder="Dehradun" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div style={{ display: "grid", gap: "var(--w-s-4)" }}>
               <div className="w-field">
                 <label className="w-label" htmlFor="problem">What has gone wrong? *</label>
                 <textarea
@@ -324,33 +359,56 @@ export default function OpenTicketPage() {
 
               <div className="w-field">
                 <label className="w-label" htmlFor="urgency">How urgent is it?</label>
-                <select
-                  id="urgency"
-                  className="w-select"
-                  value={form.urgency}
-                  onChange={e => set("urgency", e.target.value)}
-                >
+                <select id="urgency" className="w-select" value={form.urgency}
+                  onChange={e => set("urgency", e.target.value)}>
                   {URGENCY_OPTIONS.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
                 </select>
               </div>
+
+              <div
+                style={{
+                  border: "1px dashed var(--w-border)",
+                  background: "var(--w-canvas)",
+                  padding: "var(--w-s-4)",
+                  opacity: 0.85,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "var(--w-s-3)", flexWrap: "wrap" }}>
+                  <button type="button" className="w-btn w-btn--outline" disabled aria-describedby="photo-note">
+                    Upload photos
+                  </button>
+                  <span
+                    className="w-eyebrow"
+                    style={{ color: "var(--w-text-mute)", border: "1px solid var(--w-border)", padding: "3px var(--w-s-2)" }}
+                  >
+                    Coming soon
+                  </span>
+                </div>
+                <p id="photo-note" className="w-hint" style={{ marginTop: "var(--w-s-2)", lineHeight: 1.55 }}>
+                  Photo upload is not switched on yet. For now, send pictures of the fault on{" "}
+                  <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--w-accent-strong)", fontWeight: 500 }}>
+                    WhatsApp
+                  </a>{" "}
+                  quoting the reference number you get on the next screen.
+                </p>
+              </div>
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div>
               <p className="w-eyebrow" style={{ marginBottom: "var(--w-s-4)" }}>Check before sending</p>
               <dl style={{ display: "grid", gap: "1px", background: "var(--w-border)", border: "1px solid var(--w-border)" }}>
                 {[
+                  ["Serial number", serial.trim()],
+                  ["Instrument", check?.valid ? check.productModel : "—"],
                   ["Name", form.submitterName],
                   ["Email", form.submitterEmail],
                   ["Phone", form.submitterPhone || "—"],
                   ["Hospital or clinic", form.organizationName],
                   ["City", form.city || "—"],
-                  ["Instrument", form.productModel],
-                  ["Serial number", form.serialNumber || "—"],
-                  ["Purchase date", form.purchaseDate || "—"],
                   ["Urgency", URGENCY_OPTIONS.find(o => o.value === form.urgency)?.label ?? form.urgency],
                   ["Problem", form.reportedProblem],
                 ].map(([label, value]) => (
@@ -375,17 +433,7 @@ export default function OpenTicketPage() {
           )}
 
           {error && (
-            <p
-              role="alert"
-              style={{
-                marginTop: "var(--w-s-4)",
-                background: "var(--w-attention-tint)",
-                border: "1px solid var(--w-attention-edge)",
-                color: "var(--w-attention-fg)",
-                padding: "var(--w-s-3) var(--w-s-4)",
-                fontSize: "15px",
-              }}
-            >
+            <p role="alert" style={{ marginTop: "var(--w-s-4)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", color: "var(--w-attention-fg)", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "15px" }}>
               {error}
             </p>
           )}
@@ -404,30 +452,24 @@ export default function OpenTicketPage() {
             <button
               type="button"
               onClick={() => setStep(s => Math.max(0, s - 1))}
-              disabled={step === 0}
               className="w-btn w-btn--outline"
               style={{ visibility: step === 0 ? "hidden" : "visible" }}
             >
               Back
             </button>
 
-            {step < 2 ? (
+            {step < 3 ? (
               <button
                 type="button"
                 onClick={() => setStep(s => s + 1)}
-                disabled={step === 0 ? !stepOneValid : !stepTwoValid}
+                disabled={step === 0 ? !verified : step === 1 ? !detailsValid : !faultValid}
                 className="w-btn w-btn--primary"
               >
                 Continue
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={submitting}
-                className="w-btn w-btn--primary"
-              >
-                {submitting ? "Sending…" : "Submit ticket"}
+              <button type="button" onClick={handleSubmit} disabled={submitting} className="w-btn w-btn--primary">
+                {submitting ? "Sending…" : "Submit request"}
               </button>
             )}
           </div>

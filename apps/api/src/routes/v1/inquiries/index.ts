@@ -3,7 +3,7 @@ import { validate } from "../../../lib/validate.js";
 import { requireAuth } from "../../../middleware/auth.js";
 import { requireRole } from "../../../middleware/require-role.js";
 import * as inquiryService from "../../../services/web-inquiry.service.js";
-import { ListInquiriesQuerySchema, UpdateInquirySchema } from "./schema.js";
+import { ConvertInquirySchema, ListInquiriesQuerySchema, UpdateInquirySchema } from "./schema.js";
 
 export const inquiriesRouter = new Hono();
 
@@ -32,5 +32,19 @@ inquiriesRouter.patch(
     const { status } = c.req.valid("json");
     const inquiry = await inquiryService.updateInquiry(c.req.param("id")!, status, c.get("user"));
     return c.json(inquiry, 200);
+  },
+);
+
+inquiriesRouter.post(
+  "/:id/convert",
+  validate("json", ConvertInquirySchema),
+  async (c) => {
+    const data = c.req.valid("json");
+    const result = await inquiryService.convertToServiceCase(
+      c.req.param("id")!,
+      data,
+      c.get("user"),
+    );
+    return c.json(result, 201);
   },
 );

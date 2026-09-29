@@ -45,7 +45,7 @@ export const VALUE_PROPS = [
 ];
 
 export const PROCESS = [
-  { step: "01", title: "You raise a ticket", body: "Submit the instrument details and the fault through this site. You get a reference number immediately." },
+  { step: "01", title: "You verify the serial number", body: "Enter the serial from your instrument. We check it against our records so the request lands against its existing service history." },
   { step: "02", title: "We acknowledge and collect", body: "Our team contacts you to confirm the fault and arrange pickup or dispatch instructions." },
   { step: "03", title: "Assessment and quote", body: "The instrument is assessed at our workshop. You receive a written quote before any work starts." },
   { step: "04", title: "Repair and quality check", body: "On approval, the repair proceeds and passes optical and leak testing before it leaves." },

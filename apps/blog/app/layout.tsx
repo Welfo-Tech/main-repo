@@ -6,7 +6,7 @@ import SiteFooter from "../components/SiteFooter";
 export const metadata: Metadata = {
   title: "Welfo Endovision — Endoscopy Equipment and Repair, Rishikesh",
   description:
-    "Medical fiber optics, endoscopy systems and surgical illumination. Manufactured and repaired in Rishikesh. Raise a repair ticket online.",
+    "Medical fiber optics, endoscopy systems and surgical illumination. Manufactured and repaired in Rishikesh. Request product support online.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

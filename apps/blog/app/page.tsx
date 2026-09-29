@@ -30,12 +30,12 @@ export default function Home() {
             </h1>
             <p style={{ fontSize: "18px", lineHeight: 1.65, color: "var(--w-text-invert-2)", marginBottom: "var(--w-s-6)" }}>
               We manufacture and repair rigid endoscopes, fiber optic light guides and imaging
-              systems from our workshop in Rishikesh. If you bought an instrument from us, or
-              you have one that has stopped performing, raise a ticket and we will assess it.
+              systems from our workshop in Rishikesh. If you have an instrument from us that has
+              stopped performing, enter its serial number and we will assess it.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--w-s-3)" }}>
-              <Link href="/open-ticket" className="w-btn w-btn--primary">
-                Open a repair ticket
+              <Link href="/product-support" className="w-btn w-btn--primary">
+                Product Support
               </Link>
               <a href={`tel:${CONTACT.phoneRaw}`} className="w-btn w-btn--ghost">
                 Call {CONTACT.phone}
@@ -91,7 +91,7 @@ export default function Home() {
       <section style={{ ...sectionPad, background: "var(--w-canvas)" }}>
         <div className="w-shell">
           <p className="w-eyebrow">How it works</p>
-          <h2 style={h2Style}>From ticket to returned instrument</h2>
+          <h2 style={h2Style}>From serial number to returned instrument</h2>
           <p style={{ fontSize: "17px", color: "var(--w-text-2)", marginTop: "var(--w-s-3)", maxWidth: "58ch" }}>
             Five steps, in order. Nothing is charged before you approve a written quote.
           </p>
@@ -189,12 +189,12 @@ export default function Home() {
               Have an instrument that needs looking at?
             </h2>
             <p style={{ fontSize: "17px", color: "var(--w-text-invert-2)", lineHeight: 1.6 }}>
-              Raise a ticket with the serial number and what went wrong. You will get a reference
-              number straight away and a call from our team.
+              Enter the serial number and tell us what went wrong. You will get a reference number
+              straight away and a call from our team.
             </p>
           </div>
-          <Link href="/open-ticket" className="w-btn w-btn--primary" style={{ background: "var(--w-plate)", color: "var(--w-accent-deep)" }}>
-            Open a ticket
+          <Link href="/product-support" className="w-btn w-btn--primary" style={{ background: "var(--w-plate)", color: "var(--w-accent-deep)" }}>
+            Product Support
           </Link>
         </div>
       </section>

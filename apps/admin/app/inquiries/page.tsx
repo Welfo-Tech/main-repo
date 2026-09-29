@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import StatusBadge from "../../components/common/StatusBadge";
@@ -37,7 +38,6 @@ export default function InquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState<WebInquiryStatus | "">("");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchInquiries = useCallback(async () => {
@@ -47,8 +47,7 @@ export default function InquiriesPage() {
       const params = new URLSearchParams();
       if (statusFilter) params.set("status", statusFilter);
       const url = `/api/v1/inquiries${params.toString() ? "?" + params.toString() : ""}`;
-      const data = await api.get<WebInquiry[]>(url);
-      setInquiries(data);
+      setInquiries(await api.get<WebInquiry[]>(url));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load inquiries");
     } finally {
@@ -58,10 +57,10 @@ export default function InquiriesPage() {
 
   useEffect(() => { fetchInquiries(); }, [fetchInquiries]);
 
-  async function handleStatusChange(id: string, status: WebInquiryStatus) {
+  async function acknowledge(id: string) {
     setUpdatingId(id);
     try {
-      await api.patch(`/api/v1/inquiries/${id}`, { status });
+      await api.patch(`/api/v1/inquiries/${id}`, { status: "ACKNOWLEDGED" });
       await fetchInquiries();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Update failed");
@@ -84,6 +83,9 @@ export default function InquiriesPage() {
     border: "1px solid var(--w-border)",
     background: "var(--w-plate)",
     color: "var(--w-text-2)",
+    display: "inline-flex",
+    alignItems: "center",
+    textDecoration: "none",
   };
 
   return (
@@ -100,7 +102,7 @@ export default function InquiriesPage() {
             </p>
           </div>
           <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>
-            Submitted from welfoendovision.com
+            Serial verified at submission
           </p>
         </div>
 
@@ -143,8 +145,7 @@ export default function InquiriesPage() {
                 <tr style={{ background: "var(--w-plate)" }}>
                   <th style={TH_STYLE}>Inquiry #</th>
                   <th style={TH_STYLE}>From</th>
-                  <th style={TH_STYLE}>Organization</th>
-                  <th style={TH_STYLE}>Product</th>
+                  <th style={TH_STYLE}>Instrument</th>
                   <th style={TH_STYLE}>Urgency</th>
                   <th style={TH_STYLE}>Received</th>
                   <th style={TH_STYLE}>Status</th>
@@ -153,100 +154,63 @@ export default function InquiriesPage() {
               </thead>
               <tbody>
                 {inquiries.map(inq => (
-                  <>
-                    <tr key={inq.id} style={{ background: "var(--w-surface)" }}>
-                      <td style={{ ...TD_STYLE, fontFamily: "var(--w-font-head)", fontWeight: 600, whiteSpace: "nowrap" }}>
-                        {inq.inquiryNumber}
-                      </td>
-                      <td style={TD_STYLE}>
-                        <div style={{ fontWeight: 500 }}>{inq.submitterName}</div>
-                        <div style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>{inq.submitterEmail}</div>
-                        {inq.submitterPhone && (
-                          <div style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>{inq.submitterPhone}</div>
-                        )}
-                      </td>
-                      <td style={TD_STYLE}>
-                        <div>{inq.organizationName}</div>
-                        {inq.city && (
-                          <div style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>{inq.city}</div>
-                        )}
-                      </td>
-                      <td style={TD_STYLE}>
-                        <div>{inq.productModel}</div>
-                        {inq.serialNumber && (
-                          <div style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", fontFamily: "monospace" }}>
-                            {inq.serialNumber}
-                          </div>
-                        )}
-                      </td>
-                      <td style={TD_STYLE}>
-                        <span className="flex items-center gap-2" style={{ whiteSpace: "nowrap" }}>
-                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: URGENCY_COLORS[inq.urgency], display: "inline-block" }} />
-                          <span style={{ fontSize: "var(--w-fs-caption)" }}>{URGENCY_LABELS[inq.urgency]}</span>
-                        </span>
-                      </td>
-                      <td style={{ ...TD_STYLE, color: "var(--w-text-2)", whiteSpace: "nowrap" }}>
-                        {new Date(inq.submittedAt).toLocaleDateString("en-IN")}
-                      </td>
-                      <td style={TD_STYLE}>
-                        <StatusBadge status={inq.status} variant="row" />
-                      </td>
-                      <td style={TD_STYLE}>
-                        <div className="flex items-center gap-2" style={{ whiteSpace: "nowrap" }}>
+                  <tr key={inq.id} style={{ background: "var(--w-surface)" }}>
+                    <td style={{ ...TD_STYLE, fontFamily: "var(--w-font-head)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                      {inq.inquiryNumber}
+                    </td>
+                    <td style={TD_STYLE}>
+                      <div style={{ fontWeight: 500 }}>{inq.submitterName}</div>
+                      <div style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>{inq.organizationName}</div>
+                    </td>
+                    <td style={TD_STYLE}>
+                      <div style={{ fontFamily: "monospace", fontWeight: 600 }}>{inq.serialNumber}</div>
+                      <div style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>
+                        {inq.product.model?.name ?? "Unregistered model"}
+                      </div>
+                    </td>
+                    <td style={TD_STYLE}>
+                      <span className="flex items-center gap-2" style={{ whiteSpace: "nowrap" }}>
+                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: URGENCY_COLORS[inq.urgency], display: "inline-block" }} />
+                        <span style={{ fontSize: "var(--w-fs-caption)" }}>{URGENCY_LABELS[inq.urgency]}</span>
+                      </span>
+                    </td>
+                    <td style={{ ...TD_STYLE, color: "var(--w-text-2)", whiteSpace: "nowrap" }}>
+                      {new Date(inq.submittedAt).toLocaleDateString("en-IN")}
+                    </td>
+                    <td style={TD_STYLE}>
+                      <StatusBadge status={inq.status} variant="row" />
+                    </td>
+                    <td style={TD_STYLE}>
+                      <div className="flex items-center gap-2" style={{ whiteSpace: "nowrap" }}>
+                        {inq.status === "PENDING" && (
                           <button
-                            onClick={() => setExpandedId(expandedId === inq.id ? null : inq.id)}
+                            onClick={() => acknowledge(inq.id)}
+                            disabled={updatingId === inq.id}
                             style={actionBtn}
                           >
-                            {expandedId === inq.id ? "Hide" : "Details"}
+                            Acknowledge
                           </button>
-                          {inq.status === "PENDING" && (
-                            <button
-                              onClick={() => handleStatusChange(inq.id, "ACKNOWLEDGED")}
-                              disabled={updatingId === inq.id}
-                              style={{ ...actionBtn, background: "var(--w-accent-strong)", color: "#fff", borderColor: "var(--w-accent-strong)" }}
-                            >
-                              Acknowledge
-                            </button>
-                          )}
-                          {inq.status === "ACKNOWLEDGED" && (
-                            <>
-                              <button
-                                onClick={() => handleStatusChange(inq.id, "CONVERTED")}
-                                disabled={updatingId === inq.id}
-                                style={{ ...actionBtn, background: "var(--w-success-tint)", color: "var(--w-success-fg)", borderColor: "var(--w-success-edge)" }}
-                              >
-                                Mark Converted
-                              </button>
-                              <button
-                                onClick={() => handleStatusChange(inq.id, "CLOSED")}
-                                disabled={updatingId === inq.id}
-                                style={actionBtn}
-                              >
-                                Close
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    {expandedId === inq.id && (
-                      <tr key={`${inq.id}-detail`} style={{ background: "var(--w-sunken)" }}>
-                        <td colSpan={8} style={{ ...TD_STYLE, padding: "var(--w-s-4)" }}>
-                          <p className="font-head font-semibold uppercase" style={{ fontSize: "var(--w-fs-eyebrow)", letterSpacing: "0.09em", color: "var(--w-text-2)", marginBottom: "var(--w-s-2)" }}>
-                            Reported Problem
-                          </p>
-                          <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-text-1)", lineHeight: 1.6, marginBottom: "var(--w-s-3)" }}>
-                            {inq.reportedProblem}
-                          </p>
-                          {inq.purchaseDate && (
-                            <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>
-                              Purchased: {new Date(inq.purchaseDate).toLocaleDateString("en-IN")}
-                            </p>
-                          )}
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                        )}
+                        {inq.status === "CONVERTED" && inq.convertedCaseId ? (
+                          <Link href={`/service-cases/${inq.convertedCaseId}`} style={{ ...actionBtn, color: "var(--w-link)" }}>
+                            View case
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/inquiries/${inq.id}`}
+                            style={{
+                              ...actionBtn,
+                              background: "var(--w-accent-strong)",
+                              color: "#fff",
+                              borderColor: "var(--w-accent-strong)",
+                            }}
+                          >
+                            Review &amp; Convert
+                          </Link>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>

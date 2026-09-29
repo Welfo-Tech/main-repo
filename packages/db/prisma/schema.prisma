@@ -236,17 +236,20 @@ model WebInquiry {
   submitterPhone   String?          @db.VarChar(50)
   organizationName String           @db.VarChar(255)
   city             String?          @db.VarChar(100)
-  productModel     String           @db.VarChar(255)
-  serialNumber     String?          @db.VarChar(100)
-  purchaseDate     DateTime?        @db.Date
+  serialNumber     String           @db.VarChar(255)
+  productId        String           @db.Uuid
   reportedProblem  String           @db.Text
   urgency          TicketUrgency    @default(NORMAL)
   status           WebInquiryStatus @default(PENDING)
+  convertedCaseId  String?          @unique @db.Uuid
   submittedAt      DateTime         @default(now()) @db.Timestamptz
   updatedAt        DateTime         @updatedAt @db.Timestamptz
 
+  product Product @relation(fields: [productId], references: [id])
+
   @@index([status])
   @@index([submittedAt])
+  @@index([productId])
   @@map("web_inquiries")
 }
 
@@ -362,6 +365,7 @@ model Product {
   model        ProductModel?   @relation(fields: [modelId], references: [id])
   ownerOrg     Organization?   @relation(fields: [ownerOrgId], references: [id])
   serviceCases ServiceCase[]
+  webInquiries WebInquiry[]
 
   @@index([serialNumber])
   @@index([ownerOrgId])

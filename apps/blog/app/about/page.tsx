@@ -89,7 +89,7 @@ export default function AboutPage() {
           </div>
 
           <div style={{ marginTop: "var(--w-s-7)", display: "flex", flexWrap: "wrap", gap: "var(--w-s-3)" }}>
-            <Link href="/open-ticket" className="w-btn w-btn--primary">Open a repair ticket</Link>
+            <Link href="/product-support" className="w-btn w-btn--primary">Product Support</Link>
             <Link href="/contact" className="w-btn w-btn--outline">Get in touch</Link>
           </div>
         </div>

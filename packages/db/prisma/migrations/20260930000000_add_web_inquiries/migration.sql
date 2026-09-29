@@ -1,6 +1,7 @@
--- Add WebInquiry table for public ticket submissions from the website.
--- These are pre-ticket records with no FK dependencies — no org or user required.
--- Ops staff acknowledge and convert them to formal Tickets manually.
+-- Add WebInquiry table for public repair requests submitted from the website.
+-- The serial number is verified against products before submission is accepted,
+-- so productId is a real FK. Organization and technician assignment are resolved
+-- later by ops, which is why there is no organizationId or createdBy here.
 
 CREATE TYPE "WebInquiryStatus" AS ENUM ('PENDING', 'ACKNOWLEDGED', 'CONVERTED', 'CLOSED');
 
@@ -19,12 +20,12 @@ CREATE TABLE "web_inquiries" (
   "submitterPhone"   VARCHAR(50),
   "organizationName" VARCHAR(255)  NOT NULL,
   "city"             VARCHAR(100),
-  "productModel"     VARCHAR(255)  NOT NULL,
-  "serialNumber"     VARCHAR(100),
-  "purchaseDate"     DATE,
+  "serialNumber"     VARCHAR(255)  NOT NULL,
+  "productId"        UUID          NOT NULL,
   "reportedProblem"  TEXT          NOT NULL,
   "urgency"          "TicketUrgency" NOT NULL DEFAULT 'NORMAL',
   "status"           "WebInquiryStatus" NOT NULL DEFAULT 'PENDING',
+  "convertedCaseId"  UUID,
   "submittedAt"      TIMESTAMPTZ   NOT NULL DEFAULT now(),
   "updatedAt"        TIMESTAMPTZ   NOT NULL DEFAULT now(),
 
@@ -32,5 +33,12 @@ CREATE TABLE "web_inquiries" (
 );
 
 CREATE UNIQUE INDEX "web_inquiries_inquiryNumber_key" ON "web_inquiries"("inquiryNumber");
+CREATE UNIQUE INDEX "web_inquiries_convertedCaseId_key" ON "web_inquiries"("convertedCaseId");
 CREATE INDEX "web_inquiries_status_idx" ON "web_inquiries"("status");
 CREATE INDEX "web_inquiries_submittedAt_idx" ON "web_inquiries"("submittedAt");
+CREATE INDEX "web_inquiries_productId_idx" ON "web_inquiries"("productId");
+
+ALTER TABLE "web_inquiries"
+  ADD CONSTRAINT "web_inquiries_productId_fkey"
+  FOREIGN KEY ("productId") REFERENCES "products"("id")
+  ON DELETE RESTRICT ON UPDATE CASCADE;

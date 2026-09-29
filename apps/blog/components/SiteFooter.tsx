@@ -45,7 +45,7 @@ export default function SiteFooter() {
             <Link href="/" style={linkStyle}>Home</Link>
             <Link href="/about" style={linkStyle}>About</Link>
             <Link href="/contact" style={linkStyle}>Contact</Link>
-            <Link href="/open-ticket" style={linkStyle}>Open a Ticket</Link>
+            <Link href="/product-support" style={linkStyle}>Product Support</Link>
           </div>
 
           <div>

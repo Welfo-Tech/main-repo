@@ -62,8 +62,8 @@ export default function SiteNav() {
               </Link>
             );
           })}
-          <Link href="/open-ticket" className="w-btn w-btn--primary" style={{ height: "38px" }}>
-            Open a Ticket
+          <Link href="/product-support" className="w-btn w-btn--primary" style={{ height: "38px" }}>
+            Product Support
           </Link>
         </nav>
 
@@ -122,12 +122,12 @@ export default function SiteNav() {
             </Link>
           ))}
           <Link
-            href="/open-ticket"
+            href="/product-support"
             onClick={() => setOpen(false)}
             className="w-btn w-btn--primary"
             style={{ width: "100%" }}
           >
-            Open a Ticket
+            Product Support
           </Link>
         </nav>
       )}

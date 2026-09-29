@@ -22,8 +22,8 @@ export default function ContactPage() {
             Talk to us
           </h1>
           <p style={{ fontSize: "17px", color: "var(--w-text-invert-2)", marginTop: "var(--w-s-3)", maxWidth: "56ch", lineHeight: 1.65 }}>
-            For a repair, the fastest route is to raise a ticket — it goes straight into our
-            system with a reference number. For anything else, reach us directly.
+            For a repair, the fastest route is the product support form — it goes straight into
+            our system with a reference number. For anything else, reach us directly.
           </p>
         </div>
       </section>
@@ -114,12 +114,12 @@ export default function ContactPage() {
                 Instrument needs repair?
               </h2>
               <p style={{ fontSize: "16px", color: "var(--w-text-invert-2)", lineHeight: 1.6 }}>
-                Raising a ticket gets you a reference number immediately and puts the request in
-                front of our service team.
+                Verify the serial number and you get a reference number immediately, with the
+                request in front of our service team.
               </p>
             </div>
-            <Link href="/open-ticket" className="w-btn w-btn--primary" style={{ background: "var(--w-plate)", color: "var(--w-accent-deep)" }}>
-              Open a ticket
+            <Link href="/product-support" className="w-btn w-btn--primary" style={{ background: "var(--w-plate)", color: "var(--w-accent-deep)" }}>
+              Product Support
             </Link>
           </div>
         </div>
