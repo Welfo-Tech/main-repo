@@ -47,7 +47,7 @@ export default function TrackPage() {
           onSubmit={handleSubmit}
           style={{ background: "var(--w-plate)", border: "1px solid var(--w-border)", padding: "var(--w-s-5)" }}
         >
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "var(--w-s-4)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "var(--w-s-4)" }}>
             <div className="w-field">
               <label className="w-label" htmlFor="ref">Reference number *</label>
               <input
@@ -118,7 +118,7 @@ export default function TrackPage() {
               <h2 style={{ fontSize: "clamp(20px, 3vw, 26px)", marginBottom: "var(--w-s-2)" }}>
                 {result.headline}
               </h2>
-              <dl style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--w-s-3)", marginTop: "var(--w-s-3)" }}>
+              <dl style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(180px, 100%), 1fr))", gap: "var(--w-s-3)", marginTop: "var(--w-s-3)" }}>
                 <div>
                   <dt className="w-label">Instrument</dt>
                   <dd style={{ fontSize: "15px" }}>{result.instrument}</dd>

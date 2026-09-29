@@ -70,7 +70,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))",
               gap: "var(--w-s-7)",
               alignItems: "start",
             }}
@@ -142,7 +142,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: `repeat(auto-fit, minmax(180px, ${table.images.length > 2 ? "1fr" : "260px"}))`,
+                    gridTemplateColumns: `repeat(auto-fit, minmax(min(180px, 100%), ${table.images.length > 2 ? "1fr" : "260px"}))`,
                     gap: "var(--w-s-4)",
                     marginBottom: "var(--w-s-5)",
                   }}

@@ -23,7 +23,7 @@ export default function FindUs() {
           Rishikesh, Uttarakhand
         </h2>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "var(--w-s-5)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: "var(--w-s-5)" }}>
           <div
             style={{
               border: "1px solid var(--w-border)",

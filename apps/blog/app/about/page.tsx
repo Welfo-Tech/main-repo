@@ -75,7 +75,7 @@ export default function AboutPage() {
             style={{
               marginTop: "var(--w-s-7)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))",
               gap: "1px",
               background: "var(--w-border)",
               border: "1px solid var(--w-border)",

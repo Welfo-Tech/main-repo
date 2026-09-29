@@ -116,22 +116,23 @@ export default function SiteNav() {
         }}
       >
         <div
-          className="w-shell"
+          className="w-shell w-navbar"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            height: "76px",
             gap: "var(--w-s-4)",
           }}
         >
           <Link href="/" aria-label="Welfo Endovision home" style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
             <Image
+              className="w-logo"
               src="/img/welfonewlogo1.png"
               alt="Welfo Endovision"
               width={666}
               height={259}
-              style={{ height: "46px", width: "auto" }}
+              sizes="(max-width: 520px) 150px, (max-width: 1140px) 175px, 200px"
+              style={{ width: "auto" }}
               priority
             />
           </Link>
@@ -226,6 +227,9 @@ export default function SiteNav() {
       </div>
 
       <style>{`
+        .w-navbar { height: 88px; }
+        .w-logo { height: 58px; }
+
         @media (max-width: 1140px) {
           .w-nav-desktop { display: none !important; }
           .w-nav-toggle { display: flex !important; }
@@ -236,8 +240,16 @@ export default function SiteNav() {
         @media (max-width: 900px) {
           .w-util-address { display: none !important; }
         }
+        @media (max-width: 720px) {
+          .w-navbar { height: 74px; }
+          .w-logo { height: 50px; }
+        }
         @media (max-width: 620px) {
           .w-util-email { display: none !important; }
+        }
+        @media (max-width: 420px) {
+          .w-navbar { height: 66px; }
+          .w-logo { height: 44px; }
         }
       `}</style>
     </header>

@@ -18,7 +18,7 @@ export const SOCIALS = [
 ] as const;
 
 /** Drop an mp4 into apps/blog/public/video/ and set this to enable the hero video. */
-export const HERO_VIDEO: string | null = null;
+export const HERO_VIDEO: string | null = "/video/hero.mp4";
 export const HERO_POSTER = "/img/Precision-Engineered.jpg";
 
 export const SPECIALTIES = [

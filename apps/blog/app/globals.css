@@ -178,7 +178,31 @@ h1, h2, h3, h4 {
   }
 }
 
+@media (max-width: 900px) {
+  :root { --w-s-9: 64px; --w-s-8: 48px; }
+}
+
 @media (max-width: 640px) {
-  :root { --w-s-9: 56px; --w-s-8: 40px; }
+  :root { --w-s-9: 52px; --w-s-8: 38px; --w-s-7: 32px; }
   body { font-size: 15px; }
+
+  .w-shell { padding-inline: var(--w-s-4); }
+
+  /* iOS zooms the page when a focused control is under 16px */
+  .w-input, .w-select, .w-textarea { font-size: 16px; }
+
+  .w-btn { padding-inline: var(--w-s-4); font-size: 14px; }
+}
+
+@supports (padding: max(0px)) {
+  .w-shell {
+    padding-left: max(var(--w-s-5), env(safe-area-inset-left));
+    padding-right: max(var(--w-s-5), env(safe-area-inset-right));
+  }
+  @media (max-width: 640px) {
+    .w-shell {
+      padding-left: max(var(--w-s-4), env(safe-area-inset-left));
+      padding-right: max(var(--w-s-4), env(safe-area-inset-right));
+    }
+  }
 }

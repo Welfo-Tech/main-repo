@@ -394,7 +394,7 @@ export default function ProductSupportPage() {
                   onChange={e => set("submitterName", e.target.value)} placeholder="Dr. Anand Mehta" required />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--w-s-4)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "var(--w-s-4)" }}>
                 <div className="w-field">
                   <label className="w-label" htmlFor="email">Email *</label>
                   <input id="email" type="email" className="w-input" value={form.submitterEmail}
@@ -407,7 +407,7 @@ export default function ProductSupportPage() {
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "var(--w-s-4)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "var(--w-s-4)" }}>
                 <div className="w-field">
                   <label className="w-label" htmlFor="org">Hospital or clinic *</label>
                   <input id="org" className="w-input" value={form.organizationName}
@@ -497,7 +497,7 @@ export default function ProductSupportPage() {
                       listStyle: "none",
                       marginTop: "var(--w-s-3)",
                       display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(min(104px, 100%), 1fr))",
                       gap: "var(--w-s-3)",
                     }}
                   >
@@ -572,7 +572,7 @@ export default function ProductSupportPage() {
                       background: "var(--w-plate)",
                       padding: "var(--w-s-3) var(--w-s-4)",
                       display: "grid",
-                      gridTemplateColumns: "minmax(140px, 1fr) 2fr",
+                      gridTemplateColumns: "minmax(min(140px, 100%), 1fr) 2fr",
                       gap: "var(--w-s-4)",
                     }}
                   >

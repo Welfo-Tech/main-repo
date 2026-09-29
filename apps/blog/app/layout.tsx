@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   title: "Welfo Endovision — Endoscopy Equipment and Repair, Rishikesh",
   description:
     "Medical fiber optics, endoscopy systems and surgical illumination. Manufactured and repaired in Rishikesh. Request product support online.",
+  icons: { icon: "/img/favicon.png" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#2b1673",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

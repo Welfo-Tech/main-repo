@@ -81,7 +81,7 @@ export default function Home() {
 
       <section style={{ background: "var(--w-brand)", color: "#fff", paddingBlock: "var(--w-s-6)" }}>
         <div className="w-shell">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "var(--w-s-5)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "var(--w-s-5)" }}>
             {STATS.map(s => (
               <div key={s.label} style={{ textAlign: "center" }}>
                 <p style={{ fontFamily: "var(--w-font-head)", fontSize: "clamp(32px, 5vw, 44px)", fontWeight: 700, lineHeight: 1 }}>
@@ -103,7 +103,7 @@ export default function Home() {
             style={{
               marginTop: "var(--w-s-6)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))",
               gap: "var(--w-s-4)",
             }}
           >
@@ -131,7 +131,7 @@ export default function Home() {
       </section>
 
       <section style={{ background: "var(--w-canvas)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))" }}>
           <div style={{ position: "relative", minHeight: "380px" }}>
             <Image
               src="/img/Precision-Engineered.jpg"
@@ -168,7 +168,7 @@ export default function Home() {
             style={{
               marginTop: "var(--w-s-7)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))",
               gap: "1px",
               background: "var(--w-border)",
               border: "1px solid var(--w-border)",
@@ -236,7 +236,7 @@ export default function Home() {
             style={{
               marginTop: "var(--w-s-7)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
               gap: "var(--w-s-6) var(--w-s-7)",
             }}
           >
@@ -259,7 +259,7 @@ export default function Home() {
             style={{
               marginTop: "var(--w-s-7)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(230px, 100%), 1fr))",
               gap: "1px",
               background: "var(--w-border)",
               border: "1px solid var(--w-border)",
@@ -302,7 +302,7 @@ export default function Home() {
             style={{
               marginTop: "var(--w-s-7)",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))",
               gap: "var(--w-s-6)",
             }}
           >
@@ -326,7 +326,7 @@ export default function Home() {
             <Link href="/products" className="w-btn w-btn--outline">View all products</Link>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "var(--w-s-4)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(230px, 100%), 1fr))", gap: "var(--w-s-4)" }}>
             {PRODUCTS.slice(0, 4).map(p => (
               <Link key={p.slug} href={`/products/${p.slug}`} style={{ border: "1px solid var(--w-border)", background: "var(--w-plate)" }}>
                 <div style={{ position: "relative", aspectRatio: "4/3", background: "var(--w-sunken)" }}>
@@ -352,7 +352,7 @@ export default function Home() {
             <Link href="/gallery" className="w-btn w-btn--outline">Full gallery</Link>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "var(--w-s-3)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(200px, 100%), 1fr))", gap: "var(--w-s-3)" }}>
             {GALLERY.slice(0, 4).map((src, i) => (
               <div key={src} style={{ position: "relative", aspectRatio: "4/3", border: "1px solid var(--w-border)", background: "var(--w-sunken)" }}>
                 <Image src={src} alt={`Welfo Endovision exhibition stand ${i + 1}`} fill sizes="(max-width: 700px) 100vw, 260px" style={{ objectFit: "cover" }} />

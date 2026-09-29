@@ -26,7 +26,7 @@ export default function SiteFooter() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
             gap: "var(--w-s-6)",
             marginBottom: "var(--w-s-7)",
           }}
