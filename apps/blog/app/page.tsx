@@ -7,7 +7,6 @@ import {
   PROCESS,
   SPECIALTIES,
   SPECIALTY_CARDS,
-  STATS,
   TECHNOLOGY,
   VALUE_PROPS,
   WHY_CHOOSE,
@@ -77,21 +76,6 @@ export default function Home() {
             </span>
             {SPECIALTIES.map(s => (
               <span key={s} style={{ fontSize: "15px", color: "var(--w-text-invert-2)" }}>{s}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={{ background: "var(--w-brand)", color: "#fff", paddingBlock: "var(--w-s-6)" }}>
-        <div className="w-shell">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "var(--w-s-5)" }}>
-            {STATS.map(s => (
-              <div key={s.label} style={{ textAlign: "center" }}>
-                <p style={{ fontFamily: "var(--w-font-head)", fontSize: "clamp(32px, 5vw, 44px)", fontWeight: 700, lineHeight: 1 }}>
-                  {s.value}
-                </p>
-                <p style={{ fontSize: "15px", marginTop: "var(--w-s-2)", opacity: 0.92 }}>{s.label}</p>
-              </div>
             ))}
           </div>
         </div>

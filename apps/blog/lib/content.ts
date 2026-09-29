@@ -30,12 +30,6 @@ export const SPECIALTIES = [
   "Veterinary",
 ];
 
-export const STATS = [
-  { value: "1000+", label: "Products Sold" },
-  { value: "900+", label: "Installations" },
-  { value: "800+", label: "Endoscopy Centres" },
-];
-
 export const SPECIALTY_CARDS = [
   { name: "Gastroenterology", image: "/img/Gastroenterology.jpg" },
   { name: "ENT", image: "/img/ENT.jpg" },
