@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const FACTS = [
   { label: "Based in", value: "Rishikesh, Uttarakhand" },
-  { label: "Working since", value: "2011" },
+  { label: "Working since", value: "2020 (parent est. 2002)" },
   { label: "Facility", value: "Optical assembly and repair workshop" },
   { label: "Serving", value: "Hospitals, clinics and distributors across India" },
 ];
@@ -31,22 +31,43 @@ export default function AboutPage() {
         <div className="w-shell" style={{ maxWidth: "720px" }}>
           <div style={{ fontSize: "17px", lineHeight: 1.75, color: "var(--w-text-1)", display: "grid", gap: "var(--w-s-4)" }}>
             <p>
-              Welfo Fiber Optics is a medical optics workshop in Rishikesh. We make rigid
-              endoscopes, fiber optic light guides and surgical illumination systems, and we
-              repair them — including instruments we did not originally sell.
+              Welfo Endovision is a trusted Indian manufacturer of rigid endoscopes, delivering
+              high-quality, cost-effective endoscopic solutions to hospitals and clinics across
+              the country.
             </p>
             <p>
-              Most of what we do is repair work. A scope with a cracked rod lens or a darkened
-              fiber bundle is usually not scrap. It is a component problem, and component
-              problems have fixes. Replacing an instrument that could have been repaired is
-              money a hospital did not need to spend.
+              Founded in 2020 as a specialised division of our parent company Welfo Fiber Optics
+              (established in 2002), Welfo Endovision was created to strengthen India&rsquo;s
+              medical device manufacturing ecosystem and address a long-standing gap in the
+              market. At the time, most rigid endoscopes were imported, expensive, and lacked
+              dependable after-sales support. We set out to change that.
             </p>
+            <h2 style={{ fontSize: "clamp(22px, 3vw, 28px)", marginTop: "var(--w-s-3)" }}>
+              Precision manufacturing. Practical solutions.
+            </h2>
             <p>
-              That is the part of the business we are opening up online. Until now, repair
-              requests came through phone calls, WhatsApp messages and whoever happened to pick
-              up. That works at small scale and breaks at larger scale. A ticket raised on this
-              site goes into our system with a reference number, so nothing gets lost between a
-              phone call and a workbench.
+              At Welfo Endovision, we manufacture rigid endoscopes designed to meet the
+              real-world demands of healthcare professionals. Our focus is on precision,
+              durability and consistent performance, ensuring that clinicians can rely on our
+              instruments in critical environments. By manufacturing locally in India, we
+              maintain strict quality control, reduce lead times, and offer solutions that are
+              both reliable and affordable.
+            </p>
+            <h2 style={{ fontSize: "clamp(22px, 3vw, 28px)", marginTop: "var(--w-s-3)" }}>
+              What sets us apart
+            </h2>
+            <ul style={{ listStyle: "none", display: "grid", gap: "var(--w-s-3)" }}>
+              {[
+                "Competitive pricing that makes advanced endoscopic equipment more accessible",
+                "Strong after-sales service, ensuring long-term support and peace of mind",
+                "Quality-driven manufacturing, backed by years of optical and medical device expertise",
+              ].map(b => (
+                <li key={b} style={{ paddingLeft: "var(--w-s-4)", borderLeft: "2px solid var(--w-accent)" }}>{b}</li>
+              ))}
+            </ul>
+            <p>
+              We don&rsquo;t just supply products — we build long-term partnerships with
+              healthcare institutions by standing behind everything we manufacture.
             </p>
           </div>
 

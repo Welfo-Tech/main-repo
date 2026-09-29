@@ -231,6 +231,7 @@ export default function ProductSupportPage() {
             </p>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--w-s-3)" }}>
+              <Link href="/track" className="w-btn w-btn--primary">Track this repair</Link>
               <Link href="/" className="w-btn w-btn--outline">Back to home</Link>
               <button
                 onClick={() => {

@@ -8,8 +8,37 @@ import { useState } from "react";
 const LINKS = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
+  { href: "/products", label: "Products" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/track", label: "Track" },
   { href: "/contact", label: "Contact" },
 ];
+
+function CartIcon() {
+  return (
+    <span
+      aria-label="Cart, coming soon"
+      title="Cart — coming soon"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "6px",
+        color: "var(--w-text-invert-2)",
+        fontFamily: "var(--w-font-head)",
+        fontSize: "14px",
+        fontWeight: 600,
+        letterSpacing: "0.06em",
+      }}
+    >
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+        <circle cx="9" cy="20" r="1.4" />
+        <circle cx="18" cy="20" r="1.4" />
+        <path d="M2 3h2.2l2.3 12.2a1.6 1.6 0 0 0 1.6 1.3h8.7a1.6 1.6 0 0 0 1.6-1.3L21 7H5.1" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      0
+    </span>
+  );
+}
 
 export default function SiteNav() {
   const pathname = usePathname();
@@ -39,7 +68,7 @@ export default function SiteNav() {
           <Image src="/logo.png" alt="Welfo" width={130} height={30} style={{ height: "30px", width: "auto" }} priority />
         </Link>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: "var(--w-s-6)" }} className="w-nav-desktop">
+        <nav style={{ display: "flex", alignItems: "center", gap: "var(--w-s-4)" }} className="w-nav-desktop">
           {LINKS.map(({ href, label }) => {
             const active = pathname === href;
             return (
@@ -62,6 +91,7 @@ export default function SiteNav() {
               </Link>
             );
           })}
+          <CartIcon />
           <Link href="/product-support" className="w-btn w-btn--primary" style={{ height: "38px" }}>
             Product Support
           </Link>
@@ -121,6 +151,7 @@ export default function SiteNav() {
               {label}
             </Link>
           ))}
+          <CartIcon />
           <Link
             href="/product-support"
             onClick={() => setOpen(false)}
@@ -133,11 +164,11 @@ export default function SiteNav() {
       )}
 
       <style>{`
-        @media (max-width: 860px) {
+        @media (max-width: 1080px) {
           .w-nav-desktop { display: none !important; }
           .w-nav-toggle { display: flex !important; }
         }
-        @media (min-width: 861px) {
+        @media (min-width: 1081px) {
           .w-nav-mobile { display: none !important; }
         }
       `}</style>

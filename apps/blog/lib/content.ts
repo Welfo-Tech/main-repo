@@ -16,6 +16,42 @@ export const SPECIALTIES = [
   "Veterinary",
 ];
 
+export const STATS = [
+  { value: "1000+", label: "Products Sold" },
+  { value: "900+", label: "Installations" },
+  { value: "800+", label: "Endoscopy Centres" },
+];
+
+export const SPECIALTY_CARDS = [
+  { name: "Gastroenterology", image: "/img/Gastroenterology.jpg" },
+  { name: "ENT", image: "/img/ENT.jpg" },
+  { name: "Urology", image: "/img/Urology.jpeg" },
+  { name: "Laparoscopy", image: "/img/Laparoscopic.jpg" },
+  { name: "Pulmonology", image: "/img/pulmonology.jpg" },
+  { name: "Veterinary", image: "/img/Veterinary.jpg" },
+];
+
+export const WHY_CHOOSE = [
+  { title: "Made In India", icon: "/img/service-img-8.png" },
+  { title: "Extend Equipment Lifespan", icon: "/img/love.png" },
+  { title: "Minimize Downtime", icon: "/img/downtime.png" },
+  { title: "Expert Support", icon: "/img/consulting-service.png" },
+  { title: "Reduce Disruptions", icon: "/img/Reduce-Disruptions.png" },
+  { title: "Affordable Solutions", icon: "/img/collaboration.png" },
+  { title: "Trusted Quality & Value", icon: "/img/trust.png" },
+];
+
+export const TECHNOLOGY = [
+  { title: "Sharper Images", icon: "/img/spectral-imaging.svg" },
+  { title: "Ease of Handling", icon: "/img/Ease-Handling.svg" },
+  { title: "Great After-Sales Service", icon: "/img/After-Sales-service.svg" },
+];
+
+export const GALLERY = [
+  "/img/ng1.jpeg", "/img/ng2.jpeg", "/img/ng3.jpeg", "/img/ng4.jpeg",
+  "/img/ng5.jpeg", "/img/ng6.jpeg", "/img/ng7.jpeg", "/img/ng8.jpeg",
+];
+
 export const CAPABILITIES = [
   {
     title: "Rigid endoscope repair",

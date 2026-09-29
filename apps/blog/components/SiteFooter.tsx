@@ -41,19 +41,23 @@ export default function SiteFooter() {
           </div>
 
           <div>
-            <p style={colHead}>Navigate</p>
+            <p style={colHead}>Quick Links</p>
             <Link href="/" style={linkStyle}>Home</Link>
-            <Link href="/about" style={linkStyle}>About</Link>
-            <Link href="/contact" style={linkStyle}>Contact</Link>
-            <Link href="/product-support" style={linkStyle}>Product Support</Link>
+            <Link href="/about" style={linkStyle}>About Us</Link>
+            <Link href="/products" style={linkStyle}>Our Products</Link>
+            <Link href="/gallery" style={linkStyle}>Gallery</Link>
+            <Link href="/track" style={linkStyle}>Track a Repair</Link>
+            <Link href="/contact" style={linkStyle}>Contact Us</Link>
           </div>
 
           <div>
-            <p style={colHead}>Service</p>
-            <span style={{ ...linkStyle, opacity: 0.7 }}>Endoscope repair</span>
-            <span style={{ ...linkStyle, opacity: 0.7 }}>Fiber bundle replacement</span>
-            <span style={{ ...linkStyle, opacity: 0.7 }}>Optical realignment</span>
-            <span style={{ ...linkStyle, opacity: 0.7 }}>Camera and light source service</span>
+            <p style={colHead}>Our Products</p>
+            <Link href="/products/cystoscope" style={linkStyle}>Cystoscope</Link>
+            <Link href="/products/laparoscope-4k" style={linkStyle}>Laparoscope</Link>
+            <Link href="/products/sinuscope" style={linkStyle}>Sinuscope</Link>
+            <Link href="/products/arthroscope" style={linkStyle}>Arthroscope</Link>
+            <Link href="/products/connectors" style={linkStyle}>Connectors</Link>
+            <Link href="/products/surgical-camera-system" style={linkStyle}>Camera system</Link>
           </div>
 
           <div>

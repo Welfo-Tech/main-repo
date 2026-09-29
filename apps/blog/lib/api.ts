@@ -37,6 +37,38 @@ export async function uploadPhoto(target: UploadTarget, file: File): Promise<voi
   }
 }
 
+export interface TimelineStep {
+  key: string;
+  label: string;
+  state: "done" | "current" | "upcoming";
+  at: string | null;
+}
+
+export interface TrackingResult {
+  found: boolean;
+  reference?: string;
+  instrument?: string;
+  serialNumber?: string;
+  submittedAt?: string;
+  caseNumber?: string | null;
+  headline?: string;
+  timeline?: TimelineStep[];
+}
+
+export async function trackRequest(ref: string, email: string): Promise<TrackingResult> {
+  const qs = new URLSearchParams({ ref, email });
+  const res = await fetch(`${BASE}/api/v1/portal/track?${qs.toString()}`);
+
+  if (res.status === 429) {
+    throw new Error("Too many lookups from this connection. Please wait a minute and try again.");
+  }
+  if (!res.ok) {
+    throw new Error("Could not look that up right now. Please try again or call us.");
+  }
+
+  return res.json() as Promise<TrackingResult>;
+}
+
 export async function verifySerial(serial: string): Promise<SerialCheck> {
   const res = await fetch(
     `${BASE}/api/v1/portal/inquiries/verify-serial?serial=${encodeURIComponent(serial)}`,
