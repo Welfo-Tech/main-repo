@@ -25,7 +25,7 @@ const h2Style: React.CSSProperties = {
 export default function Home() {
   return (
     <>
-      <section style={{ background: "var(--w-ink)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-9)" }}>
+      <section style={{ background: "var(--w-ink-gradient)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-9)" }}>
         <div className="w-shell">
           <div style={{ maxWidth: "62ch" }}>
             <p className="w-eyebrow" style={{ color: "var(--w-accent)" }}>
@@ -112,7 +112,7 @@ export default function Home() {
                     position: "absolute",
                     inset: "auto 0 0 0",
                     padding: "var(--w-s-3) var(--w-s-4)",
-                    background: "linear-gradient(transparent, rgba(21,33,45,0.88))",
+                    background: "linear-gradient(transparent, rgba(26,13,69,0.9))",
                     color: "#fff",
                     fontFamily: "var(--w-font-head)",
                     fontSize: "19px",

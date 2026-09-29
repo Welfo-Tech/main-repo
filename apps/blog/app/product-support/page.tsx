@@ -525,7 +525,7 @@ export default function ProductSupportPage() {
                             width: "22px",
                             height: "22px",
                             border: "none",
-                            background: "rgba(21,33,45,0.82)",
+                            background: "rgba(26,13,69,0.85)",
                             color: "#fff",
                             cursor: "pointer",
                             lineHeight: 1,

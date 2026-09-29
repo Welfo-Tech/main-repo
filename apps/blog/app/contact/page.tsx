@@ -15,7 +15,7 @@ const cardStyle: React.CSSProperties = {
 export default function ContactPage() {
   return (
     <>
-      <section style={{ background: "var(--w-ink)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-8)" }}>
+      <section style={{ background: "var(--w-ink-gradient)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-8)" }}>
         <div className="w-shell">
           <p className="w-eyebrow" style={{ color: "var(--w-accent)" }}>Contact</p>
           <h1 style={{ fontSize: "clamp(32px, 5vw, 50px)", marginTop: "var(--w-s-3)", color: "var(--w-text-invert)" }}>

@@ -46,7 +46,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <section style={{ background: "var(--w-ink)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-7)" }}>
+      <section style={{ background: "var(--w-ink-gradient)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-7)" }}>
         <div className="w-shell">
           <p style={{ fontSize: "14px", color: "var(--w-text-invert-2)", marginBottom: "var(--w-s-3)" }}>
             <Link href="/" style={{ color: "inherit" }}>Home</Link>
