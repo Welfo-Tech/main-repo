@@ -29,7 +29,10 @@ export default function Home() {
     <>
       <section style={{ position: "relative", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-9)", overflow: "hidden" }}>
         <HeroMedia />
-        <div className="w-shell" style={{ position: "relative" }}>
+        <div
+          className="w-shell"
+          style={{ position: "relative", textShadow: "0 1px 12px rgba(12,6,32,0.55)" }}
+        >
           <div style={{ maxWidth: "62ch" }}>
             <p className="w-eyebrow" style={{ color: "var(--w-accent)" }}>
               Endoscopy service division

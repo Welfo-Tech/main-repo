@@ -43,23 +43,26 @@ export default function HeroMedia() {
           <source src={HERO_VIDEO} type="video/mp4" />
         </video>
       ) : (
-        <Image
-          src={HERO_POSTER}
-          alt=""
-          fill
-          sizes="100vw"
-          style={{ objectFit: "cover", opacity: 0.3 }}
-          priority
-        />
+        <Image src={HERO_POSTER} alt="" fill sizes="100vw" style={{ objectFit: "cover" }} priority />
       )}
 
       <div
+        className="w-hero-scrim"
         style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(135deg, rgba(43,22,115,0.90) 0%, rgba(26,13,69,0.86) 100%)",
+          background:
+            "linear-gradient(90deg, rgba(12,6,32,0.80) 0%, rgba(12,6,32,0.55) 45%, rgba(12,6,32,0.22) 100%)",
         }}
       />
+
+      <style>{`
+        @media (max-width: 860px) {
+          .w-hero-scrim {
+            background: linear-gradient(180deg, rgba(12,6,32,0.62) 0%, rgba(12,6,32,0.78) 100%) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
