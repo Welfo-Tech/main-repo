@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CONTACT } from "../../lib/content";
+import FindUs from "../../components/FindUs";
 
 export const metadata: Metadata = {
   title: "Contact — Welfo Endovision",
@@ -124,6 +125,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
+      <FindUs />
     </>
   );
 }

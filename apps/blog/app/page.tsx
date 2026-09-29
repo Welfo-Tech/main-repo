@@ -13,6 +13,8 @@ import {
   WHY_CHOOSE,
 } from "../lib/content";
 import { PRODUCTS } from "../lib/products";
+import HeroMedia from "../components/HeroMedia";
+import FindUs from "../components/FindUs";
 
 const sectionPad: React.CSSProperties = { paddingBlock: "var(--w-s-9)" };
 
@@ -25,8 +27,9 @@ const h2Style: React.CSSProperties = {
 export default function Home() {
   return (
     <>
-      <section style={{ background: "var(--w-ink-gradient)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-9)" }}>
-        <div className="w-shell">
+      <section style={{ position: "relative", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-9)", overflow: "hidden" }}>
+        <HeroMedia />
+        <div className="w-shell" style={{ position: "relative" }}>
           <div style={{ maxWidth: "62ch" }}>
             <p className="w-eyebrow" style={{ color: "var(--w-accent)" }}>
               Endoscopy service division
@@ -358,6 +361,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <FindUs />
 
       <section style={{ background: "var(--w-accent-deep)", color: "var(--w-text-invert)", paddingBlock: "var(--w-s-8)" }}>
         <div

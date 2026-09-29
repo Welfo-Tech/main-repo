@@ -5,7 +5,21 @@ export const CONTACT = {
   addressLines: ["Forest Road Industrial Area", "Dhalwala, Rishikesh", "Uttarakhand 249201"],
   mapsUrl: "https://maps.google.com/?q=Forest+Road+Industrial+Area+Dhalwala+Rishikesh",
   whatsappUrl: "https://wa.me/919557870167",
+  addressOneLine: "Forest Road Industrial Area, Dhalwala, Rishikesh, Uttarakhand, India",
+  mapsEmbedUrl:
+    "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13803.568663916893!2d78.287043!3d30.125899!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39093d8f2eb1900d%3A0x12ef47db96fa32!2swelfo%20fiber%20optics!5e0!3m2!1sen!2sus!4v1762754726882!5m2!1sen!2sus",
 };
+
+export const SOCIALS = [
+  { name: "Facebook", url: "https://www.facebook.com/welfoendovision" },
+  { name: "Instagram", url: "https://www.instagram.com/welfo_endovision" },
+  { name: "X", url: "https://x.com/WelfoEndovison" },
+  { name: "YouTube", url: "https://www.youtube.com/@WelfoEndovison" },
+] as const;
+
+/** Drop an mp4 into apps/blog/public/video/ and set this to enable the hero video. */
+export const HERO_VIDEO: string | null = null;
+export const HERO_POSTER = "/img/Precision-Engineered.jpg";
 
 export const SPECIALTIES = [
   "Gastroenterology",
