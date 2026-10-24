@@ -1,4 +1,5 @@
 import { NotFoundError, ValidationError } from "../lib/errors.js";
+import { notifyCaseAssigned, notifyStatusChanged } from "./notification.service.js";
 import type { AuthUser } from "../middleware/auth.js";
 import { findOrganizationById } from "../repositories/organization.repository.js";
 import { findProductById } from "../repositories/product.repository.js";
@@ -98,8 +99,12 @@ export async function editCase(
   data: UpdateCaseData,
   _actor: AuthUser,
 ) {
-  await requireCase(id);
-  return updateCase(id, data).catch(handleTriggerError);
+  const before = await requireCase(id);
+  const updated = await updateCase(id, data).catch(handleTriggerError);
+  if (data.status && data.status !== before.status) {
+    notifyStatusChanged(id, before.caseNumber, before.technician?.id ?? null, data.status);
+  }
+  return updated;
 }
 
 export async function assignTechnician(
@@ -107,9 +112,12 @@ export async function assignTechnician(
   data: { technicianId: string; reason?: string },
   actor: AuthUser,
 ) {
-  await requireCase(caseId);
+  const sc = await requireCase(caseId);
   const tech = await findTechnicianById(data.technicianId);
   if (!tech) throw new NotFoundError("technician not found");
   if (!tech.isActive) throw new ValidationError("technician is not active");
-  return assignTechnicianToCase(caseId, data.technicianId, actor.id, data.reason);
+
+  const result = await assignTechnicianToCase(caseId, data.technicianId, actor.id, data.reason);
+  notifyCaseAssigned(caseId, sc.caseNumber, data.technicianId);
+  return result;
 }

@@ -4,6 +4,11 @@ import type { AuthUser } from "../middleware/auth.js";
 import { findCaseAttachments } from "../repositories/attachment.repository.js";
 import { findTechnicianByUserId } from "../repositories/technician.repository.js";
 import { requireCaseForActor } from "./service-case.service.js";
+import {
+  notifyIrreparableProposed,
+  notifyIrreparableVerdict,
+  notifyQcPending,
+} from "./notification.service.js";
 
 /**
  * What a technician may move a case to, from each state. Commercial and
@@ -71,7 +76,7 @@ export async function advanceCaseStatus(
     throw new ValidationError("a reason is required when putting a case on hold");
   }
 
-  return prisma.serviceCase.update({
+  const updated = await prisma.serviceCase.update({
     where: { id: caseId },
     data: {
       status: nextStatus,
@@ -79,6 +84,13 @@ export async function advanceCaseStatus(
     },
     select: { id: true, caseNumber: true, status: true, holdReason: true },
   });
+
+  if (nextStatus === "QC_PENDING") {
+    const tech = sc.technician?.user.name ?? "A technician";
+    notifyQcPending(caseId, updated.caseNumber, tech);
+  }
+
+  return updated;
 }
 
 export async function proposeIrreparable(
@@ -103,7 +115,7 @@ export async function proposeIrreparable(
     );
   }
 
-  return prisma.serviceCase.update({
+  const proposed = await prisma.serviceCase.update({
     where: { id: caseId },
     data: {
       irreparableState: "PROPOSED",
@@ -123,6 +135,9 @@ export async function proposeIrreparable(
       irreparableProposedAt: true,
     },
   });
+
+  notifyIrreparableProposed(caseId, proposed.caseNumber, tech.user.name, reason.trim());
+  return proposed;
 }
 
 export type IrreparableVerdict = "CONFIRMED" | "SECOND_CHANCE";
@@ -144,7 +159,7 @@ export async function ruleOnIrreparable(
 
   // SECOND_CHANCE keeps the technician's call on the record while work resumes,
   // so an override is never silently lost.
-  return prisma.serviceCase.update({
+  const ruled = await prisma.serviceCase.update({
     where: { id: caseId },
     data: {
       irreparableState: verdict,
@@ -161,6 +176,15 @@ export async function ruleOnIrreparable(
       irreparableVerdictNote: true,
     },
   });
+
+  notifyIrreparableVerdict(
+    caseId,
+    ruled.caseNumber,
+    sc.technician?.id ?? null,
+    verdict,
+    note?.trim() || null,
+  );
+  return ruled;
 }
 
 /** Called when the instrument was saved after a second chance. */
