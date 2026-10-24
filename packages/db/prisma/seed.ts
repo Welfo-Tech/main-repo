@@ -4,6 +4,8 @@ import {
   DispatchDirection,
   DispatchStatus,
   PrismaClient,
+  ProductCategory,
+  ProductStatus,
   RepairEventType,
   ServiceCaseStatus,
   UserRole,
@@ -27,6 +29,15 @@ const SEED_ASSIGNMENT_ID = "00000000-0000-0000-0000-000000000070";
 const SEED_REPAIR_EVENT_1_ID = "00000000-0000-0000-0000-000000000080";
 const SEED_REPAIR_EVENT_2_ID = "00000000-0000-0000-0000-000000000081";
 const SEED_DISPATCH_ID = "00000000-0000-0000-0000-000000000090";
+
+const DEMO_MODEL_LAP_ID = "00000000-0000-0000-0000-0000000000a1";
+const DEMO_MODEL_CYS_ID = "00000000-0000-0000-0000-0000000000a2";
+const DEMO_PRODUCT_1_ID = "00000000-0000-0000-0000-0000000000b1";
+const DEMO_PRODUCT_2_ID = "00000000-0000-0000-0000-0000000000b2";
+const DEMO_TECH_USER_ID = "00000000-0000-0000-0000-0000000000c1";
+const DEMO_TECH_ID = "00000000-0000-0000-0000-0000000000d1";
+const DEMO_TECH_PASSWORD_HASH =
+  "$2a$12$KpDv.hdaXNi.8Cg7oXL0SO6YnGnJav9xYgDFL2jGOaf90Kxi8udrS";
 
 async function main() {
   await prisma.user.upsert({
@@ -184,7 +195,85 @@ async function main() {
     update: {},
   });
 
-  console.info("Seed complete: technicians, repair events, dispatch record");
+  await prisma.productModel.upsert({
+    where: { id: DEMO_MODEL_LAP_ID },
+    create: {
+      id: DEMO_MODEL_LAP_ID,
+      name: "Welfo Laparoscope 10mm 30deg",
+      category: ProductCategory.ENDOSCOPE,
+      manufacturer: "Welfo",
+      description: "Rigid laparoscope, 10mm diameter, 30 degree view",
+    },
+    update: {},
+  });
+
+  await prisma.productModel.upsert({
+    where: { id: DEMO_MODEL_CYS_ID },
+    create: {
+      id: DEMO_MODEL_CYS_ID,
+      name: "Welfo Cystoscope 4mm 12deg",
+      category: ProductCategory.ENDOSCOPE,
+      manufacturer: "Welfo",
+      description: "Rigid cystoscope, 4mm diameter, 12 degree view",
+    },
+    update: {},
+  });
+
+  await prisma.product.upsert({
+    where: { id: DEMO_PRODUCT_1_ID },
+    create: {
+      id: DEMO_PRODUCT_1_ID,
+      serialNumber: "WF-2024-00002",
+      modelId: DEMO_MODEL_LAP_ID,
+      ownerOrgId: APOLLO_ORG_ID,
+      saleDate: new Date("2024-03-15"),
+      warrantyExpiry: new Date("2027-03-15"),
+      status: ProductStatus.IN_SERVICE,
+      notes: "Demo unit for end to end testing",
+    },
+    update: {},
+  });
+
+  await prisma.product.upsert({
+    where: { id: DEMO_PRODUCT_2_ID },
+    create: {
+      id: DEMO_PRODUCT_2_ID,
+      serialNumber: "WF-2024-00003",
+      modelId: DEMO_MODEL_CYS_ID,
+      ownerOrgId: APOLLO_ORG_ID,
+      saleDate: new Date("2024-07-02"),
+      warrantyExpiry: new Date("2027-07-02"),
+      status: ProductStatus.IN_SERVICE,
+      notes: "Demo unit for end to end testing",
+    },
+    update: {},
+  });
+
+  await prisma.user.upsert({
+    where: { id: DEMO_TECH_USER_ID },
+    create: {
+      id: DEMO_TECH_USER_ID,
+      name: "Ravi Sharma",
+      email: "tech@welfo.local",
+      passwordHash: DEMO_TECH_PASSWORD_HASH,
+      role: UserRole.TECHNICIAN,
+    },
+    update: {},
+  });
+
+  await prisma.technician.upsert({
+    where: { id: DEMO_TECH_ID },
+    create: {
+      id: DEMO_TECH_ID,
+      userId: DEMO_TECH_USER_ID,
+      employeeId: "EMP-001",
+      phone: "+91 95578 70168",
+      specializations: ["rigid-endoscope-repair", "fiber-bundle-restoration"],
+    },
+    update: {},
+  });
+
+  console.info("Seed complete: technicians, repair events, dispatch record, demo products");
 }
 
 main()
