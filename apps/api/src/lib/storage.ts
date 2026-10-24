@@ -17,6 +17,54 @@ function safeExtension(fileName: string): string {
   return ALLOWED_EXTENSIONS.has(ext) ? ext : "jpg";
 }
 
+/**
+ * Signs upload URLs under an arbitrary prefix. Callers pass a prefix rather
+ * than an id so inquiry photos and case attachments stay in separate trees.
+ * A uniqueness suffix keeps a second upload batch from overwriting the first.
+ */
+export async function createUploadTargetsAt(
+  prefix: string,
+  fileNames: string[],
+): Promise<UploadTarget[]> {
+  if (!isStorageConfigured()) return [];
+
+  const base = config.SUPABASE_URL!.replace(/\/$/, "");
+  const bucket = config.SUPABASE_BUCKET;
+  const batch = Date.now().toString(36);
+
+  return Promise.all(
+    fileNames.map(async (fileName, index) => {
+      const path = `${prefix}/${batch}-${index + 1}.${safeExtension(fileName)}`;
+
+      const res = await fetch(
+        `${base}/storage/v1/object/upload/sign/${bucket}/${path}`,
+        {
+          method: "POST",
+          headers: {
+            apikey: config.SUPABASE_SECRET_KEY!,
+            Authorization: `Bearer ${config.SUPABASE_SECRET_KEY!}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ expiresIn: 600 }),
+        },
+      );
+
+      if (!res.ok) {
+        const detail = await res.text().catch(() => "");
+        throw new Error(`could not create upload url: ${res.status} ${detail}`);
+      }
+
+      const body = (await res.json()) as { url: string };
+
+      return {
+        path,
+        uploadUrl: `${base}/storage/v1${body.url}`,
+        publicUrl: `${base}/storage/v1/object/public/${bucket}/${path}`,
+      };
+    }),
+  );
+}
+
 export async function createUploadTargets(
   inquiryId: string,
   fileNames: string[],
