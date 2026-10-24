@@ -7,8 +7,8 @@ import AdminLayout from "../../../components/layout/AdminLayout";
 import StatusBadge from "../../../components/common/StatusBadge";
 import PriorityBar from "../../../components/common/PriorityBar";
 import { api } from "../../../lib/api";
-import type { ServiceCase, ServiceCaseStatus } from "../../../types/service-case";
-import { PRIORITY_LABELS, STATUS_LABELS, TYPE_LABELS } from "../../../types/service-case";
+import type { CasePhotos, ServiceCase, ServiceCaseStatus } from "../../../types/service-case";
+import { IRREPARABLE_LABEL, PRIORITY_LABELS, STATUS_LABELS, TYPE_LABELS } from "../../../types/service-case";
 import type {
   DispatchRecord,
   DispatchStatus,
@@ -145,6 +145,11 @@ export default function ServiceCaseDetailPage() {
   const [addingEvent, setAddingEvent] = useState(false);
   const [addEventError, setAddEventError] = useState("");
 
+  const [photos, setPhotos] = useState<CasePhotos>({ customer: [], technician: [] });
+  const [verdictNote, setVerdictNote] = useState("");
+  const [ruling, setRuling] = useState("");
+  const [verdictError, setVerdictError] = useState("");
+
   const [dispatches, setDispatches] = useState<DispatchRecord[]>([]);
   const [dispatchLoading, setDispatchLoading] = useState(false);
   const [showDispatchForm, setShowDispatchForm] = useState(false);
@@ -190,6 +195,14 @@ export default function ServiceCaseDetailPage() {
     }
   }, [id]);
 
+  const fetchPhotos = useCallback(async () => {
+    try {
+      setPhotos(await api.get<CasePhotos>(`/api/v1/service-cases/${id}/photos`));
+    } catch {
+      // non-critical
+    }
+  }, [id]);
+
   const fetchTechnicians = useCallback(async () => {
     try {
       const data = await api.get<Technician[]>("/api/v1/technicians?isActive=true");
@@ -204,7 +217,38 @@ export default function ServiceCaseDetailPage() {
     fetchRepairEvents();
     fetchDispatches();
     fetchTechnicians();
-  }, [fetchCase, fetchRepairEvents, fetchDispatches, fetchTechnicians]);
+    fetchPhotos();
+  }, [fetchCase, fetchRepairEvents, fetchDispatches, fetchTechnicians, fetchPhotos]);
+
+  async function handleVerdict(verdict: "CONFIRMED" | "SECOND_CHANCE") {
+    setRuling(verdict);
+    setVerdictError("");
+    try {
+      await api.post(`/api/v1/service-cases/${id}/irreparable/verdict`, {
+        verdict,
+        ...(verdictNote.trim() ? { note: verdictNote.trim() } : {}),
+      });
+      setVerdictNote("");
+      await fetchCase();
+    } catch (err) {
+      setVerdictError(err instanceof Error ? err.message : "Could not record the verdict");
+    } finally {
+      setRuling("");
+    }
+  }
+
+  async function handleWithdrawFlag() {
+    setRuling("WITHDRAW");
+    setVerdictError("");
+    try {
+      await api.post(`/api/v1/service-cases/${id}/irreparable/withdraw`, {});
+      await fetchCase();
+    } catch (err) {
+      setVerdictError(err instanceof Error ? err.message : "Could not withdraw the flag");
+    } finally {
+      setRuling("");
+    }
+  }
 
   async function handleStatusUpdate(e: React.FormEvent) {
     e.preventDefault();
@@ -385,6 +429,141 @@ export default function ServiceCaseDetailPage() {
             <p className="font-head font-medium uppercase" style={{ fontSize: "var(--w-fs-label)", color: "var(--w-attention-fg)", letterSpacing: "0.06em", marginBottom: "var(--w-s-2)" }}>Cancellation Reason</p>
             <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-attention-fg)" }}>{sc.cancellationReason}</p>
           </div>
+        )}
+
+        {sc.irreparableState && sc.irreparableState !== "WITHDRAWN" && (
+          <SectionPanel>
+            <div className="flex items-center justify-between" style={{ marginBottom: "var(--w-s-3)", flexWrap: "wrap", gap: "var(--w-s-2)" }}>
+              <h2 style={{ ...sectionHeadStyle, marginBottom: 0 }}>Irreparable Assessment</h2>
+              <StatusBadge
+                status={sc.irreparableState === "CONFIRMED" ? "REJECTED" : sc.irreparableState === "SECOND_CHANCE" ? "ON_HOLD" : "PENDING"}
+                variant="row"
+              />
+            </div>
+
+            <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", marginBottom: "var(--w-s-3)" }}>
+              {IRREPARABLE_LABEL[sc.irreparableState]}
+              {sc.irreparableProposedAt && ` \u00b7 raised ${new Date(sc.irreparableProposedAt).toLocaleDateString("en-IN")}`}
+            </p>
+
+            {sc.irreparableReason && (
+              <div style={{ background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-3) var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+                <p style={{ ...labelStyle, marginBottom: "var(--w-s-1)" }}>Technician&rsquo;s assessment</p>
+                <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-attention-fg)", lineHeight: 1.6 }}>
+                  {sc.irreparableReason}
+                </p>
+              </div>
+            )}
+
+            {sc.irreparableState === "SECOND_CHANCE" && (
+              <p style={{ background: "var(--w-waiting-tint)", border: "1px solid var(--w-waiting-edge)", color: "#573b0c", padding: "var(--w-s-3) var(--w-s-4)", fontSize: "var(--w-fs-body)", lineHeight: 1.6, marginBottom: "var(--w-s-4)" }}>
+                The technician&rsquo;s irreparable call still stands while repair continues. Withdraw it
+                if the instrument is saved, or confirm it if the second attempt also fails.
+                {sc.irreparableVerdictNote && <><br /><strong>Your note:</strong> {sc.irreparableVerdictNote}</>}
+              </p>
+            )}
+
+            {sc.irreparableState === "PROPOSED" && (
+              <>
+                <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)", marginBottom: "var(--w-s-3)" }}>
+                  Review the diagnosis photos below before deciding.
+                </p>
+                <label style={labelStyle}>Note to the technician (optional)</label>
+                <input
+                  style={{ ...inputStyle, marginBottom: "var(--w-s-3)" }}
+                  value={verdictNote}
+                  onChange={e => setVerdictNote(e.target.value)}
+                  placeholder="Try a donor objective from the parts bin"
+                />
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => handleVerdict("CONFIRMED")}
+                    disabled={ruling !== ""}
+                    className="font-head font-semibold uppercase"
+                    style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", background: "var(--w-attention-solid)", color: "#fff", border: "none", cursor: ruling ? "not-allowed" : "pointer" }}
+                  >
+                    {ruling === "CONFIRMED" ? "Confirming\u2026" : "Confirm irreparable"}
+                  </button>
+                  <button
+                    onClick={() => handleVerdict("SECOND_CHANCE")}
+                    disabled={ruling !== ""}
+                    className="font-head font-semibold uppercase"
+                    style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", background: "var(--w-accent-strong)", color: "#fff", border: "none", cursor: ruling ? "not-allowed" : "pointer" }}
+                  >
+                    {ruling === "SECOND_CHANCE" ? "Saving\u2026" : "Give it a chance"}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {sc.irreparableState === "SECOND_CHANCE" && (
+              <button
+                onClick={handleWithdrawFlag}
+                disabled={ruling !== ""}
+                className="font-head font-semibold uppercase"
+                style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", background: "var(--w-success-tint)", color: "var(--w-success-fg)", border: "1px solid var(--w-success-edge)", cursor: ruling ? "not-allowed" : "pointer" }}
+              >
+                {ruling === "WITHDRAW" ? "Withdrawing\u2026" : "Instrument was saved \u2014 withdraw flag"}
+              </button>
+            )}
+
+            {verdictError && (
+              <p style={{ marginTop: "var(--w-s-3)", color: "var(--w-attention-fg)", background: "var(--w-attention-tint)", border: "1px solid var(--w-attention-edge)", padding: "var(--w-s-2) var(--w-s-3)", fontSize: "var(--w-fs-body)" }}>
+                {verdictError}
+              </p>
+            )}
+          </SectionPanel>
+        )}
+
+        {(photos.technician.length > 0 || photos.customer.length > 0) && (
+          <SectionPanel>
+            <h2 style={sectionHeadStyle}>Photos</h2>
+
+            {photos.technician.length > 0 && (
+              <div style={{ marginBottom: "var(--w-s-5)" }}>
+                <p style={{ ...labelStyle, marginBottom: "var(--w-s-2)" }}>
+                  Technician diagnosis ({photos.technician.length})
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(140px, 100%), 1fr))", gap: "var(--w-s-3)" }}>
+                  {photos.technician.map(p => (
+                    <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" title={`${p.fileName} \u00b7 ${p.uploadedBy}`}>
+                      <img
+                        src={p.url}
+                        alt={p.fileName}
+                        style={{ width: "100%", aspectRatio: "1", objectFit: "cover", border: "1px solid var(--w-border)", display: "block" }}
+                      />
+                      <span style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)", display: "block", marginTop: "4px" }}>
+                        {new Date(p.uploadedAt).toLocaleDateString("en-IN")} \u00b7 {p.uploadedBy}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <p style={{ ...labelStyle, marginBottom: "var(--w-s-2)" }}>
+                From the customer ({photos.customer.length})
+              </p>
+              {photos.customer.length === 0 ? (
+                <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>
+                  The customer did not send any photos.
+                </p>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(140px, 100%), 1fr))", gap: "var(--w-s-3)" }}>
+                  {photos.customer.map(p => (
+                    <a key={p.url} href={p.url} target="_blank" rel="noopener noreferrer" title={p.source}>
+                      <img
+                        src={p.url}
+                        alt="Reported by the customer"
+                        style={{ width: "100%", aspectRatio: "1", objectFit: "cover", border: "1px solid var(--w-border)", display: "block" }}
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </SectionPanel>
         )}
 
         {nextStatuses.length > 0 && (
