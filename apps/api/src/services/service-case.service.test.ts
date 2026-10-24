@@ -4,11 +4,13 @@ import { NotFoundError, ValidationError } from "../lib/errors.js";
 import * as orgRepo from "../repositories/organization.repository.js";
 import * as productRepo from "../repositories/product.repository.js";
 import * as caseRepo from "../repositories/service-case.repository.js";
+import * as techRepo from "../repositories/technician.repository.js";
 import { editCase, getCase, listCases, openCase } from "./service-case.service.js";
 
 vi.mock("../repositories/organization.repository.js");
 vi.mock("../repositories/product.repository.js");
 vi.mock("../repositories/service-case.repository.js");
+vi.mock("../repositories/technician.repository.js");
 
 const actor = { id: "user-1", role: UserRole.ADMIN };
 
@@ -70,7 +72,79 @@ const mockCase = {
   ticket: null,
 };
 
+const techActor = { id: "tech-user-1", role: UserRole.TECHNICIAN };
+
+const mockTechProfile = {
+  id: "tech-1",
+  employeeId: "EMP-001",
+  phone: null,
+  specializations: [],
+  isActive: true,
+  createdAt: new Date("2026-01-01"),
+  updatedAt: new Date("2026-01-01"),
+  user: { id: "tech-user-1", name: "Ravi Sharma", email: "tech@welfo.local" },
+};
+
 beforeEach(() => vi.clearAllMocks());
+
+describe("technician scoping", () => {
+  it("forces a technician's case list to their own assignments", async () => {
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(mockTechProfile);
+    vi.mocked(caseRepo.findCases).mockResolvedValue([]);
+
+    await listCases({ status: ServiceCaseStatus.IN_REPAIR }, techActor);
+
+    expect(caseRepo.findCases).toHaveBeenCalledWith(
+      expect.objectContaining({ technicianId: "tech-1" }),
+    );
+  });
+
+  it("ignores a technicianId the technician tries to pass in", async () => {
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(mockTechProfile);
+    vi.mocked(caseRepo.findCases).mockResolvedValue([]);
+
+    await listCases({ technicianId: "someone-else" }, techActor);
+
+    expect(caseRepo.findCases).toHaveBeenCalledWith(
+      expect.objectContaining({ technicianId: "tech-1" }),
+    );
+  });
+
+  it("does not scope admins", async () => {
+    vi.mocked(caseRepo.findCases).mockResolvedValue([mockCase]);
+
+    await listCases({}, actor);
+
+    expect(techRepo.findTechnicianByUserId).not.toHaveBeenCalled();
+    expect(caseRepo.findCases).toHaveBeenCalledWith({});
+  });
+
+  it("hides a case assigned to a different technician", async () => {
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(mockTechProfile);
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue({
+      ...mockCase,
+      technician: { id: "tech-other", user: { id: "u9", name: "Someone Else" } },
+    });
+
+    await expect(getCase("case-1", techActor)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("allows a technician their own case", async () => {
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(mockTechProfile);
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue({
+      ...mockCase,
+      technician: { id: "tech-1", user: { id: "tech-user-1", name: "Ravi Sharma" } },
+    });
+
+    const result = await getCase("case-1", techActor);
+    expect(result.caseNumber).toBe("WFC-2026-0001");
+  });
+
+  it("rejects a TECHNICIAN role with no technician profile", async () => {
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(null);
+    await expect(listCases({}, techActor)).rejects.toBeInstanceOf(NotFoundError);
+  });
+});
 
 describe("listCases", () => {
   it("returns all cases", async () => {
