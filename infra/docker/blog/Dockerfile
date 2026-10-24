@@ -15,6 +15,8 @@ RUN npm ci
 FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN npm run build --workspace=@welfo/blog
 
 FROM base AS runner
@@ -23,6 +25,7 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 welfo
 COPY --from=builder --chown=welfo:nodejs /app/apps/blog/.next/standalone ./
 COPY --from=builder --chown=welfo:nodejs /app/apps/blog/.next/static ./apps/blog/.next/static
+COPY --from=builder --chown=welfo:nodejs /app/apps/blog/public ./apps/blog/public
 USER welfo
 EXPOSE 3002
 ENV PORT=3002

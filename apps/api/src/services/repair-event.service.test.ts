@@ -124,3 +124,42 @@ describe("addRepairEvent", () => {
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 });
+
+describe("addRepairEvent as a technician", () => {
+  const techActor = { id: "user-1", role: UserRole.TECHNICIAN };
+
+  it("resolves the technician profile by user id, not technician id", async () => {
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue(makeCase(ServiceCaseStatus.IN_REPAIR));
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(mockTech);
+    vi.mocked(repairEventRepo.createRepairEvent).mockResolvedValue({} as never);
+
+    await addRepairEvent(
+      "case-1",
+      { eventType: RepairEventType.NOTE, description: "Replaced fiber bundle" },
+      techActor,
+    );
+
+    expect(techRepo.findTechnicianByUserId).toHaveBeenCalledWith("user-1");
+    expect(repairEventRepo.createRepairEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ technicianId: "tech-1" }),
+    );
+  });
+
+  it("throws NotFoundError when the user has no technician profile", async () => {
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue(makeCase(ServiceCaseStatus.IN_REPAIR));
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue(null);
+
+    await expect(
+      addRepairEvent("case-1", { eventType: RepairEventType.NOTE, description: "x" }, techActor),
+    ).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("refuses when the technician is not assigned to the case", async () => {
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue(makeCase(ServiceCaseStatus.IN_REPAIR));
+    vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue({ ...mockTech, id: "tech-other" });
+
+    await expect(
+      addRepairEvent("case-1", { eventType: RepairEventType.NOTE, description: "x" }, techActor),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+});

@@ -9,20 +9,24 @@ import {
   Package,
   Wrench,
   Ticket,
+  Inbox,
   FileText,
   Receipt,
-  Users,
+  HardHat,
+  ShieldCheck,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin-dashboard", label: "Dashboard",      icon: LayoutDashboard },
   { href: "/organizations",   label: "Organizations",  icon: Building2 },
   { href: "/products",        label: "Products",        icon: Package },
+  { href: "/inquiries",       label: "Web Inquiries",   icon: Inbox },
   { href: "/service-cases",   label: "Service Cases",   icon: Wrench },
   { href: "/tickets",         label: "Tickets",         icon: Ticket },
   { href: "/quotes",          label: "Quotes",          icon: FileText },
   { href: "/invoices",        label: "Invoices",        icon: Receipt },
-  { href: "/technicians",     label: "Technicians",     icon: Users },
+  { href: "/technicians",     label: "Technicians",     icon: HardHat },
+  { href: "/users",           label: "Users",           icon: ShieldCheck },
 ];
 
 export default function Sidebar() {

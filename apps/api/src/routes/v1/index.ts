@@ -1,19 +1,25 @@
 import { Hono } from "hono";
 import { authRouter } from "./auth/index.js";
+import { inquiriesRouter } from "./inquiries/index.js";
 import { invoicesRouter } from "./invoices/index.js";
 import { organizationsRouter } from "./organizations/index.js";
 import { portalAuthRouter } from "./portal/auth/index.js";
+import { portalInquiriesRouter } from "./portal/inquiries/index.js";
+import { portalTrackRouter } from "./portal/track/index.js";
 import { productModelsRouter } from "./product-models/index.js";
 import { productsRouter } from "./products/index.js";
 import { quotesRouter } from "./quotes/index.js";
 import { serviceCasesRouter } from "./service-cases/index.js";
 import { techniciansRouter } from "./technicians/index.js";
 import { ticketsRouter } from "./tickets/index.js";
+import { usersRouter } from "./users/index.js";
 
 export const v1Router = new Hono();
 
 v1Router.route("/auth", authRouter);
 v1Router.route("/portal/auth", portalAuthRouter);
+v1Router.route("/portal/inquiries", portalInquiriesRouter);
+v1Router.route("/portal/track", portalTrackRouter);
 v1Router.route("/organizations", organizationsRouter);
 v1Router.route("/product-models", productModelsRouter);
 v1Router.route("/products", productsRouter);
@@ -22,3 +28,5 @@ v1Router.route("/service-cases", serviceCasesRouter);
 v1Router.route("/technicians", techniciansRouter);
 v1Router.route("/quotes", quotesRouter);
 v1Router.route("/invoices", invoicesRouter);
+v1Router.route("/inquiries", inquiriesRouter);
+v1Router.route("/users", usersRouter);
