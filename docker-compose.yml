@@ -127,6 +127,20 @@ services:
     networks:
       - welfo
 
+  tech:
+    build:
+      context: .
+      dockerfile: infra/docker/tech/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: production
+    networks:
+      - welfo
+
   # ---------------------------------------------------------------------------
   # monitoring
   # ---------------------------------------------------------------------------
