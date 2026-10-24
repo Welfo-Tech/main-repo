@@ -12,6 +12,7 @@ import { quotesRouter } from "./quotes/index.js";
 import { serviceCasesRouter } from "./service-cases/index.js";
 import { techniciansRouter } from "./technicians/index.js";
 import { ticketsRouter } from "./tickets/index.js";
+import { usersRouter } from "./users/index.js";
 
 export const v1Router = new Hono();
 
@@ -28,3 +29,4 @@ v1Router.route("/technicians", techniciansRouter);
 v1Router.route("/quotes", quotesRouter);
 v1Router.route("/invoices", invoicesRouter);
 v1Router.route("/inquiries", inquiriesRouter);
+v1Router.route("/users", usersRouter);

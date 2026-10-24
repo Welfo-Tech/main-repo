@@ -23,6 +23,7 @@ const mockUser = {
   email: "ravi@welfo.local",
   role: UserRole.TECHNICIAN,
   isActive: true,
+  lastLoginAt: null,
 };
 
 const mockTech = {

@@ -12,7 +12,8 @@ import {
   Inbox,
   FileText,
   Receipt,
-  Users,
+  HardHat,
+  ShieldCheck,
 } from "lucide-react";
 
 const NAV = [
@@ -24,7 +25,8 @@ const NAV = [
   { href: "/tickets",         label: "Tickets",         icon: Ticket },
   { href: "/quotes",          label: "Quotes",          icon: FileText },
   { href: "/invoices",        label: "Invoices",        icon: Receipt },
-  { href: "/technicians",     label: "Technicians",     icon: Users },
+  { href: "/technicians",     label: "Technicians",     icon: HardHat },
+  { href: "/users",           label: "Users",           icon: ShieldCheck },
 ];
 
 export default function Sidebar() {
