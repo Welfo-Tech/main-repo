@@ -1,5 +1,6 @@
 import { type AttachmentCategory } from "@repo/db";
-import { ValidationError } from "../lib/errors.js";
+import { ServiceUnavailableError, ValidationError } from "../lib/errors.js";
+import { logger } from "../logger.js";
 import { type UploadTarget, createUploadTargetsAt, publicUrlFor } from "../lib/storage.js";
 import type { AuthUser } from "../middleware/auth.js";
 import {
@@ -61,10 +62,24 @@ export async function createCasePhotoUploads(
   }
 
   const category = input.category ?? "DIAGNOSIS_PHOTO";
-  const uploads = await createUploadTargetsAt(`cases/${caseId}/${category.toLowerCase()}`, input.fileNames);
+
+  // Storage lives behind a third party that can be paused or unreachable.
+  // Surface that as a clear, retryable message rather than an opaque 500.
+  let uploads;
+  try {
+    uploads = await createUploadTargetsAt(
+      `cases/${caseId}/${category.toLowerCase()}`,
+      input.fileNames,
+    );
+  } catch (err) {
+    logger.warn({ err, caseId }, "photo storage unreachable");
+    throw new ServiceUnavailableError(
+      "photo storage is unavailable right now — your other changes still saved, please try the photos again shortly",
+    );
+  }
 
   if (uploads.length === 0) {
-    throw new ValidationError("photo storage is not configured");
+    throw new ServiceUnavailableError("photo storage is not configured");
   }
 
   await createCaseAttachments(
