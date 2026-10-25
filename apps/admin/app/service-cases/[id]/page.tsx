@@ -8,6 +8,8 @@ import StatusBadge from "../../../components/common/StatusBadge";
 import PriorityBar from "../../../components/common/PriorityBar";
 import { api } from "../../../lib/api";
 import type { CasePhotos, ServiceCase, ServiceCaseStatus } from "../../../types/service-case";
+import type { Quote } from "../../../types/quote";
+import { STATUS_LABELS as QUOTE_STATUS_LABELS, formatINR } from "../../../types/quote";
 import { IRREPARABLE_LABEL, PRIORITY_LABELS, STATUS_LABELS, TYPE_LABELS } from "../../../types/service-case";
 import type {
   DispatchRecord,
@@ -145,6 +147,8 @@ export default function ServiceCaseDetailPage() {
   const [addingEvent, setAddingEvent] = useState(false);
   const [addEventError, setAddEventError] = useState("");
 
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [authorising, setAuthorising] = useState(false);
   const [photos, setPhotos] = useState<CasePhotos>({ customer: [], technician: [] });
   const [verdictNote, setVerdictNote] = useState("");
   const [ruling, setRuling] = useState("");
@@ -203,6 +207,14 @@ export default function ServiceCaseDetailPage() {
     }
   }, [id]);
 
+  const fetchQuotes = useCallback(async () => {
+    try {
+      setQuotes(await api.get<Quote[]>(`/api/v1/quotes?caseId=${id}`));
+    } catch {
+      // non-critical
+    }
+  }, [id]);
+
   const fetchTechnicians = useCallback(async () => {
     try {
       const data = await api.get<Technician[]>("/api/v1/technicians?isActive=true");
@@ -218,7 +230,21 @@ export default function ServiceCaseDetailPage() {
     fetchDispatches();
     fetchTechnicians();
     fetchPhotos();
-  }, [fetchCase, fetchRepairEvents, fetchDispatches, fetchTechnicians, fetchPhotos]);
+    fetchQuotes();
+  }, [fetchCase, fetchRepairEvents, fetchDispatches, fetchTechnicians, fetchPhotos, fetchQuotes]);
+
+  async function handleAuthoriseWork() {
+    setAuthorising(true);
+    setUpdateError("");
+    try {
+      await api.patch(`/api/v1/service-cases/${id}`, { status: "WORK_AUTHORIZED" });
+      await fetchCase();
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : "Could not authorise work");
+    } finally {
+      setAuthorising(false);
+    }
+  }
 
   async function handleVerdict(verdict: "CONFIRMED" | "SECOND_CHANCE") {
     setRuling(verdict);
@@ -365,6 +391,10 @@ export default function ServiceCaseDetailPage() {
   }
 
   const nextStatuses = STATUS_TRANSITIONS[sc.status] ?? [];
+  const approvedQuote = quotes.find(q => q.status === "APPROVED") ?? null;
+  // The customer has decided but work is not authorised until staff confirm.
+  const awaitingAuthorisation =
+    sc.status === "AWAITING_QUOTE_APPROVAL" ? approvedQuote : null;
   const isWorkable = WORKABLE_STATUSES.has(sc.status);
 
   return (
@@ -430,6 +460,91 @@ export default function ServiceCaseDetailPage() {
             <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-attention-fg)" }}>{sc.cancellationReason}</p>
           </div>
         )}
+
+        <SectionPanel>
+          <div className="flex items-center justify-between" style={{ marginBottom: "var(--w-s-3)", flexWrap: "wrap", gap: "var(--w-s-2)" }}>
+            <h2 style={{ ...sectionHeadStyle, marginBottom: 0 }}>Quotes</h2>
+            <Link
+              href={`/quotes?caseId=${sc.id}`}
+              style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-link)", fontFamily: "var(--w-font-head)", fontWeight: 600 }}
+            >
+              All quotes &rarr;
+            </Link>
+          </div>
+
+          {awaitingAuthorisation && (
+            <div style={{ background: "var(--w-success-tint)", border: "1px solid var(--w-success-edge)", padding: "var(--w-s-3) var(--w-s-4)", marginBottom: "var(--w-s-4)" }}>
+              <p style={{ fontSize: "var(--w-fs-body)", color: "var(--w-success-fg)", lineHeight: 1.6, marginBottom: "var(--w-s-3)" }}>
+                <strong>{awaitingAuthorisation.approvedByName}</strong> approved{" "}
+                {awaitingAuthorisation.quoteNumber}
+                {awaitingAuthorisation.approvedAt && ` on ${new Date(awaitingAuthorisation.approvedAt).toLocaleDateString("en-IN")}`}
+                {awaitingAuthorisation.approvalMethod === "PORTAL" ? " from the website" : ""}.
+                Work is not authorised until you confirm.
+              </p>
+              <button
+                onClick={handleAuthoriseWork}
+                disabled={authorising}
+                className="font-head font-semibold uppercase"
+                style={{ height: "var(--w-control-h)", paddingInline: "var(--w-s-4)", fontSize: "var(--w-fs-label)", letterSpacing: "0.06em", background: "var(--w-success-fg)", color: "#fff", border: "none", cursor: authorising ? "not-allowed" : "pointer" }}
+              >
+                {authorising ? "Authorising\u2026" : "Authorise work"}
+              </button>
+            </div>
+          )}
+
+          {quotes.length === 0 ? (
+            <p style={{ fontSize: "var(--w-fs-caption)", color: "var(--w-text-mute)" }}>
+              No quote raised for this case yet.
+            </p>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "480px" }}>
+                <thead>
+                  <tr style={{ background: "var(--w-sunken)" }}>
+                    {["Quote", "Ver.", "Total", "Status", "Approved by", ""].map(h => (
+                      <th key={h} style={{ ...labelStyle, textAlign: "left", padding: "var(--w-s-2) var(--w-s-3)", marginBottom: 0 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {quotes.map(q => (
+                    <tr key={q.id} style={{ borderBottom: "1px solid var(--w-border-soft)" }}>
+                      <td style={{ padding: "var(--w-s-2) var(--w-s-3)", fontSize: "var(--w-fs-cell)", fontFamily: "var(--w-font-head)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                        {q.quoteNumber}
+                      </td>
+                      <td style={{ padding: "var(--w-s-2) var(--w-s-3)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>v{q.version}</td>
+                      <td className="w-num" style={{ padding: "var(--w-s-2) var(--w-s-3)", fontSize: "var(--w-fs-cell)", fontWeight: 500, whiteSpace: "nowrap" }}>
+                        {formatINR(q.totalAmount)}
+                      </td>
+                      <td style={{ padding: "var(--w-s-2) var(--w-s-3)" }}>
+                        <StatusBadge status={q.status} variant="row" />
+                      </td>
+                      <td style={{ padding: "var(--w-s-2) var(--w-s-3)", fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>
+                        {q.approvedByName ?? "\u2014"}
+                        {q.approvalMethod === "PORTAL" && (
+                          <span style={{ color: "var(--w-success-fg)" }}> (website)</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "var(--w-s-2) var(--w-s-3)" }}>
+                        <Link href={`/quotes/${q.id}`} style={{ color: "var(--w-link)", fontSize: "var(--w-fs-caption)", fontFamily: "var(--w-font-head)", fontWeight: 600 }}>
+                          Open &rarr;
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {approvedQuote && sc.status !== "AWAITING_QUOTE_APPROVAL" && (
+            <p style={{ marginTop: "var(--w-s-3)", fontSize: "var(--w-fs-caption)", color: "var(--w-text-2)" }}>
+              Invoice this case from the{" "}
+              <Link href={`/invoices`} style={{ color: "var(--w-link)", fontWeight: 500 }}>Invoices</Link>{" "}
+              page using {approvedQuote.quoteNumber}.
+            </p>
+          )}
+        </SectionPanel>
 
         {sc.irreparableState && sc.irreparableState !== "WITHDRAWN" && (
           <SectionPanel>
