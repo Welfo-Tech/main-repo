@@ -156,3 +156,36 @@ export function notifyQcPending(caseId: string, caseNumber: string, technicianNa
     }
   });
 }
+
+export function notifyQuoteDecision(
+  caseId: string,
+  quoteNumber: string,
+  decision: "APPROVE" | "REJECT",
+  approverName: string,
+  reason: string | null,
+) {
+  safely("quote-decision", async () => {
+    const approved = decision === "APPROVE";
+    for (const email of await staffEmails()) {
+      queueMail({
+        to: email,
+        subject: approved
+          ? `Quote approved by the customer — ${quoteNumber}`
+          : `Quote declined — ${quoteNumber}`,
+        heading: approved
+          ? `${approverName} approved ${quoteNumber}`
+          : `${approverName} declined ${quoteNumber}`,
+        lines: approved
+          ? [
+              "The customer approved this quote from the website.",
+              "Work is not authorised yet — open the case and confirm before the technician starts.",
+            ]
+          : [
+              "The customer declined this quote.",
+              ...(reason ? [`Reason given: ${reason}`] : []),
+            ],
+        action: { label: "Open the case", url: caseUrl(caseId) },
+      });
+    }
+  });
+}
