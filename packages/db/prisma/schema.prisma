@@ -375,6 +375,7 @@ model Product {
   ownerOrg     Organization?   @relation(fields: [ownerOrgId], references: [id])
   serviceCases ServiceCase[]
   webInquiries WebInquiry[]
+  tickets      Ticket[]
 
   @@index([serialNumber])
   @@index([ownerOrgId])
@@ -484,11 +485,13 @@ model Ticket {
 
   organization Organization     @relation(fields: [organizationId], references: [id])
   contact      CustomerContact? @relation(fields: [contactId], references: [id])
+  product      Product?         @relation(fields: [productId], references: [id])
   creator      User             @relation("TicketCreatedBy", fields: [createdBy], references: [id])
   serviceCase  ServiceCase?
 
   @@index([ticketNumber])
   @@index([organizationId])
+  @@index([productId])
   @@index([status])
   @@index([createdAt])
   @@map("tickets")

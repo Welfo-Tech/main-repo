@@ -1,9 +1,10 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
+    exclude: [...configDefaults.exclude, "src/**/*.integration.test.ts"],
     env: {
       DATABASE_URL: "postgresql://test:test@localhost:5432/welfo_test",
       NODE_ENV: "test",
