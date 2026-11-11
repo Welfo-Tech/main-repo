@@ -5,6 +5,8 @@ import { requireRole } from "../../../middleware/require-role.js";
 import * as caseService from "../../../services/service-case.service.js";
 import * as dispatchService from "../../../services/dispatch.service.js";
 import * as repairEventService from "../../../services/repair-event.service.js";
+import * as photoService from "../../../services/case-photo.service.js";
+import * as workbench from "../../../services/technician-workbench.service.js";
 import {
   AssignTechnicianSchema,
   CreateCaseSchema,
@@ -14,6 +16,12 @@ import {
   UpdateCaseSchema,
   UpdateDispatchSchema,
 } from "./schema.js";
+import {
+  AdvanceStatusSchema,
+  CasePhotoUploadSchema,
+  IrreparableVerdictSchema,
+  ProposeIrreparableSchema,
+} from "./workbench-schema.js";
 
 export const serviceCasesRouter = new Hono();
 
@@ -134,5 +142,77 @@ serviceCasesRouter.patch(
       c.get("user"),
     );
     return c.json(dispatch, 200);
+  },
+);
+
+serviceCasesRouter.get("/:id/photos", async (c) => {
+  const photos = await photoService.listCasePhotos(c.req.param("id")!, c.get("user"));
+  return c.json(photos, 200);
+});
+
+serviceCasesRouter.post(
+  "/:id/photos",
+  requireRole("ADMIN", "OPERATIONS", "TECHNICIAN"),
+  validate("json", CasePhotoUploadSchema),
+  async (c) => {
+    const data = c.req.valid("json");
+    const result = await photoService.createCasePhotoUploads(
+      c.req.param("id")!,
+      data,
+      c.get("user"),
+    );
+    return c.json(result, 201);
+  },
+);
+
+serviceCasesRouter.patch(
+  "/:id/progress",
+  requireRole("ADMIN", "OPERATIONS", "TECHNICIAN"),
+  validate("json", AdvanceStatusSchema),
+  async (c) => {
+    const { status, note } = c.req.valid("json");
+    const sc = await workbench.advanceCaseStatus(
+      c.req.param("id")!,
+      status,
+      note,
+      c.get("user"),
+    );
+    return c.json(sc, 200);
+  },
+);
+
+serviceCasesRouter.post(
+  "/:id/irreparable",
+  requireRole("TECHNICIAN", "ADMIN", "OPERATIONS"),
+  validate("json", ProposeIrreparableSchema),
+  async (c) => {
+    const { reason } = c.req.valid("json");
+    const sc = await workbench.proposeIrreparable(c.req.param("id")!, reason, c.get("user"));
+    return c.json(sc, 201);
+  },
+);
+
+serviceCasesRouter.post(
+  "/:id/irreparable/verdict",
+  requireRole("ADMIN", "OPERATIONS"),
+  validate("json", IrreparableVerdictSchema),
+  async (c) => {
+    const { verdict, note } = c.req.valid("json");
+    const sc = await workbench.ruleOnIrreparable(
+      c.req.param("id")!,
+      verdict,
+      note,
+      c.get("user"),
+    );
+    return c.json(sc, 200);
+  },
+);
+
+serviceCasesRouter.post(
+  "/:id/irreparable/withdraw",
+  requireRole("ADMIN", "OPERATIONS", "TECHNICIAN"),
+  async (c) => {
+    const sc = await workbench.withdrawIrreparable(c.req.param("id")!, c.get("user"));
+    return c.json(sc, 200);
   },
 );

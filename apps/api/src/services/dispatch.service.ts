@@ -9,7 +9,7 @@ import {
   findDispatchesByCaseId,
   updateDispatch,
 } from "../repositories/dispatch.repository.js";
-import { findCaseById } from "../repositories/service-case.repository.js";
+import { requireCaseForActor } from "./service-case.service.js";
 
 const DISPATCH_STATUS_TRANSITIONS: Record<DispatchStatus, DispatchStatus[]> = {
   [DispatchStatus.PENDING]: [DispatchStatus.DISPATCHED],
@@ -20,20 +20,14 @@ const DISPATCH_STATUS_TRANSITIONS: Record<DispatchStatus, DispatchStatus[]> = {
   [DispatchStatus.RETURNED]: [],
 };
 
-async function requireCase(id: string) {
-  const sc = await findCaseById(id);
-  if (!sc) throw new NotFoundError("service case not found");
-  return sc;
-}
-
 async function requireDispatch(id: string) {
   const dispatch = await findDispatchById(id);
   if (!dispatch) throw new NotFoundError("dispatch record not found");
   return dispatch;
 }
 
-export async function listDispatches(caseId: string, _actor: AuthUser) {
-  await requireCase(caseId);
+export async function listDispatches(caseId: string, actor: AuthUser) {
+  await requireCaseForActor(caseId, actor);
   return findDispatchesByCaseId(caseId);
 }
 
@@ -51,9 +45,9 @@ export interface CreateDispatchInput {
 export async function createCaseDispatch(
   caseId: string,
   input: CreateDispatchInput,
-  _actor: AuthUser,
+  actor: AuthUser,
 ) {
-  await requireCase(caseId);
+  await requireCaseForActor(caseId, actor);
 
   const data: CreateDispatchData = {
     caseId,
@@ -81,9 +75,9 @@ export async function updateCaseDispatch(
   caseId: string,
   dispatchId: string,
   input: UpdateDispatchInput,
-  _actor: AuthUser,
+  actor: AuthUser,
 ) {
-  await requireCase(caseId);
+  await requireCaseForActor(caseId, actor);
   const dispatch = await requireDispatch(dispatchId);
 
   if (dispatch.caseId !== caseId) {

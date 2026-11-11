@@ -102,3 +102,71 @@ export async function submitInquiry(payload: InquiryPayload): Promise<SubmitResu
 
   return res.json() as Promise<SubmitResult>;
 }
+
+export interface PortalQuote {
+  found: boolean;
+  reference?: string;
+  instrument?: { serialNumber: string; model: string | null };
+  quote?: {
+    quoteNumber: string;
+    version: number;
+    status: string;
+    currency: string;
+    subtotal: string;
+    taxAmount: string;
+    totalAmount: string;
+    validUntil: string | null;
+    terms: string | null;
+    approvedByName: string | null;
+    approvedAt: string | null;
+    lineItems: {
+      description: string;
+      quantity: string;
+      unitPrice: string;
+      discountPct: string;
+      taxRate: string;
+      lineTotal: string;
+    }[];
+  };
+}
+
+export async function fetchQuote(ref: string, email: string): Promise<PortalQuote> {
+  const qs = new URLSearchParams({ ref, email });
+  const res = await fetch(`${BASE}/api/v1/portal/quotes?${qs.toString()}`);
+  if (!res.ok) return { found: false };
+  return res.json() as Promise<PortalQuote>;
+}
+
+export async function decideQuote(input: {
+  ref: string;
+  email: string;
+  decision: "APPROVE" | "REJECT";
+  approverName: string;
+  reason?: string;
+}): Promise<{ quoteNumber: string; status: string }> {
+  const res = await fetch(`${BASE}/api/v1/portal/quotes/decision`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (res.status === 429) {
+    throw new Error("Too many attempts. Please wait a few minutes or call us.");
+  }
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? "Could not record your decision. Please call us.");
+  }
+
+  return res.json() as Promise<{ quoteNumber: string; status: string }>;
+}
+
+export function formatINR(v: string): string {
+  const n = Number(v);
+  if (Number.isNaN(n)) return v;
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(n);
+}

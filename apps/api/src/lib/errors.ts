@@ -43,3 +43,9 @@ export class RateLimitError extends AppError {
     super(429, message);
   }
 }
+
+export class ServiceUnavailableError extends AppError {
+  constructor(message: string) {
+    super(503, message);
+  }
+}
