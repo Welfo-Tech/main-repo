@@ -1,0 +1,126 @@
+/* WELFO OPERATIONS PLATFORM — DESIGN TOKENS v1.0 */
+
+:root {
+  --w-canvas:            #f2f2f3;
+  --w-plate:             #ffffff;
+  --w-sunken:            #e9e9ea;
+  --w-ink:               #1d2d3d;
+  --w-ink-raised:        #2c455d;
+
+  --w-row-hover:         rgba(29, 31, 32, 0.045);
+  --w-row-selected:      #eef6ff;
+  --w-overlay-scrim:     rgba(29, 31, 32, 0.45);
+
+  --w-border:            rgba(29, 31, 32, 0.16);
+  --w-border-soft:       rgba(29, 31, 32, 0.08);
+  --w-border-strong:     #b7b7ba;
+  --w-border-ink:        rgba(242, 242, 243, 0.16);
+  --w-border-focus:      #416180;
+
+  --w-text-1:            #1d1f20;
+  --w-text-2:            #5d5d60;
+  --w-text-mute:         #7a7a7d;
+  --w-text-invert:       #f2f2f3;
+  --w-text-invert-2:     #9ebbd8;
+  --w-link:              #416180;
+
+  --w-accent:            #5980a6;
+  --w-accent-strong:     #416180;
+  --w-accent-deep:       #2c455d;
+  --w-accent-tint:       #eef6ff;
+  --w-accent-tint-2:     #d6ebff;
+
+  --w-brand:             #0f8a3d;
+
+  --w-neutral-dot:       #7a7a7d;
+  --w-neutral-tint:      #f5f5f8;
+  --w-neutral-edge:      #d4d4d7;
+  --w-neutral-fg:        #424244;
+
+  --w-progress-dot:      #5980a6;
+  --w-progress-tint:     #eef6ff;
+  --w-progress-edge:     #b5d9fd;
+  --w-progress-fg:       #2c455d;
+
+  --w-waiting-dot:       #b07d17;
+  --w-waiting-tint:      #fbf1dd;
+  --w-waiting-edge:      #ecd39b;
+  --w-waiting-fg:        #573b0c;
+
+  --w-attention-dot:     #c0392b;
+  --w-attention-tint:    #fdeeec;
+  --w-attention-edge:    #f3c3bb;
+  --w-attention-fg:      #642016;
+  --w-attention-solid:   #8c2f22;
+
+  --w-success-dot:       #1f6b3c;
+  --w-success-tint:      #e9f5ec;
+  --w-success-edge:      #b6ddc2;
+  --w-success-fg:        #14492a;
+
+  --w-terminal-dot:      #424244;
+  --w-terminal-tint:     #424244;
+  --w-terminal-edge:     #424244;
+  --w-terminal-fg:       #f5f5f8;
+
+  --w-prio-critical:     #c0392b;
+  --w-prio-high:         #b07d17;
+  --w-prio-normal:       #7a7a7d;
+  --w-prio-low:          #c8c8cb;
+
+  --w-font-head:  "Barlow Condensed", system-ui, sans-serif;
+  --w-font-body:  "Barlow", system-ui, sans-serif;
+
+  --w-fs-metric:      30px;
+  --w-fs-page:        26px;
+  --w-fs-section:     18px;
+  --w-fs-subsection:  15px;
+  --w-fs-body:        14px;
+  --w-fs-cell:        13px;
+  --w-fs-caption:     12px;
+  --w-fs-label:       12px;
+  --w-fs-eyebrow:     11px;
+  --w-fs-badge:       11px;
+
+  --w-s-1: 4px;  --w-s-2: 8px;  --w-s-3: 12px; --w-s-4: 16px;
+  --w-s-5: 24px; --w-s-6: 32px; --w-s-7: 48px;
+
+  --w-row-h:        34px;
+  --w-row-h-comfy:  40px;
+  --w-control-h:    32px;
+  --w-tap-min:      32px;
+  --w-sidebar-w:    212px;
+  --w-page-max:     1440px;
+
+  --w-radius: 0px;
+  --w-radius-full: 999px;
+
+  --w-shadow-sm: 0 1px 2px rgba(43, 43, 45, 0.14), 0 0 0 1px var(--w-border);
+  --w-shadow-md: 0 3px 10px rgba(43, 43, 45, 0.16);
+  --w-shadow-lg: 0 12px 32px rgba(43, 43, 45, 0.22);
+
+  --w-dur-fast: 120ms;
+  --w-dur:      160ms;
+  --w-dur-slow: 200ms;
+  --w-dur-skel: 1200ms;
+  --w-ease: cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+[data-density="shop"] {
+  --w-row-h:     48px;
+  --w-control-h: 40px;
+  --w-tap-min:   44px;
+  --w-fs-cell:   14px;
+  --w-fs-body:   15px;
+}
+
+.w-num { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--w-border-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}

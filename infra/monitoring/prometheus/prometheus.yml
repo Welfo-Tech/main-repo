@@ -28,8 +28,3 @@ scrape_configs:
       - targets:
           - services:4001
     metrics_path: /metrics
-
-  - job_name: postgres
-    static_configs:
-      - targets:
-          - postgres:9187
