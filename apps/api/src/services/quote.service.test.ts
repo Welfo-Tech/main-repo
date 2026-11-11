@@ -1,4 +1,4 @@
-import { UserRole } from "@repo/db";
+import { ServiceCaseStatus, UserRole } from "@repo/db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotFoundError, ValidationError } from "../lib/errors.js";
 import * as quoteRepo from "../repositories/quote.repository.js";
@@ -25,6 +25,13 @@ const mockCase = {
   closedAt: null,
   cancellationReason: null,
   holdReason: null,
+  irreparableState: null,
+  irreparableReason: null,
+  irreparableProposedBy: null,
+  irreparableProposedAt: null,
+  irreparableVerdictBy: null,
+  irreparableVerdictAt: null,
+  irreparableVerdictNote: null,
   createdBy: "user-1",
   createdAt: new Date("2026-01-01"),
   updatedAt: new Date("2026-01-01"),
@@ -150,5 +157,62 @@ describe("removeItem", () => {
 
     await removeItem(QUOTE_ID, "li-1", actor);
     expect(quoteRepo.removeLineItem).toHaveBeenCalledWith(QUOTE_ID, "li-1");
+  });
+});
+
+describe("quote status drives the case", () => {
+  it("sending a quote moves the case to awaiting approval", async () => {
+    vi.mocked(quoteRepo.findQuoteById).mockResolvedValue(mockQuote as never);
+    vi.mocked(quoteRepo.findQuotes).mockResolvedValue([] as never);
+    vi.mocked(quoteRepo.updateQuote).mockResolvedValue({ ...mockQuote, status: "SENT" } as never);
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue({
+      ...mockCase,
+      status: ServiceCaseStatus.UNDER_ASSESSMENT,
+    } as never);
+    vi.mocked(caseRepo.updateCase).mockResolvedValue({} as never);
+
+    await editQuote("quote-1", { status: "SENT" }, actor);
+
+    expect(caseRepo.updateCase).toHaveBeenCalledWith(
+      mockQuote.caseId,
+      { status: "AWAITING_QUOTE_APPROVAL" },
+    );
+  });
+
+  it("approving a quote does NOT authorise work", async () => {
+    vi.mocked(quoteRepo.findQuoteById).mockResolvedValue(mockQuote as never);
+    vi.mocked(quoteRepo.updateQuote).mockResolvedValue({ ...mockQuote, status: "APPROVED" } as never);
+    vi.mocked(caseRepo.updateCase).mockResolvedValue({} as never);
+
+    await editQuote("quote-1", { status: "APPROVED" }, actor);
+
+    expect(caseRepo.updateCase).not.toHaveBeenCalled();
+  });
+
+  it("refuses to send while another quote is already with the customer", async () => {
+    vi.mocked(quoteRepo.findQuoteById).mockResolvedValue(mockQuote as never);
+    vi.mocked(quoteRepo.findQuotes).mockResolvedValue([
+      { id: "quote-9", quoteNumber: "QTE-2026-0009", status: "SENT" },
+    ] as never);
+
+    await expect(
+      editQuote("quote-1", { status: "SENT" }, actor),
+    ).rejects.toBeInstanceOf(ValidationError);
+    expect(quoteRepo.updateQuote).not.toHaveBeenCalled();
+  });
+
+  it("leaves a case alone if it is not under assessment", async () => {
+    vi.mocked(quoteRepo.findQuoteById).mockResolvedValue(mockQuote as never);
+    vi.mocked(quoteRepo.findQuotes).mockResolvedValue([] as never);
+    vi.mocked(quoteRepo.updateQuote).mockResolvedValue({ ...mockQuote, status: "SENT" } as never);
+    vi.mocked(caseRepo.findCaseById).mockResolvedValue({
+      ...mockCase,
+      status: ServiceCaseStatus.IN_REPAIR,
+    } as never);
+    vi.mocked(caseRepo.updateCase).mockResolvedValue({} as never);
+
+    await editQuote("quote-1", { status: "SENT" }, actor);
+
+    expect(caseRepo.updateCase).not.toHaveBeenCalled();
   });
 });

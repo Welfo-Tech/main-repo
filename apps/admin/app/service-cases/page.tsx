@@ -247,6 +247,23 @@ export default function ServiceCasesPage() {
                     style={{ borderBottom: i < cases.length - 1 ? "1px solid var(--w-border-soft)" : undefined }}>
                     <td className="w-num" style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-link)", fontFamily: "var(--w-font-head)", fontWeight: 600, whiteSpace: "nowrap" }}>
                       {sc.caseNumber}
+                      {(sc.irreparableState === "PROPOSED" || sc.irreparableState === "SECOND_CHANCE") && (
+                        <span
+                          title={sc.irreparableState === "PROPOSED" ? "Irreparable proposed \u2014 awaiting your verdict" : "Irreparable flagged \u2014 second chance in progress"}
+                          style={{
+                            marginLeft: "var(--w-s-2)",
+                            fontSize: "var(--w-fs-badge)",
+                            fontWeight: 700,
+                            letterSpacing: "0.06em",
+                            padding: "1px 5px",
+                            background: sc.irreparableState === "PROPOSED" ? "var(--w-attention-tint)" : "var(--w-waiting-tint)",
+                            color: sc.irreparableState === "PROPOSED" ? "var(--w-attention-fg)" : "#573b0c",
+                            border: `1px solid ${sc.irreparableState === "PROPOSED" ? "var(--w-attention-edge)" : "var(--w-waiting-edge)"}`,
+                          }}
+                        >
+                          {sc.irreparableState === "PROPOSED" ? "IRREPARABLE?" : "2ND CHANCE"}
+                        </span>
+                      )}
                     </td>
                     <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-2)" }}>{TYPE_LABELS[sc.type]}</td>
                     <td style={{ padding: "0 var(--w-s-3)", height: "var(--w-row-h)", fontSize: "var(--w-fs-cell)", color: "var(--w-text-1)" }}>{sc.organization.name}</td>

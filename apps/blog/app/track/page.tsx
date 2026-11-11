@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CONTACT } from "../../lib/content";
-import { type TrackingResult, trackRequest } from "../../lib/api";
+import { type PortalQuote, type TrackingResult, fetchQuote, trackRequest } from "../../lib/api";
+import QuotePanel from "../../components/QuotePanel";
 
 function fmt(d: string | null | undefined) {
   if (!d) return null;
@@ -16,14 +17,21 @@ export default function TrackPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<TrackingResult | null>(null);
+  const [quote, setQuote] = useState<PortalQuote | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
     setResult(null);
+    setQuote(null);
     try {
-      setResult(await trackRequest(ref.trim(), email.trim()));
+      const [tracking, q] = await Promise.all([
+        trackRequest(ref.trim(), email.trim()),
+        fetchQuote(ref.trim(), email.trim()),
+      ]);
+      setResult(tracking);
+      setQuote(q.found ? q : null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not look that up right now.");
     } finally {
@@ -211,6 +219,17 @@ export default function TrackPage() {
               quoting {result.reference}.
             </p>
           </div>
+        )}
+
+        {quote && (
+          <QuotePanel
+            data={quote}
+            reference={ref.trim()}
+            email={email.trim()}
+            onDecided={() => {
+              fetchQuote(ref.trim(), email.trim()).then(q => setQuote(q.found ? q : null));
+            }}
+          />
         )}
 
         <p style={{ marginTop: "var(--w-s-6)", fontSize: "15px", color: "var(--w-text-2)" }}>

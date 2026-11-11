@@ -20,6 +20,27 @@ export type ServiceCaseStatus =
   | "CANCELLED";
 export type CasePriority = "LOW" | "NORMAL" | "HIGH" | "CRITICAL";
 
+export type IrreparableState = "PROPOSED" | "CONFIRMED" | "SECOND_CHANCE" | "WITHDRAWN";
+
+export const IRREPARABLE_LABEL: Record<IrreparableState, string> = {
+  PROPOSED: "Awaiting your verdict",
+  CONFIRMED: "Confirmed irreparable",
+  SECOND_CHANCE: "Second chance granted",
+  WITHDRAWN: "Flag withdrawn — instrument was saved",
+};
+
+export interface CasePhotos {
+  customer: { source: string; url: string }[];
+  technician: {
+    id: string;
+    category: string;
+    url: string;
+    fileName: string;
+    uploadedAt: string;
+    uploadedBy: string;
+  }[];
+}
+
 export interface ServiceCase {
   id: string;
   caseNumber: string;
@@ -32,6 +53,11 @@ export interface ServiceCase {
   closedAt: string | null;
   cancellationReason: string | null;
   holdReason: string | null;
+  irreparableState: IrreparableState | null;
+  irreparableReason: string | null;
+  irreparableProposedAt: string | null;
+  irreparableVerdictAt: string | null;
+  irreparableVerdictNote: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;

@@ -5,8 +5,8 @@ import {
   createRepairEvent,
   findRepairEventsByCaseId,
 } from "../repositories/repair-event.repository.js";
-import { findCaseById } from "../repositories/service-case.repository.js";
 import { findTechnicianByUserId } from "../repositories/technician.repository.js";
+import { requireCaseForActor } from "./service-case.service.js";
 
 const WORKABLE_STATUSES = new Set([
   "ASSIGNED",
@@ -17,14 +17,8 @@ const WORKABLE_STATUSES = new Set([
   "QC_FAILED",
 ]);
 
-async function requireCase(id: string) {
-  const sc = await findCaseById(id);
-  if (!sc) throw new NotFoundError("service case not found");
-  return sc;
-}
-
-export async function listRepairEvents(caseId: string, _actor: AuthUser) {
-  await requireCase(caseId);
+export async function listRepairEvents(caseId: string, actor: AuthUser) {
+  await requireCaseForActor(caseId, actor);
   return findRepairEventsByCaseId(caseId);
 }
 
@@ -39,7 +33,7 @@ export async function addRepairEvent(
   data: AddRepairEventData,
   actor: AuthUser,
 ) {
-  const sc = await requireCase(caseId);
+  const sc = await requireCaseForActor(caseId, actor);
 
   if (!WORKABLE_STATUSES.has(sc.status)) {
     throw new ValidationError(

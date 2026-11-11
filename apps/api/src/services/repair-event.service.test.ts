@@ -36,6 +36,13 @@ function makeCase(status: ServiceCaseStatus) {
     closedAt: null,
     cancellationReason: null,
     holdReason: null,
+    irreparableState: null,
+    irreparableReason: null,
+    irreparableProposedBy: null,
+    irreparableProposedAt: null,
+    irreparableVerdictBy: null,
+    irreparableVerdictAt: null,
+    irreparableVerdictNote: null,
     createdBy: "user-1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -154,12 +161,12 @@ describe("addRepairEvent as a technician", () => {
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it("refuses when the technician is not assigned to the case", async () => {
+  it("hides a case the technician is not assigned to, rather than admitting it exists", async () => {
     vi.mocked(caseRepo.findCaseById).mockResolvedValue(makeCase(ServiceCaseStatus.IN_REPAIR));
     vi.mocked(techRepo.findTechnicianByUserId).mockResolvedValue({ ...mockTech, id: "tech-other" });
 
     await expect(
       addRepairEvent("case-1", { eventType: RepairEventType.NOTE, description: "x" }, techActor),
-    ).rejects.toBeInstanceOf(ValidationError);
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 });

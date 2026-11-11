@@ -3,6 +3,7 @@ import { validate } from "../../../lib/validate.js";
 import { requireAuth } from "../../../middleware/auth.js";
 import { requireRole } from "../../../middleware/require-role.js";
 import * as techService from "../../../services/technician.service.js";
+import * as workbench from "../../../services/technician-workbench.service.js";
 import {
   CreateTechnicianSchema,
   ListTechniciansQuerySchema,
@@ -22,6 +23,11 @@ techniciansRouter.get(
     return c.json(technicians, 200);
   },
 );
+
+techniciansRouter.get("/me", async (c) => {
+  const profile = await workbench.getMyProfile(c.get("user"));
+  return c.json(profile, 200);
+});
 
 techniciansRouter.get("/:id", async (c) => {
   const tech = await techService.getTechnician(c.req.param("id"), c.get("user"));

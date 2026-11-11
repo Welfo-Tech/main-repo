@@ -203,8 +203,16 @@ enum AuditAction {
   STATUS_CHANGE
 }
 
+enum IrreparableState {
+  PROPOSED
+  CONFIRMED
+  SECOND_CHANCE
+  WITHDRAWN
+}
+
 enum AttachmentCategory {
   INTAKE_PHOTO
+  DIAGNOSIS_PHOTO
   QC_PHOTO
   REPAIR_PHOTO
   SIGNED_QUOTE
@@ -424,6 +432,15 @@ model ServiceCase {
   closedAt             DateTime?         @db.Timestamptz
   cancellationReason   String?           @db.Text
   holdReason           String?           @db.Text
+
+  irreparableState      IrreparableState?
+  irreparableReason     String?           @db.Text
+  irreparableProposedBy String?           @db.Uuid
+  irreparableProposedAt DateTime?         @db.Timestamptz
+  irreparableVerdictBy  String?           @db.Uuid
+  irreparableVerdictAt  DateTime?         @db.Timestamptz
+  irreparableVerdictNote String?          @db.Text
+
   createdBy            String            @db.Uuid
   createdAt            DateTime          @default(now()) @db.Timestamptz
   updatedAt            DateTime          @updatedAt @db.Timestamptz
