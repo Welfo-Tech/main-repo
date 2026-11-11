@@ -23,6 +23,7 @@ const schema = z.object({
   MAIL_FROM: z.string().min(1).default("Welfo Service <onboarding@resend.dev>"),
   MAIL_REPLY_TO: emptyAsUndefined(z.string().email()),
   APP_TECH_URL: z.string().min(1).default("http://localhost:3003"),
+  CORS_ORIGINS: emptyAsUndefined(z.string().min(1)),
 });
 
 export const config = schema.parse(process.env);
