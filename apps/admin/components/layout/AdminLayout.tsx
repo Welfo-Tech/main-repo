@@ -1,18 +1,17 @@
-import React from "react";
+import Header from "./Header";
 import Sidebar from "./Sidebar";
 
-type Props = {
-  children: React.ReactNode;
-};
-
-export default function AdminLayout({ children }: Props) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[calc(100vh-72px)]">
+    <>
+      <Header />
       <Sidebar />
-
-      <main className="ml-60 flex-1 overflow-y-auto ">
+      <main
+        className="min-h-screen bg-canvas"
+        style={{ marginLeft: "var(--w-sidebar-w)", paddingTop: "48px" }}
+      >
         {children}
       </main>
-    </div>
+    </>
   );
 }

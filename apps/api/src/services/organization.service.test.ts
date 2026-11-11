@@ -34,7 +34,7 @@ describe("listOrganizations", () => {
     const result = await listOrganizations({}, actor);
 
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe("City General Hospital");
+    expect(result[0]!.name).toBe("City General Hospital");
     expect(orgRepo.findOrganizations).toHaveBeenCalledWith({});
   });
 

@@ -1,25 +1,208 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* WELFO PUBLIC SITE — shares the operations platform token vocabulary */
 
-@layer base {
-  *,
-  *::before,
-  *::after {
-    @apply box-border p-0 m-0;
-  }
+:root {
+  --w-canvas:        #f6f6f9;
+  --w-plate:         #ffffff;
+  --w-sunken:        #eceaf3;
+  --w-ink:           #2b1673;
+  --w-ink-raised:    #3d2596;
+  --w-ink-deep:      #1a0d45;
+  --w-ink-gradient:  linear-gradient(135deg, #2b1673 0%, #1a0d45 100%);
 
-  html,
-  body {
-    @apply max-w-full overflow-x-hidden;
-  }
+  --w-border:        rgba(43, 22, 115, 0.16);
+  --w-border-soft:   rgba(43, 22, 115, 0.08);
+  --w-border-ink:    rgba(255, 255, 255, 0.16);
+  --w-border-focus:  #019640;
 
-  body {
-    @apply font-sans text-slate-950 bg-white;
-  }
+  --w-text-1:        #373634;
+  --w-text-2:        #5f5d5a;
+  --w-text-mute:     #85837f;
+  --w-text-invert:   #ffffff;
+  --w-text-invert-2: #c3b9e8;
 
-  a {
-    @apply text-current no-underline;
+  --w-accent:        #8f7ae0;
+  --w-accent-strong: #2b1673;
+  --w-accent-deep:   #1a0d45;
+  --w-accent-tint:   #f0ecfb;
+
+  --w-brand:         #019640;
+  --w-brand-dark:    #017a34;
+  --w-brand-tint:    #e6f5ec;
+
+  --w-attention:     #c0392b;
+  --w-attention-tint:#fdeeec;
+  --w-attention-edge:#f3c3bb;
+  --w-attention-fg:  #642016;
+
+  --w-success-fg:    #14492a;
+  --w-success-tint:  #e9f5ec;
+  --w-success-edge:  #b6ddc2;
+
+  --w-font-head: "Poppins", system-ui, -apple-system, sans-serif;
+  --w-font-body: "Poppins", system-ui, -apple-system, sans-serif;
+
+  --w-s-1: 4px;  --w-s-2: 8px;  --w-s-3: 12px; --w-s-4: 16px;
+  --w-s-5: 24px; --w-s-6: 32px; --w-s-7: 48px; --w-s-8: 64px;
+  --w-s-9: 96px;
+
+  --w-control-h: 46px;
+  --w-page-max:  1200px;
+  --w-radius:    8px;
+  --w-radius-lg: 12px;
+
+  --w-dur: 160ms;
+  --w-ease: cubic-bezier(0.2, 0, 0.2, 1);
+
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--w-font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--w-text-1);
+  background: var(--w-canvas);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+h1, h2, h3, h4 {
+  font-family: var(--w-font-head);
+  font-weight: 600;
+  line-height: 1.1;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--w-border-focus);
+  outline-offset: 2px;
+}
+
+.w-shell {
+  max-width: var(--w-page-max);
+  margin-inline: auto;
+  padding-inline: var(--w-s-5);
+}
+
+.w-eyebrow {
+  font-family: var(--w-font-head);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--w-brand);
+}
+
+.w-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--w-s-2);
+  height: var(--w-control-h);
+  padding-inline: var(--w-s-5);
+  font-family: var(--w-font-head);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  border-radius: var(--w-radius);
+  cursor: pointer;
+  transition: background var(--w-dur) var(--w-ease), color var(--w-dur) var(--w-ease);
+  white-space: nowrap;
+}
+
+.w-btn--primary { background: var(--w-brand); color: #fff; }
+.w-btn--primary:hover { background: var(--w-brand-dark); }
+
+.w-btn--ghost {
+  background: transparent;
+  color: var(--w-text-invert);
+  border-color: var(--w-border-ink);
+}
+.w-btn--ghost:hover { background: rgba(255, 255, 255, 0.12); }
+
+.w-btn--outline {
+  background: transparent;
+  color: var(--w-accent-strong);
+  border-color: var(--w-accent-strong);
+}
+.w-btn--outline:hover { background: var(--w-accent-tint); }
+
+.w-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.w-field { display: flex; flex-direction: column; gap: var(--w-s-1); }
+
+.w-label {
+  font-family: var(--w-font-head);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--w-text-2);
+}
+
+.w-input, .w-select, .w-textarea {
+  width: 100%;
+  min-height: var(--w-control-h);
+  padding: 10px var(--w-s-3);
+  font-size: 15px;
+  background: var(--w-plate);
+  border: 1px solid var(--w-border);
+  border-radius: var(--w-radius);
+  transition: border-color var(--w-dur) var(--w-ease);
+}
+
+.w-input:focus, .w-select:focus, .w-textarea:focus {
+  border-color: var(--w-accent-strong);
+  outline: none;
+}
+
+.w-textarea { min-height: 128px; resize: vertical; line-height: 1.6; }
+
+.w-hint { font-size: 13px; color: var(--w-text-mute); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
+@media (max-width: 900px) {
+  :root { --w-s-9: 64px; --w-s-8: 48px; }
+}
+
+@media (max-width: 640px) {
+  :root { --w-s-9: 52px; --w-s-8: 38px; --w-s-7: 32px; }
+  body { font-size: 15px; }
+
+  .w-shell { padding-inline: var(--w-s-4); }
+
+  /* iOS zooms the page when a focused control is under 16px */
+  .w-input, .w-select, .w-textarea { font-size: 16px; }
+
+  .w-btn { padding-inline: var(--w-s-4); font-size: 14px; }
+}
+
+@supports (padding: max(0px)) {
+  .w-shell {
+    padding-left: max(var(--w-s-5), env(safe-area-inset-left));
+    padding-right: max(var(--w-s-5), env(safe-area-inset-right));
+  }
+  @media (max-width: 640px) {
+    .w-shell {
+      padding-left: max(var(--w-s-4), env(safe-area-inset-left));
+      padding-right: max(var(--w-s-4), env(safe-area-inset-right));
+    }
+  }
+}

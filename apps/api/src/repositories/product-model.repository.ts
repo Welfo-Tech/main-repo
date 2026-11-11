@@ -46,7 +46,10 @@ export async function createProductModel(data: {
   description?: string;
   specifications?: Record<string, unknown>;
 }) {
-  return prisma.productModel.create({ data, select: productModelSelect });
+  return prisma.productModel.create({
+    data: { ...data, specifications: data.specifications as never },
+    select: productModelSelect,
+  });
 }
 
 export async function updateProductModel(
@@ -60,7 +63,11 @@ export async function updateProductModel(
     isActive: boolean;
   }>,
 ) {
-  return prisma.productModel.update({ where: { id }, data, select: productModelSelect });
+  return prisma.productModel.update({
+    where: { id },
+    data: { ...data, specifications: data.specifications as never },
+    select: productModelSelect,
+  });
 }
 
 export async function deactivateProductModel(id: string) {

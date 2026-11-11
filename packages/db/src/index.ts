@@ -27,4 +27,6 @@ export {
   AuditAction,
   AttachmentCategory,
   SlaEventType,
+  IrreparableState,
+  WebInquiryStatus,
 } from "../generated/prisma/client.js";
